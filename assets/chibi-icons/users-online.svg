@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <filter id="sticker" x="-20%" y="-20%" width="140%" height="140%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="4.5" result="dilated"/>
+      <feFlood flood-color="#ffffff" result="white"/>
+      <feComposite in="white" in2="dilated" operator="in" result=" whiteOutline"/>
+      <feDropShadow dx="0" dy="5" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.38" result="shadow"/>
+      <feMerge>
+        <feMergeNode in="shadow"/>
+        <feMergeNode in="whiteOutline"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="55%" stop-color="#facc15"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="roofGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="wallGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#dbeafe"/>
+    </linearGradient>
+  </defs>
+  <g filter="url(#sticker)" stroke="#3b2314" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    
+    <circle cx="60" cy="60" r="42" fill="#38bdf8"/>
+    <ellipse cx="60" cy="60" rx="22" ry="42" fill="none" stroke="#bae6fd" stroke-width="3"/>
+    <line x1="18" y1="60" x2="102" y2="60" stroke="#bae6fd" stroke-width="3"/>
+    <circle cx="42" cy="48" r="13" fill="#fef08a"/>
+    <path d="M24 82 C24 66 60 66 60 82 Z" fill="#4ade80"/>
+    <circle cx="78" cy="48" r="13" fill="#fbcfe8"/>
+    <path d="M60 82 C60 66 96 66 96 82 Z" fill="#fb7185"/>
+  
+  </g>
+</svg>

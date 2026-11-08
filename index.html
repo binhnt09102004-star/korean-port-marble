@@ -1,0 +1,4814 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>한국 항구 퀴즈 마블 - 4인 온라인 & 3D 치비 건설 에디션</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Gowun+Dodum&display=swap" rel="stylesheet">
+  <!-- WebRTC P2P 4인 온라인 멀티플레이어 엔진 (PeerJS) -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <style>
+    /* =========================================================================
+       귀엽고 친근한 한국어 치비(Chibi) 전용 웹폰트 (CookieRun + 나눔스퀘어라운드)
+       ========================================================================= */
+    @font-face {
+      font-family: 'CookieRun-Regular';
+      src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/CookieRun-Regular.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'CookieRun-Bold';
+      src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/CookieRun-Bold.woff') format('woff');
+      font-weight: bold;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'NanumSquareRound';
+      src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NanumSquareRound.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    :root {
+      --font-chibi-title: 'CookieRun-Bold', 'CookieRun-Regular', 'Fredoka', 'NanumSquareRound', sans-serif;
+      --font-chibi-body: 'NanumSquareRound', 'CookieRun-Regular', 'Gowun Dodum', 'Malgun Gothic', sans-serif;
+      --font-cartoon: var(--font-chibi-title);
+      --ink-dark: #2b2118;
+      --ink-navy: #253b6e;
+      --chibi-outline: #3b2818;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    body {
+      font-family: var(--font-chibi-body);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      background:
+        radial-gradient(circle at 20% 15%, rgba(254, 240, 138, 0.35) 0%, transparent 40%),
+        radial-gradient(circle at 50% 22%, #67e8f9 0%, #38bdf8 52%, #0284c7 100%);
+      color: var(--ink-dark);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+      padding: 8px;
+      position: relative;
+    }
+
+    h1, h2, h3,
+    .game-title,
+    .hero-ribbon,
+    .best-record-box,
+    .diff-title,
+    .cartoon-primary-btn,
+    .board-top-title,
+    .view-toggle-btn,
+    .marble-top-turn-banner,
+    .my-turn-ribbon,
+    .roll-btn,
+    .cell-num,
+    .owner-badge,
+    .cell-name,
+    .pawn-player-tag,
+    .floating-delta,
+    .dice-result-callout,
+    .player-rank-shield,
+    .player-hud-header,
+    .hud-val-gold,
+    .hud-val-asset,
+    .status-Hud-value,
+    .modal-port-badge,
+    .modal-title,
+    .feedback-title,
+    .action-btn,
+    .celebration-badge,
+    .celebration-title,
+    .rank-title,
+    .stat-value {
+      font-family: var(--font-chibi-title);
+      letter-spacing: 0.01em;
+    }
+
+    /* 모든 치비 스티커 아이콘 공통 귀여운 외곽 그림자 */
+    img[src*="assets/chibi-icons/"] {
+      filter: drop-shadow(0 2px 3px rgba(59, 40, 24, 0.28));
+      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* 카툰 바다 배경 구름 장식 */
+    .cartoon-bg-decor {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .cartoon-cloud {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.88);
+      border-radius: 999px;
+      box-shadow: 0 8px 0 rgba(186, 230, 253, 0.7);
+      animation: floatCloud linear infinite;
+    }
+    .cartoon-cloud::before,
+    .cartoon-cloud::after {
+      content: '';
+      position: absolute;
+      background: inherit;
+      border-radius: 50%;
+    }
+    .cloud-1 { width: 140px; height: 44px; top: 5%; left: -160px; animation-duration: 38s; }
+    .cloud-1::before { width: 64px; height: 64px; top: -32px; left: 22px; }
+    .cloud-1::after  { width: 50px; height: 50px; top: -22px; left: 66px; }
+
+    .cloud-2 { width: 110px; height: 36px; top: 15%; left: -130px; animation-duration: 52s; animation-delay: -18s; opacity: 0.75; }
+    .cloud-2::before { width: 50px; height: 50px; top: -24px; left: 18px; }
+    .cloud-2::after  { width: 40px; height: 40px; top: -16px; left: 52px; }
+
+    .cloud-3 { width: 160px; height: 48px; top: 84%; left: -180px; animation-duration: 45s; animation-delay: -9s; opacity: 0.5; }
+    .cloud-3::before { width: 70px; height: 70px; top: -34px; left: 28px; }
+    .cloud-3::after  { width: 56px; height: 56px; top: -24px; left: 82px; }
+
+    @keyframes floatCloud {
+      from { transform: translateX(0); }
+      to   { transform: translateX(calc(100vw + 240px)); }
+    }
+
+    #fx-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 150;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 1140px;
+      position: relative;
+      z-index: 5;
+    }
+
+    .screen {
+      display: none;
+      width: 100%;
+      animation: popScreen 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes popScreen {
+      from { opacity: 0; transform: scale(0.94) translateY(10px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* ================= 1. 시작 화면 ================= */
+    .cartoon-panel {
+      background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
+      border: 5px solid #1e3a8a;
+      border-radius: 32px;
+      padding: 22px 26px;
+      box-shadow:
+        0 14px 0 #1e3a8a,
+        0 24px 50px rgba(3, 105, 161, 0.55),
+        inset 0 4px 0 #ffffff;
+      text-align: center;
+      max-width: 730px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cartoon-hero-stage {
+      width: 100%;
+      height: 215px;
+      border-radius: 22px;
+      border: 4px solid #1e3a8a;
+      box-shadow: 0 7px 0 #1e3a8a;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 16px;
+      background: #38bdf8;
+    }
+
+    .hero-chibi-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 35%;
+      transition: transform 0.5s ease;
+    }
+    .cartoon-hero-stage:hover .hero-chibi-bg {
+      transform: scale(1.05);
+    }
+
+    .hero-chibi-shade {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(15, 23, 42, 0.82) 0%, rgba(15, 23, 42, 0.18) 55%, rgba(15, 23, 42, 0.05) 100%);
+      pointer-events: none;
+    }
+
+    .hero-ribbon {
+      background: #facc15;
+      color: #1e3a8a;
+      border: 3px solid #1e3a8a;
+      box-shadow: 0 4px 0 #1e3a8a;
+      padding: 4px 16px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .game-title {
+      font-size: 2.5rem;
+      line-height: 1.08;
+      letter-spacing: 0.5px;
+      color: #ffffff;
+      text-shadow:
+        0 5px 0 #1e3a8a,
+        -2.5px -2.5px 0 #1e3a8a,
+        2.5px -2.5px 0 #1e3a8a,
+        -2.5px 2.5px 0 #1e3a8a,
+        2.5px 2.5px 0 #1e3a8a;
+      z-index: 2;
+    }
+
+    .game-subtitle {
+      margin-top: 6px;
+      background: rgba(15, 23, 42, 0.82);
+      color: #fef08a;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      z-index: 2;
+      border: 2px solid #ffffff;
+    }
+
+    .best-record-box {
+      background: linear-gradient(180deg, #fef08a 0%, #facc15 100%);
+      border: 3.5px solid #1e3a8a;
+      box-shadow: 0 6px 0 #1e3a8a;
+      border-radius: 18px;
+      padding: 9px 22px;
+      margin-bottom: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: #1e3a8a;
+      font-size: 1.06rem;
+    }
+
+    .rules-box {
+      background: #e0f2fe;
+      border: 3.5px solid #1e3a8a;
+      box-shadow: inset 0 3px 0 #ffffff, 0 6px 0 rgba(30, 58, 138, 0.18);
+      border-radius: 20px;
+      padding: 14px 18px;
+      text-align: left;
+      margin-bottom: 16px;
+    }
+
+    .rules-box h3 {
+      color: #1d4ed8;
+      font-size: 1.06rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .rules-list {
+      list-style: none;
+      font-size: 0.92rem;
+      line-height: 1.62;
+      color: #1e293b;
+    }
+
+    .rules-list li {
+      margin-bottom: 4px;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .rules-list li::before {
+      content: '★';
+      color: #f59e0b;
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-size: 0.9rem;
+    }
+
+    .difficulty-section { margin-bottom: 16px; }
+    .difficulty-label   { font-size: 0.98rem; color: #1e3a8a; margin-bottom: 8px; }
+    .difficulty-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .diff-btn {
+      font-family: var(--font-cartoon);
+      background: #ffffff;
+      border: 3.5px solid #94a3b8;
+      box-shadow: 0 6px 0 #94a3b8;
+      border-radius: 18px;
+      padding: 11px 14px;
+      color: #334155;
+      cursor: pointer;
+      transition: transform 0.14s ease, box-shadow 0.14s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      text-align: left;
+    }
+    .diff-btn:hover { transform: translateY(-2px); }
+    .diff-btn.selected {
+      background: linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%);
+      border-color: #1e3a8a;
+      box-shadow: 0 6px 0 #1e3a8a;
+      color: #1e3a8a;
+    }
+    .diff-title { font-size: 1.1rem; display: block; }
+    .diff-desc  { font-size: 0.86rem; color: #2563eb; }
+
+    .cartoon-primary-btn {
+      font-family: var(--font-cartoon);
+      background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%);
+      color: #ffffff;
+      border: 4px solid #1e3a8a;
+      box-shadow: 0 8px 0 #1e3a8a, inset 0 3px 0 rgba(255, 255, 255, 0.5);
+      border-radius: 20px;
+      padding: 13px 28px;
+      font-size: 1.3rem;
+      cursor: pointer;
+      width: 100%;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-shadow: 0 2px 0 #14532d;
+    }
+    .cartoon-primary-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 0 #1e3a8a, inset 0 3px 0 rgba(255, 255, 255, 0.6);
+    }
+    .cartoon-primary-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 4px 0 #1e3a8a;
+    }
+
+    /* ================= 2. 3D 치비 입체 블록 보드 스테이지 ================= */
+    .board-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 0 6px;
+      position: relative;
+      z-index: 30;
+    }
+
+    .board-top-title {
+      background: rgba(255, 255, 255, 0.95);
+      border: 3px solid #1e3a8a;
+      box-shadow: 0 4px 0 #1e3a8a;
+      border-radius: 999px;
+      padding: 5px 15px;
+      font-size: 0.92rem;
+      color: #1e3a8a;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cam-btn-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    .view-toggle-btn {
+      font-family: var(--font-cartoon);
+      background: #fef08a;
+      border: 3px solid #1e3a8a;
+      box-shadow: 0 4px 0 #1e3a8a;
+      color: #1e3a8a;
+      padding: 5px 13px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      cursor: pointer;
+      transition: transform 0.12s ease, background 0.12s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .view-toggle-btn:hover { transform: translateY(-2px); }
+    .view-toggle-btn.active-cam {
+      background: #4ade80;
+      color: #052e16;
+    }
+
+    .board-stage {
+      padding: 12px 4px 22px 4px;
+    }
+
+    .board-wrapper {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, minmax(168px, auto));
+      gap: 16px;
+      width: 100%;
+      background:
+        radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.42), transparent 55%),
+        linear-gradient(180deg, #7dd3fc 0%, #38bdf8 60%, #0284c7 100%);
+      padding: 20px 18px 22px 18px;
+      border-radius: 34px;
+      border: 5px solid #ffffff;
+      outline: 4px solid #1e3a8a;
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      position: relative;
+      box-shadow:
+        0 18px 0 #0369a1,
+        0 24px 0 #1e3a8a,
+        0 36px 55px rgba(2, 12, 27, 0.55);
+    }
+
+    /* 기본 cam-3d: 텍스처 블러 현상 없이 100% 네이티브 해상도로 3D 입체 블록을 선명하게 렌더링 */
+    .board-wrapper.cam-3d {
+      transform: none;
+    }
+    /* 선택형 테이블 기울기 뷰 (단일 레이어 원근으로 뭉개짐 최소화) */
+    .board-wrapper.cam-iso {
+      transform: perspective(1800px) rotateX(12deg);
+    }
+    .board-wrapper.cam-flat {
+      transform: none;
+    }
+
+    /* =========================================================================
+       각 칸(.cell) = 바닥 받침대(Pedestal) + 위로 솟아오른 [초선명 3D 치비 입체 블록]
+       ========================================================================= */
+    .cell {
+      position: relative;
+      min-height: 168px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      --cliff-top: #38bdf8;
+      --cliff-mid: #0284c7;
+      --cliff-bottom: #1e3a8a;
+    }
+
+    .cell.special-start {
+      --cliff-top: #38bdf8;
+      --cliff-mid: #0284c7;
+      --cliff-bottom: #1e3a8a;
+    }
+    .cell.special-key {
+      --cliff-top: #facc15;
+      --cliff-mid: #d97706;
+      --cliff-bottom: #78350f;
+    }
+    .cell.special-customs {
+      --cliff-top: #fb7185;
+      --cliff-mid: #e11d48;
+      --cliff-bottom: #881337;
+    }
+    .cell.owned-lv1 {
+      --cliff-top: #34d399;
+      --cliff-mid: #059669;
+      --cliff-bottom: #064e3b;
+    }
+    .cell.owned-lv2 {
+      --cliff-top: #fde047;
+      --cliff-mid: #d97706;
+      --cliff-bottom: #78350f;
+    }
+
+    /* 1) 바닥 타일 받침대 (Base Pedestal on the board) */
+    .cell-pedestal {
+      width: 100%;
+      background: linear-gradient(180deg, #e0f2fe 0%, #ffffff 55%);
+      border: 3.5px solid #1e3a8a;
+      border-radius: 22px;
+      box-shadow:
+        0 8px 0 #1e3a8a,
+        0 14px 20px rgba(3, 37, 65, 0.32);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 6px 8px 8px 8px;
+      position: relative;
+      transition: border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+    }
+
+    /* 특수 칸 및 보유 단계별 받침대 테마 */
+    .cell.special-key .cell-pedestal {
+      background: linear-gradient(180deg, #fef08a 0%, #fde047 100%);
+      border-color: #92400e;
+      box-shadow: 0 8px 0 #78350f, 0 14px 20px rgba(120, 53, 15, 0.32);
+    }
+    .cell.special-customs .cell-pedestal {
+      background: linear-gradient(180deg, #ffe4e6 0%, #fecdd3 100%);
+      border-color: #9f1239;
+      box-shadow: 0 8px 0 #881337, 0 14px 20px rgba(136, 19, 55, 0.32);
+    }
+    .cell.owned-lv1 .cell-pedestal {
+      background: linear-gradient(180deg, #d1fae5 0%, #6ee7b7 100%);
+      border-color: #047857;
+      box-shadow: 0 8px 0 #064e3b, 0 0 22px rgba(16, 185, 129, 0.55);
+    }
+    .cell.owned-lv2 .cell-pedestal {
+      background: linear-gradient(180deg, #fef9c3 0%, #facc15 100%);
+      border-color: #b45309;
+      box-shadow: 0 8px 0 #78350f, 0 0 28px rgba(250, 204, 21, 0.85);
+    }
+    .cell.active-cell .cell-pedestal {
+      border-color: #f97316 !important;
+      box-shadow: 0 0 0 4px #fde047, 0 10px 0 #c2410c !important;
+    }
+
+    /* =========================================================================
+       2) 치비 이미지 자체가 두꺼운 3D 입체 블록(Cube)이 되어 받침대 위로 솟아오름!
+       ========================================================================= */
+    .chibi-3d-block {
+      position: relative;
+      margin: -14px 2px 6px 2px;
+      z-index: 10;
+      transform: translateY(-4px);
+      transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.26s ease;
+      filter: drop-shadow(0 10px 10px rgba(15, 23, 42, 0.36));
+    }
+
+    /* 호버 시 또는 현재 배가 위치한 칸일 때 3D 치비 블록이 위로 번쩍 솟아오름! */
+    .cell:hover .chibi-3d-block {
+      transform: translateY(-13px) scale(1.03);
+      filter: drop-shadow(0 18px 14px rgba(15, 23, 42, 0.45));
+    }
+    .cell.active-cell .chibi-3d-block {
+      transform: translateY(-12px) scale(1.03);
+      filter: drop-shadow(0 16px 14px rgba(249, 115, 22, 0.48));
+    }
+    /* 보유/업그레이드된 항구는 기본적으로 더 높이 솟아 있음 */
+    .cell.owned-lv1 .chibi-3d-block {
+      transform: translateY(-8px);
+    }
+    .cell.owned-lv2 .chibi-3d-block {
+      transform: translateY(-12px);
+    }
+    .board-wrapper.cam-flat .chibi-3d-block {
+      transform: translateY(0px);
+    }
+
+    /* (A) 치비 3D 블록의 상단 고해상도 디오라마 면 (겹침 없이 100% 선명!) */
+    .chibi-block-top {
+      position: relative;
+      width: 100%;
+      height: 108px;
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+      border-bottom-left-radius: 6px;
+      border-bottom-right-radius: 6px;
+      overflow: hidden;
+      border: 3px solid #ffffff;
+      outline: 3px solid var(--cliff-bottom);
+      background: #38bdf8;
+      box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.9),
+        inset 0 -3px 0 rgba(15, 23, 42, 0.25);
+    }
+
+    .chibi-block-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 48%;
+      display: block;
+      image-rendering: -webkit-optimize-contrast;
+      filter: contrast(1.04) saturate(1.06);
+      transition: transform 0.35s ease;
+    }
+    .cell:hover .chibi-block-img {
+      transform: scale(1.05);
+    }
+    .cell-3 .chibi-block-img {
+      transform: scaleX(-1);
+      filter: hue-rotate(-12deg) contrast(1.04) saturate(1.1);
+    }
+
+    /* (B) 치비 3D 블록의 입체 두께 절벽 벽면 (Chibi 3D Extruded Block Cliff) */
+    .chibi-block-cliff {
+      width: 100%;
+      height: 14px;
+      background: linear-gradient(180deg, var(--cliff-top) 0%, var(--cliff-mid) 45%, var(--cliff-bottom) 100%);
+      border-left: 3px solid var(--cliff-bottom);
+      border-right: 3px solid var(--cliff-bottom);
+      border-bottom: 3px solid var(--cliff-bottom);
+      border-bottom-left-radius: 13px;
+      border-bottom-right-radius: 13px;
+      position: relative;
+      box-shadow:
+        inset 0 2px 0 rgba(255, 255, 255, 0.45),
+        0 4px 0 var(--cliff-bottom);
+      transition: height 0.25s ease, background 0.25s ease;
+    }
+
+    /* 3D 블록 전면 입체 몰딩 디테일 */
+    .chibi-block-cliff::after {
+      content: '';
+      position: absolute;
+      left: 18%;
+      right: 18%;
+      top: 3px;
+      bottom: 3px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.28);
+      box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.35);
+    }
+
+    /* 인수(x1) 및 랜드마크(x2) 시 3D 블록 두께 자체가 더 두껍게 솟아오름! */
+    .cell.owned-lv1 .chibi-block-cliff {
+      height: 18px;
+    }
+    .cell.owned-lv2 .chibi-block-cliff {
+      height: 22px;
+    }
+    .board-wrapper.cam-flat .chibi-block-cliff {
+      height: 6px;
+    }
+
+    /* (C) 치비 3D 블록 상단 모서리 미니 배지 (일러스트를 가리지 않게 깔끔히 배치) */
+    .chibi-block-header {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      right: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .cell-num {
+      font-size: 0.68rem;
+      color: #ffffff;
+      background: rgba(30, 58, 138, 0.9);
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 0 rgba(15, 23, 42, 0.45);
+    }
+
+    .owner-badge {
+      font-size: 0.68rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 2px solid #1e3a8a;
+      box-shadow: 0 2px 0 #1e3a8a;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .owner-badge.lv1 { background: #34d399; color: #064e3b; }
+    .owner-badge.lv2 { background: #facc15; color: #713f12; }
+    .owner-badge img { width: 12px; height: 12px; object-fit: contain; }
+
+    /* 받침대 하단 텍스트 영역 */
+    .cell-body {
+      position: relative;
+      z-index: 4;
+      padding-top: 2px;
+    }
+
+    .cell-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      padding: 0 2px;
+    }
+
+    .cell-name-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .cell-mini-ico {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .cell-name {
+      font-size: 1.02rem;
+      color: #1e293b;
+      letter-spacing: 0px;
+      white-space: nowrap;
+    }
+
+    .cell-sub-tag {
+      font-family: var(--font-chibi-body);
+      font-weight: 800;
+      font-size: 0.7rem;
+      color: #475569;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cell-info {
+      font-family: var(--font-chibi-body);
+      font-weight: 800;
+      font-size: 0.76rem;
+      color: #1e3a8a;
+      text-align: center;
+      background: #e0f2fe;
+      border-radius: 11px;
+      padding: 3px 6px;
+      border: 2px solid #93c5fd;
+      margin-top: 3px;
+    }
+    .cell.special-key .cell-info     { background: #fef9c3; border-color: #f59e0b; color: #78350f; }
+    .cell.special-customs .cell-info { background: #ffe4e6; border-color: #fb7185; color: #881337; }
+    .cell.owned-lv1 .cell-info       { background: #ecfdf5; border-color: #10b981; color: #065f46; }
+    .cell.owned-lv2 .cell-info       { background: #fffbeb; border-color: #d97706; color: #92400e; }
+    .cell-info .income               { color: #0284c7; }
+    .cell.owned-lv1 .cell-info .income { color: #047857; }
+    .cell.owned-lv2 .cell-info .income { color: #b45309; }
+
+    /* ================= 3D 치비 캐릭터 말 토큰 (모두의마블 / 빌리언 마블 스타일 전신 캐릭터 + 노란 화살표) ================= */
+    .ship-token {
+      position: absolute;
+      top: -42px;
+      right: 4px;
+      width: 72px;
+      height: 108px;
+      z-index: 60;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      pointer-events: none;
+      animation: tokenIdleFloat 1.4s ease-in-out infinite;
+    }
+
+    .ship-token.pawn-hopping {
+      animation: pawnHopArc 0.19s cubic-bezier(0.28, 0.84, 0.42, 1) infinite !important;
+    }
+
+    /* 캐릭터 머리 위 노란색 3D 포인터 화살표 (▼) */
+    .pawn-arrow {
+      width: 22px;
+      height: 20px;
+      background: linear-gradient(180deg, #fef08a 0%, #f59e0b 100%);
+      clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
+      filter: drop-shadow(0 3px 0 #78350f) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.45));
+      margin-bottom: -2px;
+      z-index: 4;
+      animation: arrowBob 0.7s ease-in-out infinite alternate;
+    }
+
+    @keyframes arrowBob {
+      from { transform: translateY(-4px) scale(0.95); }
+      to   { transform: translateY(2px) scale(1.08); }
+    }
+
+    /* 전신 치비 캐릭터 스프라이트 */
+    .ship-token img.pawn-char-sprite {
+      width: 66px;
+      height: 84px;
+      object-fit: contain;
+      position: relative;
+      z-index: 3;
+      image-rendering: -webkit-optimize-contrast;
+      filter:
+        drop-shadow(1.5px 0 0 #ffffff)
+        drop-shadow(-1.5px 0 0 #ffffff)
+        drop-shadow(0 -1.5px 0 #ffffff)
+        drop-shadow(0 6px 5px rgba(15, 23, 42, 0.65));
+    }
+
+    /* 캐릭터 발밑 황금 3D 링 받침대 */
+    .pawn-pedestal-ring {
+      position: absolute;
+      bottom: 1px;
+      width: 52px;
+      height: 17px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #fef08a 0%, #f59e0b 72%, #b45309 100%);
+      border: 2.5px solid #ffffff;
+      outline: 2px solid #78350f;
+      box-shadow:
+        0 4px 0 #78350f,
+        0 6px 12px rgba(0, 0, 0, 0.55),
+        0 0 14px rgba(250, 204, 21, 0.85);
+      z-index: 1;
+    }
+
+    .pawn-player-tag {
+      position: absolute;
+      bottom: -6px;
+      background: linear-gradient(180deg, #f97316 0%, #c2410c 100%);
+      color: #ffffff;
+      font-size: 0.54rem;
+      padding: 1px 7px;
+      border-radius: 999px;
+      border: 1.5px solid #ffffff;
+      box-shadow: 0 2px 0 #431407;
+      z-index: 5;
+      letter-spacing: 0.04em;
+    }
+
+    @keyframes tokenIdleFloat {
+      0%, 100% { transform: translateY(0px); }
+      50%      { transform: translateY(-5px); }
+    }
+
+    @keyframes pawnHopArc {
+      0%   { transform: translateY(0px) scale(1.04, 0.92); }
+      45%  { transform: translateY(-28px) scale(0.95, 1.08) rotate(-4deg); }
+      100% { transform: translateY(0px) scale(1.04, 0.92); }
+    }
+
+    /* 4인 멀티플레이 시 같은 칸에 여러 캐릭터 말이 서 있을 때 겹치지 않게 슬롯 배치 */
+    .ship-token.slot-0 { right: 4px;  top: -42px; z-index: 63; }
+    .ship-token.slot-1 { right: 50px; top: -46px; z-index: 62; transform: scale(0.92); }
+    .ship-token.slot-2 { right: 94px; top: -42px; z-index: 61; transform: scale(0.88); }
+    .ship-token.slot-3 { right: 26px; top: -64px; z-index: 60; transform: scale(0.85); }
+
+    /* =========================================================================
+       [신규] 타일 위 3D 치비 항구 빌딩(x1) & 황금 랜드마크(x2) 입체 건설 시스템!
+       ========================================================================= */
+    .tile-3d-building-slot {
+      position: absolute;
+      left: 6px;
+      bottom: 18px;
+      z-index: 48;
+      pointer-events: none;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .tile-building-model {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform-origin: center bottom;
+      animation: buildingIdleBob 2.2s ease-in-out infinite;
+    }
+
+    .tile-building-model.just-built {
+      animation: buildingConstructPop 0.88s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+    }
+
+    .building-flag-pill {
+      font-family: var(--font-chibi-title);
+      font-size: 0.62rem;
+      color: #ffffff;
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 2px solid #ffffff;
+      box-shadow: 0 3px 0 rgba(15, 23, 42, 0.65);
+      white-space: nowrap;
+      margin-bottom: -4px;
+      z-index: 5;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .building-sprite-wrap {
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 3;
+    }
+
+    .building-sprite-lv1 {
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 5px rgba(15, 23, 42, 0.55));
+    }
+
+    .building-sprite-lv2-sub {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      margin-right: -12px;
+      margin-bottom: 2px;
+      filter: drop-shadow(0 4px 4px rgba(15, 23, 42, 0.45));
+    }
+
+    .building-sprite-lv2-main {
+      width: 66px;
+      height: 66px;
+      object-fit: contain;
+      filter:
+        drop-shadow(0 0 10px rgba(250, 204, 21, 0.9))
+        drop-shadow(0 7px 6px rgba(15, 23, 42, 0.6));
+    }
+
+    /* 건물 바닥 플레이어 컬러 3D 오라 패드 */
+    .building-base-pad {
+      width: 54px;
+      height: 15px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      margin-top: -8px;
+      z-index: 1;
+      box-shadow: 0 3px 0 rgba(15, 23, 42, 0.6), 0 0 12px currentColor;
+    }
+
+    .tile-building-model.lv2 .building-base-pad {
+      width: 72px;
+      height: 19px;
+      background: radial-gradient(circle, #fef08a 0%, #f59e0b 65%, #b45309 100%) !important;
+      box-shadow: 0 4px 0 #78350f, 0 0 20px #facc15;
+    }
+
+    @keyframes buildingIdleBob {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50%      { transform: translateY(-3px) scale(1.03); }
+    }
+
+    /* 하늘에서 쿵! 떨어져 탄성 있게 솟아오르는 3D 집/랜드마크 건설 애니메이션 */
+    @keyframes buildingConstructPop {
+      0%   { opacity: 0; transform: translateY(-95px) scale(0.3, 1.4); }
+      38%  { opacity: 1; transform: translateY(4px) scale(1.32, 0.68); }
+      58%  { opacity: 1; transform: translateY(-18px) scale(0.88, 1.18); }
+      78%  { opacity: 1; transform: translateY(2px) scale(1.08, 0.94); }
+      100% { opacity: 1; transform: translateY(0px) scale(1, 1); }
+    }
+
+    /* 건설 순간 타일 블록 전체가 쿵! 진동하며 빛나는 효과 */
+    .cell.constructing-shake .chibi-3d-block {
+      animation: tileConstructShake 0.58s cubic-bezier(0.36, 0.07, 0.19, 0.97) !important;
+    }
+    @keyframes tileConstructShake {
+      0%   { transform: translateY(-10px) scale(1); }
+      25%  { transform: translateY(3px) scale(1.06, 0.94) rotate(-2deg); }
+      50%  { transform: translateY(-18px) scale(0.96, 1.07) rotate(2deg); }
+      75%  { transform: translateY(-6px) scale(1.03, 0.98) rotate(-1deg); }
+      100% { transform: translateY(-10px) scale(1); }
+    }
+
+    /* 타일에서 하늘로 솟구치는 3D 건설 빛기둥 (Light Pillar) */
+    .tile-light-pillar {
+      position: absolute;
+      left: 34%;
+      bottom: 24px;
+      width: 68px;
+      height: 190px;
+      transform: translateX(-50%);
+      background: linear-gradient(to top, rgba(52, 211, 153, 0.92) 0%, rgba(167, 243, 208, 0.55) 55%, transparent 100%);
+      border-radius: 34px;
+      filter: blur(2px);
+      pointer-events: none;
+      z-index: 54;
+      animation: pillarShootUp 0.95s ease-out forwards;
+    }
+    .tile-light-pillar.gold {
+      width: 84px;
+      height: 225px;
+      background: linear-gradient(to top, rgba(250, 204, 21, 0.96) 0%, rgba(254, 240, 138, 0.72) 60%, transparent 100%);
+    }
+    @keyframes pillarShootUp {
+      0%   { opacity: 0; transform: translateX(-50%) scaleX(0.2) scaleY(0.1); }
+      22%  { opacity: 1; transform: translateX(-50%) scaleX(1.15) scaleY(1.05); }
+      65%  { opacity: 0.85; transform: translateX(-50%) scaleX(0.9) scaleY(1); }
+      100% { opacity: 0; transform: translateX(-50%) scaleX(0.1) scaleY(1.2); }
+    }
+
+    /* 타일 바닥으로 퍼지는 3D 건설 충격파 링 */
+    .tile-build-shockwave {
+      position: absolute;
+      left: 34%;
+      bottom: 20px;
+      width: 30px;
+      height: 16px;
+      border-radius: 50%;
+      border: 4px solid #fef08a;
+      box-shadow: 0 0 18px #facc15;
+      transform: translate(-50%, 50%) scale(0.3);
+      pointer-events: none;
+      z-index: 52;
+      animation: buildShockExpand 0.75s ease-out forwards;
+    }
+    @keyframes buildShockExpand {
+      0%   { opacity: 1; transform: translate(-50%, 50%) scale(0.4); }
+      100% { opacity: 0; transform: translate(-50%, 50%) scale(4.2); }
+    }
+
+    /* 망치 쾅쾅! 건설 아이콘 & 연기 퍼프 */
+    .tile-hammer-fx {
+      position: absolute;
+      left: 42%;
+      bottom: 58px;
+      width: 54px;
+      height: 54px;
+      z-index: 66;
+      pointer-events: none;
+      animation: hammerSwingPop 0.82s ease-in-out forwards;
+    }
+    @keyframes hammerSwingPop {
+      0%   { opacity: 0; transform: scale(0.4) rotate(-45deg); }
+      25%  { opacity: 1; transform: scale(1.15) rotate(25deg); }
+      45%  { opacity: 1; transform: scale(1) rotate(-30deg); }
+      68%  { opacity: 1; transform: scale(1.2) rotate(28deg); }
+      100% { opacity: 0; transform: translateY(-20px) scale(0.6) rotate(0deg); }
+    }
+
+    .tile-build-banner {
+      position: absolute;
+      left: 50%;
+      top: -22px;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, #fef08a 0%, #f59e0b 100%);
+      color: #451a03;
+      border: 3px solid #ffffff;
+      outline: 2.5px solid #78350f;
+      box-shadow: 0 5px 0 #78350f, 0 8px 16px rgba(0, 0, 0, 0.45);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-family: var(--font-chibi-title);
+      font-size: 0.82rem;
+      white-space: nowrap;
+      z-index: 70;
+      pointer-events: none;
+      animation: floatUpCrisp 1.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    /* =========================================================================
+       [신규] 4인 실시간 온라인 멀티플레이 로비 & 4인 플레이어 HUD 바
+       ========================================================================= */
+    .mode-switch-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .mode-tab-btn {
+      font-family: var(--font-chibi-title);
+      background: #f1f5f9;
+      border: 3.5px solid #94a3b8;
+      box-shadow: 0 5px 0 #94a3b8;
+      border-radius: 18px;
+      padding: 10px 12px;
+      font-size: 1rem;
+      color: #475569;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.12s ease, background 0.12s ease;
+    }
+    .mode-tab-btn:hover { transform: translateY(-2px); }
+    .mode-tab-btn.active {
+      background: linear-gradient(180deg, #fef08a 0%, #facc15 100%);
+      border-color: #1e3a8a;
+      box-shadow: 0 5px 0 #1e3a8a;
+      color: #1e3a8a;
+    }
+
+    .online-lobby-box {
+      background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+      border: 3.5px solid #1e3a8a;
+      box-shadow: inset 0 3px 0 #ffffff, 0 6px 0 rgba(30, 58, 138, 0.18);
+      border-radius: 22px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      text-align: left;
+    }
+
+    .online-room-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: #ffffff;
+      border: 2.5px solid #1e3a8a;
+      border-radius: 14px;
+      padding: 7px 10px;
+      margin-bottom: 10px;
+    }
+
+    .room-code-input {
+      font-family: var(--font-chibi-title);
+      width: 90px;
+      padding: 4px 8px;
+      border: 2.5px solid #1e3a8a;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      text-align: center;
+      color: #1e3a8a;
+      background: #fef9c3;
+    }
+
+    .mini-lobby-btn {
+      font-family: var(--font-chibi-title);
+      background: #38bdf8;
+      color: #0f172a;
+      border: 2.5px solid #1e3a8a;
+      box-shadow: 0 3px 0 #1e3a8a;
+      border-radius: 10px;
+      padding: 5px 10px;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+    .mini-lobby-btn:hover { background: #7dd3fc; }
+    .mini-lobby-btn.gold  { background: #facc15; }
+
+    .online-status-pill {
+      font-size: 0.78rem;
+      color: #047857;
+      background: #d1fae5;
+      border: 2px solid #059669;
+      border-radius: 999px;
+      padding: 3px 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .online-slots-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .online-slot-card {
+      background: #ffffff;
+      border: 3px solid #1e3a8a;
+      box-shadow: 0 4px 0 #1e3a8a;
+      border-radius: 15px;
+      padding: 7px 6px;
+      text-align: center;
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.12s ease;
+    }
+    .online-slot-card:hover { transform: translateY(-2px); }
+    .online-slot-card.my-seat {
+      background: linear-gradient(180deg, #fef9c3 0%, #fde047 100%);
+      border-color: #b45309;
+      box-shadow: 0 4px 0 #78350f;
+    }
+    .slot-avatar {
+      width: 44px;
+      height: 48px;
+      border-radius: 10px;
+      border: 2px solid #1e3a8a;
+      object-fit: cover;
+      object-position: center top;
+      background: #bae6fd;
+      margin: 0 auto 4px auto;
+      display: block;
+    }
+    .slot-p-tag {
+      font-family: var(--font-chibi-title);
+      font-size: 0.65rem;
+      color: #ffffff;
+      padding: 1px 6px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-bottom: 2px;
+    }
+    .slot-p-name {
+      font-family: var(--font-chibi-title);
+      font-size: 0.8rem;
+      color: #0f172a;
+      display: block;
+    }
+    .slot-p-state {
+      font-size: 0.66rem;
+      color: #0284c7;
+      display: block;
+      margin-top: 2px;
+    }
+
+    /* 4인 플레이어 하단 HUD 그리드 */
+    .marble-4p-hud-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      width: 100%;
+    }
+
+    .hud-4p-card {
+      display: flex;
+      align-items: center;
+      background: linear-gradient(180deg, #1e293b 0%, #090d16 100%);
+      border: 3px solid #475569;
+      border-radius: 16px;
+      padding: 6px 9px 6px 6px;
+      box-shadow: 0 6px 0 #0f172a, 0 10px 18px rgba(0, 0, 0, 0.45);
+      position: relative;
+      color: #ffffff;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    .hud-4p-card.active-turn {
+      border-color: #facc15;
+      box-shadow: 0 0 0 3px #f59e0b, 0 8px 0 #78350f, 0 0 22px rgba(250, 204, 21, 0.75);
+      transform: translateY(-4px);
+    }
+    .hud-4p-card.bankrupt {
+      opacity: 0.48;
+      filter: grayscale(0.8);
+    }
+    .hud-4p-avatar {
+      width: 48px;
+      height: 52px;
+      border-radius: 11px;
+      border: 2.5px solid #ffffff;
+      object-fit: cover;
+      object-position: center top;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+    .hud-4p-rank {
+      position: absolute;
+      top: -9px;
+      right: 8px;
+      background: linear-gradient(180deg, #fef08a 0%, #f59e0b 100%);
+      color: #451a03;
+      border: 2px solid #ffffff;
+      border-radius: 8px;
+      padding: 1px 7px;
+      font-family: var(--font-chibi-title);
+      font-size: 0.68rem;
+      box-shadow: 0 2px 0 #78350f;
+    }
+    .hud-4p-body {
+      flex: 1;
+      min-width: 0;
+      text-align: left;
+    }
+    .hud-4p-title {
+      font-family: var(--font-chibi-title);
+      font-size: 0.74rem;
+      color: #ffffff;
+      padding: 1px 6px;
+      border-radius: 5px;
+      margin-bottom: 3px;
+      display: inline-block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    .hud-4p-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.68rem;
+      line-height: 1.25;
+      color: #cbd5e1;
+    }
+    .hud-4p-gold {
+      font-family: var(--font-chibi-title);
+      font-size: 0.85rem;
+      color: #facc15;
+    }
+    .hud-4p-asset {
+      font-family: var(--font-chibi-title);
+      font-size: 0.74rem;
+      color: #38bdf8;
+    }
+
+    /* 플로팅 금액 팝업 */
+    .floating-delta {
+      position: absolute;
+      left: 50%;
+      top: 12%;
+      font-size: 1.02rem;
+      padding: 4px 12px;
+      border-radius: 999px;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 65;
+      border: 3px solid #1e3a8a;
+      box-shadow: 0 4px 0 #1e3a8a;
+      animation: floatUpCrisp 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    .floating-delta.plus { background: #4ade80; color: #052e16; }
+    .floating-delta.minus { background: #fb7185; color: #4c0519; }
+
+    @keyframes floatUpCrisp {
+      0%   { opacity: 0; transform: translate(-50%, 10px) scale(0.5); }
+      25%  { opacity: 1; transform: translate(-50%, -8px) scale(1.12); }
+      100% { opacity: 0; transform: translate(-50%, -36px) scale(0.95); }
+    }
+
+    /* =========================================================================
+       빌리언 마블 / 모두의마블 스타일 상단 턴 배너 ("Change Turn / My Turn!")
+       ========================================================================= */
+    .marble-top-turn-banner {
+      position: relative;
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto 8px auto;
+      padding: 7px 28px;
+      background: linear-gradient(90deg, transparent 0%, rgba(15, 23, 42, 0.84) 18%, rgba(15, 23, 42, 0.92) 50%, rgba(15, 23, 42, 0.84) 82%, transparent 100%);
+      text-align: center;
+      color: #ffffff;
+      font-size: 1.15rem;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+      z-index: 35;
+    }
+    .marble-top-turn-banner::before,
+    .marble-top-turn-banner::after {
+      content: '';
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.92) 50%, transparent 100%);
+    }
+    .marble-top-turn-banner::before { top: 0; }
+    .marble-top-turn-banner::after  { bottom: 0; }
+
+    /* =========================================================================
+       중앙 3D 잔디 공원 광장 & 3D 물리 주사위 낙하 스테이지 (BILLION MARBLE PLAZA)
+       ========================================================================= */
+    .center-dashboard {
+      grid-column: 2 / 4;
+      grid-row: 2 / 4;
+      background:
+        radial-gradient(circle at 50% 45%, #65a30d 0%, #4d7c0f 58%, #365314 100%);
+      border: 4px solid #ffffff;
+      outline: 4px solid #1e3a8a;
+      border-radius: 26px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow:
+        inset 0 0 32px rgba(20, 83, 45, 0.75),
+        0 12px 0 #1e3a8a,
+        0 18px 28px rgba(3, 37, 65, 0.42);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 중앙 공원 분수대 디오라마 배경 */
+    .plaza-park-bg {
+      position: absolute;
+      left: 50%;
+      top: 44%;
+      transform: translate(-50%, -50%);
+      width: 82%;
+      height: 82%;
+      object-fit: contain;
+      opacity: 0.94;
+      pointer-events: none;
+      filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.45));
+      z-index: 1;
+    }
+
+    /* 잔디밭 중앙 워터마크 로고 (BILLION MARBLE 스타일) */
+    .plaza-watermark {
+      position: absolute;
+      left: 50%;
+      top: 52%;
+      transform: translate(-50%, -50%) rotate(-12deg);
+      font-size: 1.8rem;
+      line-height: 1.05;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.18);
+      border: 3px solid rgba(255, 255, 255, 0.15);
+      padding: 6px 16px;
+      border-radius: 14px;
+      pointer-events: none;
+      z-index: 2;
+      letter-spacing: 2px;
+    }
+
+    /* 좌측 "My Turn! -> Dice Rolling" 반투명 골드 컨트롤 박스 (유저 스크린샷과 동일 레이아웃) */
+    .my-turn-floating-box {
+      position: relative;
+      z-index: 25;
+      width: 164px;
+      background: linear-gradient(180deg, rgba(254, 243, 199, 0.92) 0%, rgba(253, 224, 71, 0.85) 100%);
+      border: 3px solid #b45309;
+      outline: 2px solid #fef08a;
+      border-radius: 18px;
+      padding: 8px 9px 10px 9px;
+      box-shadow:
+        0 8px 0 #78350f,
+        0 12px 24px rgba(0, 0, 0, 0.48),
+        inset 0 2px 0 #ffffff;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-top: 4px;
+    }
+
+    .my-turn-ribbon {
+      background: linear-gradient(90deg, #f59e0b 0%, #facc15 50%, #f59e0b 100%);
+      color: #451a03;
+      border: 2px solid #78350f;
+      border-radius: 999px;
+      padding: 2px 10px;
+      font-size: 0.78rem;
+      text-align: center;
+      box-shadow: 0 2px 0 #78350f;
+    }
+
+    .roll-btn {
+      font-family: var(--font-cartoon);
+      background: linear-gradient(180deg, #475569 0%, #1e293b 55%, #0f172a 100%);
+      color: #ffffff;
+      border: 3px solid #facc15;
+      box-shadow: 0 5px 0 #78350f, inset 0 2px 0 rgba(255, 255, 255, 0.35);
+      border-radius: 14px;
+      padding: 9px 10px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      text-shadow: 0 2px 0 #000000;
+      width: 100%;
+    }
+    .roll-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+      box-shadow: 0 7px 0 #78350f, 0 0 14px rgba(250, 204, 21, 0.75);
+    }
+    .roll-btn:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #78350f;
+    }
+    .roll-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .roll-btn-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-align: left;
+      line-height: 1.15;
+    }
+
+    /* 미니 2D 주사위 눈 표시 */
+    .dice-box {
+      width: 34px;
+      height: 34px;
+      background: #ffffff;
+      border-radius: 9px;
+      border: 2.5px solid #1e3a8a;
+      box-shadow: 0 3px 0 #1e3a8a;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .dice-pip-grid {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      place-items: center;
+    }
+    .dice-pip {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #1e3a8a;
+      opacity: 0;
+      transform: scale(0.4);
+    }
+    .dice-pip.on { opacity: 1; transform: scale(1); }
+    .dice-pip.red-one {
+      width: 8px;
+      height: 8px;
+      background: #ef4444;
+    }
+
+    /* 현재 항구/위치 미니 카드 */
+    .sell-asset-btn {
+      font-family: var(--font-cartoon);
+      background: linear-gradient(180deg, #78350f 0%, #451a03 100%);
+      color: #fef08a;
+      border: 2.5px solid #f59e0b;
+      box-shadow: 0 4px 0 #270e01, inset 0 1px 0 rgba(255, 255, 255, 0.28);
+      border-radius: 12px;
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      width: 100%;
+      transition: transform 0.12s ease, filter 0.12s ease;
+    }
+    .sell-asset-btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.12);
+    }
+    .sell-asset-btn:active {
+      transform: translateY(2px);
+    }
+
+    .my-turn-port-pill {
+      background: rgba(15, 23, 42, 0.85);
+      color: #fef08a;
+      border: 2px solid #b45309;
+      border-radius: 10px;
+      padding: 4px 7px;
+      font-size: 0.68rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .center-chibi-thumb {
+      width: 34px;
+      height: 26px;
+      border-radius: 6px;
+      border: 1.5px solid #ffffff;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    /* =========================================================================
+       중앙 공원 위로 위에서 떨어져 통통 튀는 진짜 6면체 3D 주사위 (3D FALLING DICE)
+       ========================================================================= */
+    .dice-drop-stage {
+      position: absolute;
+      inset: 0;
+      perspective: 900px;
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    /* 바닥에 드리워지는 주사위 그림자 (높이에 따라 크기/농도 변화) */
+    .dice-floor-shadow {
+      position: absolute;
+      left: 60%;
+      top: 54%;
+      width: 58px;
+      height: 26px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0) 75%);
+      transform: translate(-50%, -50%) scale(1);
+      z-index: 18;
+      transition: opacity 0.1s ease;
+    }
+
+    /* 주사위가 잔디밭에 부딪힐 때 퍼지는 황금 충격파 링 */
+    .dice-impact-ring {
+      position: absolute;
+      left: 60%;
+      top: 54%;
+      width: 24px;
+      height: 14px;
+      border-radius: 50%;
+      border: 3px solid #fef08a;
+      box-shadow: 0 0 12px #facc15;
+      transform: translate(-50%, -50%) scale(0.3);
+      opacity: 0;
+      z-index: 19;
+      pointer-events: none;
+    }
+    .dice-impact-ring.pop {
+      animation: impactWave 0.42s ease-out forwards;
+    }
+    @keyframes impactWave {
+      0%   { opacity: 1; transform: translate(-50%, -50%) scale(0.4); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(3.4); }
+    }
+
+    /* 3D 6면체 정육면체 주사위 컨테이너 */
+    .cube-dice-anchor {
+      position: absolute;
+      left: 60%;
+      top: 46%;
+      width: 56px;
+      height: 56px;
+      margin-left: -28px;
+      margin-top: -28px;
+      transform-style: preserve-3d;
+      z-index: 22;
+    }
+
+    .cube-dice-3d {
+      width: 56px;
+      height: 56px;
+      position: relative;
+      transform-style: preserve-3d;
+      transform: rotateX(-22deg) rotateY(28deg);
+    }
+
+    .cube-face {
+      position: absolute;
+      width: 56px;
+      height: 56px;
+      background: radial-gradient(circle at 32% 30%, #ffffff 0%, #f8fafc 68%, #e2e8f0 100%);
+      border: 3px solid #1e3a8a;
+      border-radius: 11px;
+      box-shadow: inset 0 0 8px rgba(148, 163, 184, 0.55);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      padding: 7px;
+      place-items: center;
+      backface-visibility: visible;
+    }
+
+    .cube-face .pip {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #334155 0%, #0f172a 100%);
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8), 0 1px 0 #ffffff;
+    }
+    .cube-face .pip.red {
+      width: 15px;
+      height: 15px;
+      background: radial-gradient(circle at 35% 35%, #f87171 0%, #dc2626 70%, #991b1b 100%);
+      border: 1.5px solid #7f1d1d;
+    }
+
+    /* 6면 정육면체 좌표 (반지름 28px) */
+    .cube-face.face-1 { transform: rotateY(0deg) translateZ(28px); }
+    .cube-face.face-6 { transform: rotateY(180deg) translateZ(28px); }
+    .cube-face.face-3 { transform: rotateY(90deg) translateZ(28px); }
+    .cube-face.face-4 { transform: rotateY(-90deg) translateZ(28px); }
+    .cube-face.face-5 { transform: rotateX(90deg) translateZ(28px); }
+    .cube-face.face-2 { transform: rotateX(-90deg) translateZ(28px); }
+
+    /* 주사위 결과 홀로그램 팝업 배지 */
+    .dice-result-callout {
+      position: absolute;
+      left: 60%;
+      top: 23%;
+      transform: translate(-50%, -50%) scale(0);
+      background: linear-gradient(180deg, #fef08a 0%, #f59e0b 100%);
+      color: #451a03;
+      border: 3px solid #ffffff;
+      outline: 2.5px solid #78350f;
+      box-shadow: 0 6px 0 #78350f, 0 10px 20px rgba(0, 0, 0, 0.5);
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 1rem;
+      z-index: 28;
+      opacity: 0;
+      transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+    }
+    .dice-result-callout.show {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+
+    /* 공원 하단 반투명 유리 로그 바 */
+    .log-box {
+      position: relative;
+      z-index: 24;
+      background: rgba(15, 23, 42, 0.84);
+      border: 2.5px solid rgba(250, 204, 21, 0.75);
+      border-radius: 14px;
+      padding: 6px 10px;
+      height: 62px;
+      overflow-y: auto;
+      font-size: 0.76rem;
+      line-height: 1.45;
+      color: #f8fafc;
+      text-align: left;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+    .log-entry {
+      margin-bottom: 3px;
+      border-bottom: 1px dashed rgba(148, 163, 184, 0.35);
+      padding-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .log-entry:last-child { margin-bottom: 0; border-bottom: none; }
+    .log-entry .turn-tag { color: #fde047; flex-shrink: 0; }
+    .log-ico { width: 15px; height: 15px; object-fit: contain; flex-shrink: 0; }
+
+    /* =========================================================================
+       하단 좌/우 "Siêu Cờ Tỷ Phú / Billion Marble" 플레이어 캐릭터 HUD 카드
+       ========================================================================= */
+    .marble-bottom-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: stretch;
+      gap: 14px;
+      margin-top: 6px;
+      padding: 0 4px;
+      position: relative;
+      z-index: 40;
+    }
+
+    .marble-player-card {
+      display: flex;
+      align-items: center;
+      background: linear-gradient(180deg, #1e293b 0%, #090d16 100%);
+      border: 3px solid #f59e0b;
+      outline: 2px solid #78350f;
+      border-radius: 18px;
+      padding: 6px 14px 6px 6px;
+      box-shadow:
+        0 8px 0 #451a03,
+        0 12px 24px rgba(0, 0, 0, 0.55),
+        inset 0 2px 0 rgba(255, 255, 255, 0.25);
+      position: relative;
+      min-width: 320px;
+      cursor: pointer;
+      transition: transform 0.14s ease;
+    }
+    .marble-player-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .player-portrait-frame {
+      width: 68px;
+      height: 68px;
+      border-radius: 14px;
+      background: radial-gradient(circle at 50% 35%, #fef08a 0%, #f59e0b 70%, #b45309 100%);
+      border: 3px solid #ffffff;
+      box-shadow: 0 4px 0 #78350f;
+      overflow: hidden;
+      flex-shrink: 0;
+      position: relative;
+      margin-right: 12px;
+    }
+    .player-portrait-frame img {
+      width: 100%;
+      height: 135%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+    .portrait-switch-hint {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(15, 23, 42, 0.82);
+      color: #fef08a;
+      font-size: 0.55rem;
+      text-align: center;
+      padding: 1px 0;
+    }
+
+    .player-rank-shield {
+      position: absolute;
+      top: -10px;
+      right: 12px;
+      background: linear-gradient(180deg, #fef08a 0%, #f59e0b 65%, #b45309 100%);
+      color: #451a03;
+      border: 2.5px solid #ffffff;
+      box-shadow: 0 4px 0 #78350f;
+      border-radius: 10px;
+      padding: 2px 10px;
+      font-size: 0.82rem;
+    }
+
+    .player-hud-info {
+      flex: 1;
+      text-align: left;
+    }
+    .player-hud-header {
+      background: linear-gradient(90deg, #f59e0b 0%, rgba(245, 158, 11, 0.1) 100%);
+      color: #ffffff;
+      font-size: 0.8rem;
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-bottom: 4px;
+      text-shadow: 0 1px 3px #000000;
+      display: inline-block;
+    }
+    .player-hud-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      line-height: 1.25;
+    }
+    .hud-key {
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+    .hud-val-gold {
+      font-size: 1.12rem;
+      color: #facc15;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+    .hud-val-asset {
+      font-size: 0.92rem;
+      color: #ffffff;
+    }
+
+    /* 우측 턴 & 보유 항구 상태 HUD 카드 */
+    .marble-status-card {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.92) 0%, rgba(9, 13, 22, 0.96) 100%);
+      border: 3px solid #38bdf8;
+      outline: 2px solid #1e3a8a;
+      border-radius: 18px;
+      padding: 8px 16px;
+      box-shadow: 0 8px 0 #0f172a, 0 12px 24px rgba(0, 0, 0, 0.45);
+      color: #ffffff;
+      gap: 12px;
+    }
+    .status-Hud-item {
+      text-align: center;
+    }
+    .status-Hud-label {
+      font-size: 0.72rem;
+      color: #7dd3fc;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .status-Hud-label img { width: 15px; height: 15px; object-fit: contain; }
+    .status-Hud-value {
+      font-size: 1.04rem;
+      color: #ffffff;
+    }
+
+    /* 시작 화면 캐릭터 선택 카드 */
+    .char-select-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .char-select-btn {
+      font-family: var(--font-cartoon);
+      background: #ffffff;
+      border: 3.5px solid #94a3b8;
+      box-shadow: 0 5px 0 #94a3b8;
+      border-radius: 18px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      text-align: left;
+      transition: transform 0.14s ease;
+    }
+    .char-select-btn:hover { transform: translateY(-2px); }
+    .char-select-btn.selected {
+      background: linear-gradient(180deg, #fef9c3 0%, #fde047 100%);
+      border-color: #b45309;
+      box-shadow: 0 5px 0 #78350f;
+    }
+    .char-select-thumb {
+      width: 48px;
+      height: 54px;
+      border-radius: 12px;
+      background: #38bdf8;
+      border: 2.5px solid #1e3a8a;
+      object-fit: cover;
+      object-position: center top;
+      flex-shrink: 0;
+    }
+
+    /* 그리드 셀 배치 (4x4 외곽 12칸 순환) */
+    .cell-0  { grid-column: 1; grid-row: 1; }
+    .cell-1  { grid-column: 2; grid-row: 1; }
+    .cell-2  { grid-column: 3; grid-row: 1; }
+    .cell-3  { grid-column: 4; grid-row: 1; }
+    .cell-4  { grid-column: 4; grid-row: 2; }
+    .cell-5  { grid-column: 4; grid-row: 3; }
+    .cell-6  { grid-column: 4; grid-row: 4; }
+    .cell-7  { grid-column: 3; grid-row: 4; }
+    .cell-8  { grid-column: 2; grid-row: 4; }
+    .cell-9  { grid-column: 1; grid-row: 4; }
+    .cell-10 { grid-column: 1; grid-row: 3; }
+    .cell-11 { grid-column: 1; grid-row: 2; }
+
+    /* ================= 3. 치비 퀴즈 & 이벤트 모달창 ================= */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.72);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      padding: 16px;
+    }
+    .modal-overlay.show {
+      display: flex;
+      animation: popScreen 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border: 5px solid #1e3a8a;
+      box-shadow: 0 14px 0 #1e3a8a, 0 24px 50px rgba(0, 0, 0, 0.5);
+      border-radius: 28px;
+      width: 100%;
+      max-width: 520px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .modal-cartoon-stage {
+      width: 100%;
+      height: 155px;
+      border-radius: 18px;
+      border: 3.5px solid #1e3a8a;
+      margin-bottom: 14px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: #38bdf8;
+    }
+
+    .modal-chibi-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    .modal-chibi-shade {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(15, 23, 42, 0.65) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .modal-port-badge {
+      position: relative;
+      z-index: 3;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffffff;
+      color: #1e3a8a;
+      border: 3px solid #1e3a8a;
+      box-shadow: 0 4px 0 #1e3a8a;
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 0.9rem;
+    }
+
+    .modal-stage-mascot {
+      position: relative;
+      z-index: 3;
+      width: 82px;
+      height: 82px;
+      object-fit: contain;
+      filter:
+        drop-shadow(2px 0 0 #ffffff)
+        drop-shadow(-2px 0 0 #ffffff)
+        drop-shadow(0 -2px 0 #ffffff)
+        drop-shadow(0 6px 6px rgba(15, 23, 42, 0.45));
+      animation: tokenIdleFloat 1.6s ease-in-out infinite;
+    }
+
+    .hero-chibi-mascot-left,
+    .hero-chibi-mascot-right {
+      position: absolute;
+      bottom: 6px;
+      width: 86px;
+      height: 104px;
+      object-fit: contain;
+      z-index: 3;
+      pointer-events: none;
+      filter:
+        drop-shadow(2px 0 0 #ffffff)
+        drop-shadow(-2px 0 0 #ffffff)
+        drop-shadow(0 -2px 0 #ffffff)
+        drop-shadow(0 6px 10px rgba(0, 0, 0, 0.55));
+    }
+    .hero-chibi-mascot-left  { left: 10px; animation: tokenIdleFloat 1.8s ease-in-out infinite; }
+    .hero-chibi-mascot-right { right: 10px; animation: tokenIdleFloat 1.8s ease-in-out infinite 0.5s; }
+
+    .celeb-chibi-mascot {
+      position: absolute;
+      right: 8px;
+      bottom: 4px;
+      width: 78px;
+      height: 86px;
+      object-fit: contain;
+      z-index: 4;
+      filter:
+        drop-shadow(2px 0 0 #ffffff)
+        drop-shadow(-2px 0 0 #ffffff)
+        drop-shadow(0 -2px 0 #ffffff)
+        drop-shadow(0 5px 8px rgba(0, 0, 0, 0.5));
+    }
+
+    .modal-title {
+      font-size: 1.32rem;
+      margin-bottom: 10px;
+      color: #1e3a8a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .quiz-question {
+      font-family: var(--font-chibi-body);
+      font-weight: 800;
+      background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+      border: 3px solid #1e3a8a;
+      box-shadow: inset 0 2px 0 #ffffff, 0 4px 0 rgba(30, 58, 138, 0.14);
+      border-radius: 18px;
+      padding: 14px 16px;
+      font-size: 1.04rem;
+      line-height: 1.58;
+      color: #1e293b;
+      margin-bottom: 12px;
+    }
+
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-bottom: 12px;
+    }
+
+    .option-btn {
+      font-family: var(--font-chibi-body);
+      font-weight: 800;
+      background: #ffffff;
+      border: 3px solid #1e3a8a;
+      box-shadow: 0 4px 0 #1e3a8a;
+      border-radius: 16px;
+      padding: 11px 15px;
+      color: #1e293b;
+      font-size: 0.98rem;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.12s ease, background 0.12s ease;
+    }
+    .option-btn:hover:not(:disabled) {
+      background: #fef08a;
+      transform: translateY(-2px);
+    }
+    .option-btn.correct {
+      background: #4ade80;
+      border-color: #14532d;
+      box-shadow: 0 4px 0 #14532d;
+      color: #052e16;
+    }
+    .option-btn.wrong {
+      background: #fb7185;
+      border-color: #881337;
+      box-shadow: 0 4px 0 #881337;
+      color: #4c0519;
+    }
+
+    .feedback-box {
+      display: none;
+      background: #f0f9ff;
+      border-radius: 16px;
+      padding: 14px;
+      margin-top: 8px;
+      border: 3px solid #1e3a8a;
+    }
+    .feedback-box.show { display: block; }
+
+    .feedback-title {
+      font-size: 1.06rem;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .feedback-desc {
+      font-size: 0.92rem;
+      color: #334155;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+    .action-row { display: flex; gap: 10px; }
+
+    .action-btn {
+      font-family: var(--font-cartoon);
+      flex: 1;
+      padding: 11px;
+      border-radius: 14px;
+      border: 3px solid #1e3a8a;
+      box-shadow: 0 5px 0 #1e3a8a;
+      font-size: 0.98rem;
+      cursor: pointer;
+      transition: transform 0.12s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+    .action-btn:hover { transform: translateY(-2px); }
+    .action-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #1e3a8a; }
+
+    .btn-buy     { background: #4ade80; color: #052e16; }
+    .btn-upgrade { background: #facc15; color: #713f12; }
+    .btn-close   { background: #e2e8f0; color: #1e293b; }
+
+    /* ================= 3D 치비 축하 팝업 ================= */
+    .celebration-3d-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 140;
+      pointer-events: none;
+    }
+    .celebration-3d-overlay.show { display: flex; }
+
+    .celebration-card-3d {
+      width: 350px;
+      background: linear-gradient(180deg, #fef9c3 0%, #fde047 100%);
+      border: 5px solid #1e3a8a;
+      box-shadow: 0 14px 0 #1e3a8a, 0 24px 60px rgba(0, 0, 0, 0.55);
+      border-radius: 28px;
+      padding: 18px;
+      text-align: center;
+      animation: cartoonCelebPop 1.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes cartoonCelebPop {
+      0%   { opacity: 0; transform: scale(0.4) rotate(-8deg); }
+      28%  { opacity: 1; transform: scale(1.06) rotate(3deg); }
+      45%  { transform: scale(1) rotate(0deg); }
+      82%  { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: translateY(-30px) scale(0.85); }
+    }
+
+    .celeb-chibi-wrap {
+      width: 100%;
+      height: 140px;
+      border-radius: 18px;
+      border: 3.5px solid #1e3a8a;
+      overflow: hidden;
+      margin-bottom: 10px;
+      position: relative;
+    }
+    .celeb-chibi-wrap img { width: 100%; height: 100%; object-fit: cover; }
+
+    .celebration-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      background: #ffffff;
+      border: 3px solid #1e3a8a;
+      color: #1e3a8a;
+      margin-bottom: 6px;
+    }
+    .celebration-title { font-size: 1.4rem; color: #1e3a8a; margin-bottom: 3px; }
+    .celebration-sub   { font-size: 0.98rem; color: #047857; }
+
+    /* ================= 4. 결과 화면 ================= */
+    .rank-badge-box {
+      background: linear-gradient(180deg, #fef08a 0%, #facc15 100%);
+      border: 4px solid #1e3a8a;
+      box-shadow: 0 8px 0 #1e3a8a;
+      border-radius: 22px;
+      padding: 16px;
+      margin: 14px 0;
+    }
+    .rank-label { font-size: 0.9rem; color: #78350f; margin-bottom: 4px; }
+    .rank-title {
+      font-size: 1.9rem;
+      color: #1e3a8a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .result-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .result-stat-item {
+      background: #e0f2fe;
+      border: 3px solid #1e3a8a;
+      box-shadow: 0 4px 0 #1e3a8a;
+      border-radius: 16px;
+      padding: 10px;
+    }
+    .stat-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 0.88rem;
+      color: #1e3a8a;
+      margin-bottom: 4px;
+    }
+    .stat-label img {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+    }
+    .stat-value {
+      font-size: 1.25rem;
+      color: #0f172a;
+    }
+    .new-record-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f43f5e;
+      color: #fff;
+      border: 2.5px solid #1e3a8a;
+      font-size: 0.84rem;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-top: 8px;
+    }
+    .wrong-note-container {
+      display: none;
+      text-align: left;
+      background: #f8fafc;
+      border: 3px solid #1e3a8a;
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 16px;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+    .wrong-note-container.show { display: block; }
+    .wrong-item {
+      border-bottom: 2px dashed #cbd5e1;
+      padding: 10px 0;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+    .wrong-item:last-child { border-bottom: none; }
+
+    @media (max-width: 740px) {
+      .game-title { font-size: 1.85rem; }
+      .board-wrapper {
+        gap: 8px;
+        padding: 10px;
+        grid-template-rows: repeat(4, minmax(136px, auto));
+      }
+      .board-wrapper.cam-3d,
+      .board-wrapper.cam-iso { transform: none; }
+      .cell { min-height: 136px; }
+      .chibi-block-top { height: 78px; }
+      .cell-name { font-size: 0.84rem; }
+      .cell-sub-tag { display: none; }
+      .cell-info { font-size: 0.65rem; padding: 2px 4px; }
+      .center-dashboard { padding: 8px; }
+      .my-turn-floating-box { width: 130px; }
+      .marble-bottom-hud { flex-direction: column; }
+      .hero-chibi-mascot-left, .hero-chibi-mascot-right { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 카툰 구름 배경 애니메이션 -->
+  <div class="cartoon-bg-decor">
+    <div class="cartoon-cloud cloud-1"></div>
+    <div class="cartoon-cloud cloud-2"></div>
+    <div class="cartoon-cloud cloud-3"></div>
+  </div>
+
+  <!-- 온디맨드 3D 컨페티 캔버스 -->
+  <canvas id="fx-canvas"></canvas>
+
+  <div class="app-container">
+    <!-- 1. 시작 화면 -->
+    <section id="start-screen" class="screen active">
+      <div class="cartoon-panel">
+        <div class="cartoon-hero-stage">
+          <img class="hero-chibi-bg" src="assets/chibi/hero.jpg" alt="치비 항구 보드게임 파노라마" />
+          <div class="hero-chibi-shade"></div>
+          <img class="hero-chibi-mascot-left" src="assets/chibi/char-boy.png" alt="캡틴 레오 치비" />
+          <img class="hero-chibi-mascot-right" src="assets/chibi/char-girl.png" alt="항해사 유나 치비" />
+          <div class="hero-ribbon">
+            <img src="assets/chibi-icons/compass.svg" style="width:22px;height:22px;" alt="" />
+            3D 치비 캐릭터 & 카와이 아일랜드 에디션
+          </div>
+          <h1 class="game-title">한국 항구 퀴즈 마블</h1>
+          <p class="game-subtitle">3D 주사위를 광장에 던져 귀여운 치비 캐릭터와 함께 8대 무역항을 인수하세요!</p>
+        </div>
+
+        <div class="best-record-box">
+          <img src="assets/chibi-icons/trophy.svg" style="width:30px;height:30px;" alt="" />
+          <span>최고 자산 기록: <strong id="best-asset-text">기록 없음</strong></span>
+        </div>
+
+        <div class="rules-box">
+          <h3>
+            <img src="assets/chibi/chibi-cheer.png" style="width:34px;height:34px;object-fit:contain;" alt="" />
+            치비 선장님의 항해 규칙 안내
+          </h3>
+          <ul class="rules-list">
+            <li><strong>총 15턴</strong> 동안 3D 입체 주사위(1~6)를 중앙 광장에 굴려 치비 캐릭터가 보드 위를 점프 이동합니다.</li>
+            <li>매 턴 이동 시 보유한 항구의 <strong>턴 수익이 자동 입금</strong>되며, 출발지 통과·도착 시 <strong>지원금 +200만 원</strong>을 받습니다.</li>
+            <li>항구 칸에 도착하면 <strong>순수 한국어 무역·항구 상식 4지선다 퀴즈</strong>가 열립니다!</li>
+            <li><strong>정답 시:</strong> 상금 <strong>+100만 원</strong> 지급 + 빈 항구 <strong>인수(x1)</strong> 또는 내 항구 <strong>2배 랜드마크 업그레이드(x2)</strong>!</li>
+            <li><strong>오답 시:</strong> 벌금 <strong>-50만 원</strong>이 차감되며, 틀린 문제는 <strong>오답 노트</strong>에 저장됩니다.</li>
+          </ul>
+        </div>
+
+        <div class="difficulty-section">
+          <div class="difficulty-label">게임 플레이 모드 선택</div>
+          <div class="mode-switch-tabs">
+            <button type="button" class="mode-tab-btn active" id="mode-btn-4p" onclick="selectGameMode('online4p')">
+              <img src="assets/chibi-icons/users-online.svg" style="width:28px;height:28px;" alt="" />
+              <span>4인 실시간 온라인 대전</span>
+            </button>
+            <button type="button" class="mode-tab-btn" id="mode-btn-1p" onclick="selectGameMode('solo1p')">
+              <img src="assets/chibi-icons/compass.svg" style="width:26px;height:26px;" alt="" />
+              <span>1인 싱글 퀴즈 마블</span>
+            </button>
+          </div>
+
+          <!-- 4인 실시간 온라인 멀티플레이어 방/로비 패널 -->
+          <div class="online-lobby-box" id="online-lobby-box">
+            <div class="online-room-bar">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <img src="assets/chibi-icons/users-online.svg" style="width:22px;height:22px;" alt="" />
+                <span style="font-family:var(--font-chibi-title);font-size:0.86rem;color:#1e3a8a;">방 코드:</span>
+                <input type="text" id="room-code-input" class="room-code-input" value="7788" maxlength="6" />
+                <button type="button" class="mini-lobby-btn" onclick="joinOrSyncOnlineRoom()">방 접속·동기화</button>
+                <button type="button" class="mini-lobby-btn gold" onclick="copyInviteLink()">초대 링크 복사</button>
+              </div>
+              <span class="online-status-pill" id="online-status-pill">🟢 온라인 채널 준비 완료 (#7788)</span>
+            </div>
+
+            <div style="font-size:0.78rem;color:#334155;margin-bottom:8px;">
+              💡 다른 브라우저/탭/기기에서 같은 <strong>방 코드(7788)</strong>로 접속하면 실시간 연동되며, 빈자리는 <strong>스마트 치비 AI</strong>가 자동으로 함께 플레이합니다! (클릭하여 내 캐릭터 변경)
+            </div>
+
+            <div class="online-slots-grid" id="online-slots-grid">
+              <!-- JS에서 4인 슬롯(P1~P4) 렌더링 -->
+            </div>
+          </div>
+
+          <div class="difficulty-label">내 대표 치비 캐릭터 선택</div>
+          <div class="char-select-grid">
+            <button type="button" class="char-select-btn selected" id="char-btn-boy" onclick="selectCharacter('boy')">
+              <img class="char-select-thumb" src="assets/chibi/char-boy.png" alt="캡틴 레오" />
+              <div>
+                <span class="diff-title">캡틴 레오</span>
+                <span class="diff-desc">황금 해운 제독 (P1)</span>
+              </div>
+            </button>
+            <button type="button" class="char-select-btn" id="char-btn-girl" onclick="selectCharacter('girl')">
+              <img class="char-select-thumb" src="assets/chibi/char-girl.png" alt="항해사 유나" />
+              <div>
+                <span class="diff-title">항해사 유나</span>
+                <span class="diff-desc">글로벌 무역 여왕 (P2)</span>
+              </div>
+            </button>
+          </div>
+
+          <div class="difficulty-label">난이도 선택 (시작 자금 설정)</div>
+          <div class="difficulty-buttons">
+            <button type="button" class="diff-btn selected" id="diff-easy" onclick="selectDifficulty('easy')">
+              <img src="assets/chibi-icons/money-bag.svg" style="width:40px;height:40px;" alt="" />
+              <div>
+                <span class="diff-title">쉬움 모드</span>
+                <span class="diff-desc">시작 자금 1,500만 원</span>
+              </div>
+            </button>
+            <button type="button" class="diff-btn" id="diff-hard" onclick="selectDifficulty('hard')">
+              <img src="assets/chibi-icons/trident.svg" style="width:40px;height:40px;" alt="" />
+              <div>
+                <span class="diff-title">어려움 모드</span>
+                <span class="diff-desc">시작 자금 1,000만 원</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <button type="button" class="cartoon-primary-btn" id="start-main-btn" onclick="startGame()">
+          <img src="assets/chibi-icons/ship.svg" style="width:34px;height:34px;" alt="" />
+          <span id="start-main-btn-text">4인 온라인 치비 마블 출항 시작!</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 2. 보드판 화면 -->
+    <section id="game-screen" class="screen">
+      <div class="board-top-bar">
+        <div class="board-top-title">
+          <img id="top-bar-chibi-ico" src="assets/chibi/char-boy.png" style="width:28px;height:28px;object-fit:contain;" alt="" />
+          <span id="top-bar-mode-label">한국 항구 퀴즈 마블 · 4인 온라인 & 3D 건설</span>
+        </div>
+        <div class="cam-btn-group">
+          <button type="button" class="view-toggle-btn" style="background:#fde047;border-color:#b45309;" onclick="demoBuildUpgradeEffect()" title="현재 항구 또는 무작위 항구에 3D 빌딩/랜드마크 건설 이펙트를 즉시 시연합니다!">
+            <img src="assets/chibi-icons/hammer-build.svg" style="width:18px;height:18px;" alt="" />
+            3D 건설·업그레이드 이펙트!
+          </button>
+          <button type="button" class="view-toggle-btn active-cam" id="cam-btn-3d" onclick="setCameraMode('cam-3d')">
+            초선명 3D 블록
+          </button>
+          <button type="button" class="view-toggle-btn" id="cam-btn-iso" onclick="setCameraMode('cam-iso')">
+            3D 테이블 기울기
+          </button>
+          <button type="button" class="view-toggle-btn" id="cam-btn-flat" onclick="setCameraMode('cam-flat')">
+            2D 평면
+          </button>
+        </div>
+      </div>
+
+      <!-- 상단 시네마틱 턴 배너 (유저 스크린샷 "Change Turn" 스타일) -->
+      <div class="marble-top-turn-banner" id="top-turn-banner">
+        My Turn! · 1턴 주사위를 굴려주세요!
+      </div>
+
+      <div class="board-stage" id="board-stage">
+        <div class="board-wrapper cam-3d" id="board-grid">
+          <!-- 중앙 3D 잔디 공원 광장 & 3D 물리 주사위 낙하 스테이지 -->
+          <div class="center-dashboard">
+            <img class="plaza-park-bg" src="assets/chibi/center-plaza.png" alt="중앙 분수대 공원 광장" />
+            <div class="plaza-watermark">KOREA PORT<br>MARBLE</div>
+
+            <!-- 좌측 "My Turn! -> Dice Rolling" 액션 패널 -->
+            <div class="my-turn-floating-box">
+              <div class="my-turn-ribbon" id="my-turn-ribbon">My Turn!</div>
+              <button type="button" class="roll-btn" id="roll-btn" onclick="rollDice()">
+                <div class="roll-btn-left">
+                  <img src="assets/chibi-icons/dice.svg" style="width:28px;height:28px;" alt="" />
+                  <div>
+                    <div style="font-size:0.9rem;">주사위 굴리기</div>
+                    <div style="font-size:0.65rem;color:#fde047;">Dice Rolling</div>
+                  </div>
+                </div>
+                <div class="dice-box" id="dice-box" title="주사위 눈">
+                  <div class="dice-pip-grid" id="dice-pip-grid">
+                    <span class="dice-pip"></span><span class="dice-pip"></span><span class="dice-pip"></span>
+                    <span class="dice-pip"></span><span class="dice-pip red-one on"></span><span class="dice-pip"></span>
+                    <span class="dice-pip"></span><span class="dice-pip"></span><span class="dice-pip"></span>
+                  </div>
+                </div>
+              </button>
+              <button type="button" class="sell-asset-btn" id="sell-asset-btn" onclick="sellAssetAction()" title="보유 중인 항구를 매각하여 현금을 확보합니다 (Sell Asset)">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <img src="assets/chibi-icons/house-lv1.svg" style="width:20px;height:20px;" alt="" />
+                  <div style="text-align:left;line-height:1.1;">
+                    <div style="font-size:0.78rem;color:#ffffff;">항구 매각</div>
+                    <div style="font-size:0.6rem;color:#fde047;">Sell Asset</div>
+                  </div>
+                </div>
+                <img src="assets/chibi-icons/coin.svg" style="width:18px;height:18px;" alt="" />
+              </button>
+              <div class="my-turn-port-pill">
+                <img id="center-chibi-thumb" class="center-chibi-thumb" src="assets/chibi/cell-0.jpg" alt="현재 치비 섬" />
+                <span id="center-live-title" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">출발 항구 대기 중</span>
+              </div>
+            </div>
+
+            <!-- 위에서 떨어져 잔디밭에서 통통 튀는 진짜 6면체 3D 물리 주사위 -->
+            <div class="dice-drop-stage" id="dice-drop-stage">
+              <div class="dice-floor-shadow" id="dice-floor-shadow"></div>
+              <div class="dice-impact-ring" id="dice-impact-ring"></div>
+              <div class="dice-result-callout" id="dice-result-callout">🎲 1칸 전진!</div>
+
+              <div class="cube-dice-anchor" id="cube-dice-anchor">
+                <div class="cube-dice-3d" id="cube-dice-3d">
+                  <!-- 1번 면 (정면) -->
+                  <div class="cube-face face-1">
+                    <span></span><span></span><span></span>
+                    <span></span><span class="pip red"></span><span></span>
+                    <span></span><span></span><span></span>
+                  </div>
+                  <!-- 6번 면 (후면) -->
+                  <div class="cube-face face-6">
+                    <span class="pip"></span><span></span><span class="pip"></span>
+                    <span class="pip"></span><span></span><span class="pip"></span>
+                    <span class="pip"></span><span></span><span class="pip"></span>
+                  </div>
+                  <!-- 3번 면 (우측) -->
+                  <div class="cube-face face-3">
+                    <span class="pip"></span><span></span><span></span>
+                    <span></span><span class="pip"></span><span></span>
+                    <span></span><span></span><span class="pip"></span>
+                  </div>
+                  <!-- 4번 면 (좌측) -->
+                  <div class="cube-face face-4">
+                    <span class="pip"></span><span></span><span class="pip"></span>
+                    <span></span><span></span><span></span>
+                    <span class="pip"></span><span></span><span class="pip"></span>
+                  </div>
+                  <!-- 5번 면 (상단) -->
+                  <div class="cube-face face-5">
+                    <span class="pip"></span><span></span><span class="pip"></span>
+                    <span></span><span class="pip"></span><span></span>
+                    <span class="pip"></span><span></span><span class="pip"></span>
+                  </div>
+                  <!-- 2번 면 (하단) -->
+                  <div class="cube-face face-2">
+                    <span class="pip"></span><span></span><span></span>
+                    <span></span><span></span><span></span>
+                    <span></span><span></span><span class="pip"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 하단 반투명 이벤트 로그 -->
+            <div class="log-box" id="event-log"></div>
+          </div>
+          <!-- 0~11번 3D 치비 입체 블록 칸은 JS에서 생성 -->
+        </div>
+      </div>
+
+      <!-- 4인 실시간 온라인 멀티플레이어 전용 4인 캐릭터 HUD 그리드 -->
+      <div class="marble-4p-hud-grid" id="hud-4p-container" style="margin-top:6px;margin-bottom:6px;display:none;"></div>
+
+      <!-- 하단 좌/우 "Siêu Cờ Tỷ Phú / Billion Marble" 플레이어 캐릭터 HUD 바 -->
+      <div class="marble-bottom-hud" id="hud-1p-container">
+        <div class="marble-player-card" onclick="toggleCharacterInGame()" title="클릭하여 치비 캐릭터 변경 (캡틴 레오 / 항해사 유나)">
+          <div class="player-portrait-frame">
+            <img id="captain-mascot-img" src="assets/chibi/char-boy.png" alt="플레이어 치비 캐릭터" />
+            <div class="portrait-switch-hint">캐릭터 변경</div>
+          </div>
+          <div class="player-rank-shield" id="hud-rank-shield">1st · 선장</div>
+          <div class="player-hud-info">
+            <div class="player-hud-header" id="hud-player-name">PLAYER · 캡틴 레오</div>
+            <div class="player-hud-row">
+              <span class="hud-key">보유 현금 (Gold)</span>
+              <span class="hud-val-gold" id="cash-display">1,500만 원</span>
+            </div>
+            <div class="player-hud-row">
+              <span class="hud-key">총자산 (Asset)</span>
+              <span class="hud-val-asset" id="asset-display">1,500만 원</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="marble-status-card">
+          <div class="status-Hud-item">
+            <div class="status-Hud-label">
+              <img src="assets/chibi-icons/compass.svg" alt="" />
+              현재 턴 (Turn)
+            </div>
+            <div class="status-Hud-value" id="turn-display">1 / 15</div>
+          </div>
+          <div class="status-Hud-item">
+            <div class="status-Hud-label">
+              <img src="assets/chibi-icons/anchor.svg" alt="" />
+              보유 무역항
+            </div>
+            <div class="status-Hud-value" id="owned-ports-pill">보유 항구: 0 / 8곳</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 결과 화면 -->
+    <section id="result-screen" class="screen">
+      <div class="cartoon-panel">
+        <div class="cartoon-hero-stage" style="height: 175px;">
+          <img class="hero-chibi-bg" src="assets/chibi/hero.jpg" alt="항해 완료 치비 배너" />
+          <div class="hero-chibi-shade"></div>
+          <img id="result-chibi-sticker" class="hero-chibi-mascot-right" src="assets/chibi/chibi-king.png" alt="치비 축하 스티커" style="width:96px;height:106px;" />
+          <h2 class="game-title" id="result-main-title" style="font-size: 2rem;">항해 종료 리포트</h2>
+          <p class="game-subtitle" id="result-sub-msg">15턴의 대한민국 무역항 항해를 모두 마쳤습니다!</p>
+        </div>
+
+        <div class="rank-badge-box">
+          <div class="rank-label">최종 달성 해운 등급</div>
+          <div class="rank-title" id="final-rank-title">
+            <img src="assets/chibi-icons/crown.svg" style="width:42px;height:42px;" alt="" />
+            <span>베테랑 선장</span>
+          </div>
+          <div id="new-record-badge" class="new-record-tag" style="display: none;">
+            <img src="assets/chibi-icons/sparkles.svg" style="width:18px;height:18px;" alt="" />
+            최고 자산 기록 경신!
+          </div>
+        </div>
+
+        <div class="result-stats">
+          <div class="result-stat-item">
+            <div class="stat-label"><img src="assets/chibi-icons/money-bag.svg" alt="" /> 최종 보유 현금</div>
+            <div class="stat-value cash" id="final-cash">0만 원</div>
+          </div>
+          <div class="result-stat-item">
+            <div class="stat-label"><img src="assets/chibi-icons/crane.svg" alt="" /> 보유 항구 평가액</div>
+            <div class="stat-value" id="final-port-value">0만 원</div>
+          </div>
+          <div class="result-stat-item">
+            <div class="stat-label"><img src="assets/chibi-icons/coin.svg" alt="" /> 최종 총자산</div>
+            <div class="stat-value asset" id="final-total-asset">0만 원</div>
+          </div>
+          <div class="result-stat-item">
+            <div class="stat-label"><img src="assets/chibi-icons/trophy.svg" alt="" /> 역대 최고 기록</div>
+            <div class="stat-value" id="final-best-asset">0만 원</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 14px;">
+          <button type="button" class="action-btn btn-close" onclick="toggleWrongNotes()">
+            <img src="assets/chibi-icons/memo.svg" style="width:22px;height:22px;" alt="" />
+            <span id="wrong-note-btn-label">오답 노트 보기 (0)</span>
+          </button>
+          <button type="button" class="action-btn btn-buy" onclick="resetToStart()">
+            <img src="assets/chibi-icons/ship.svg" style="width:24px;height:24px;" alt="" />
+            <span>다시 출항하기</span>
+          </button>
+        </div>
+
+        <div class="wrong-note-container" id="wrong-note-box"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- 치비 퀴즈 및 이벤트 모달창 -->
+  <div class="modal-overlay" id="quiz-modal">
+    <div class="modal-card">
+      <div class="modal-cartoon-stage" id="modal-cartoon-stage">
+        <img id="modal-chibi-bg" class="modal-chibi-bg" src="assets/chibi/cell-1.jpg" alt="치비 항구 일러스트" />
+        <div class="modal-chibi-shade"></div>
+        <div class="modal-port-badge" id="modal-badge">
+          <img id="modal-badge-ico" src="assets/chibi-icons/fuel.svg" style="width:24px;height:24px;" alt="" />
+          <span id="modal-badge-text">울산항 퀴즈</span>
+        </div>
+        <img id="modal-stage-mascot" class="modal-stage-mascot" src="assets/chibi/char-boy.png" alt="치비 캐릭터 마스코트" />
+      </div>
+      <h3 class="modal-title" id="modal-title">항구 상식 퀴즈</h3>
+      <div class="quiz-question" id="modal-question">문제 텍스트</div>
+      <div class="options-list" id="modal-options"></div>
+
+      <div class="feedback-box" id="modal-feedback">
+        <div class="feedback-title" id="feedback-title"></div>
+        <div class="feedback-desc" id="feedback-desc"></div>
+        <div class="action-row" id="feedback-actions"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3D 치비 항구 인수 / 업그레이드 축하 팝업 -->
+  <div class="celebration-3d-overlay" id="celebration-overlay">
+    <div class="celebration-card-3d">
+      <div class="celeb-chibi-wrap">
+        <img id="celeb-chibi-img" src="assets/chibi/cell-1.jpg" alt="인수한 치비 항구" />
+        <img id="celeb-chibi-mascot" class="celeb-chibi-mascot" src="assets/chibi/chibi-cheer.png" alt="치비 축하 캐릭터" />
+      </div>
+      <div class="celebration-badge" id="celeb-badge">
+        <img src="assets/chibi-icons/crown.svg" style="width:18px;height:18px;" alt="" />
+        <span>NEW PORT!</span>
+      </div>
+      <div class="celebration-title" id="celeb-title">울산항 인수 완료!</div>
+      <div class="celebration-sub" id="celeb-sub">매턴 수익 +60만 원 확보!</div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================================
+       1. 12칸 3D 치비 입체 블록 데이터 (Kawaii Chibi SVG 스티커 아이콘 적용)
+       ========================================================================= */
+    const BOARD_CELLS = [
+      {
+        id: 0,
+        name: '출발',
+        type: 'start',
+        chibi: 'assets/chibi/cell-0.jpg',
+        icon: 'assets/chibi-icons/compass.svg',
+        subTag: '해운 지원 본부',
+        desc: '통과·도착 +200만'
+      },
+      {
+        id: 1,
+        name: '울산항',
+        type: 'port',
+        chibi: 'assets/chibi/cell-1.jpg',
+        icon: 'assets/chibi-icons/fuel.svg',
+        subTag: '자동차·석유화학',
+        price: 300,
+        income: 60
+      },
+      {
+        id: 2,
+        name: '부산항',
+        type: 'port',
+        chibi: 'assets/chibi/cell-2.jpg',
+        icon: 'assets/chibi-icons/cargo-ship.svg',
+        subTag: '최대 컨테이너항',
+        price: 400,
+        income: 80
+      },
+      {
+        id: 3,
+        name: '황금열쇠',
+        type: 'key1',
+        chibi: 'assets/chibi/cell-3.jpg',
+        icon: 'assets/chibi-icons/key-gold.svg',
+        subTag: '해상 보물섬',
+        desc: '호황 +150 / 태풍 -100'
+      },
+      {
+        id: 4,
+        name: '인천항',
+        type: 'port',
+        chibi: 'assets/chibi/cell-4.jpg',
+        icon: 'assets/chibi-icons/bridge.svg',
+        subTag: '수도권 갑문항',
+        price: 350,
+        income: 70
+      },
+      {
+        id: 5,
+        name: '광양항',
+        type: 'port',
+        chibi: 'assets/chibi/cell-5.jpg',
+        icon: 'assets/chibi-icons/crane.svg',
+        subTag: '복합 물류 허브',
+        price: 300,
+        income: 60
+      },
+      {
+        id: 6,
+        name: '세관 검사소',
+        type: 'customs',
+        chibi: 'assets/chibi/cell-6.jpg',
+        icon: 'assets/chibi-icons/siren.svg',
+        subTag: '통관 검문소',
+        desc: '통관 지연 -100만'
+      },
+      {
+        id: 7,
+        name: '평택항',
+        type: 'port',
+        chibi: 'assets/chibi/cell-7.jpg',
+        icon: 'assets/chibi-icons/car.svg',
+        subTag: '수출 자동차항',
+        price: 250,
+        income: 50
+      },
+      {
+        id: 8,
+        name: '포항항',
+        type: 'port',
+        chibi: 'assets/chibi/cell-8.jpg',
+        icon: 'assets/chibi-icons/factory.svg',
+        subTag: '제철·철강 산업항',
+        price: 250,
+        income: 50
+      },
+      {
+        id: 9,
+        name: '황금열쇠',
+        type: 'key2',
+        chibi: 'assets/chibi/cell-9.jpg',
+        icon: 'assets/chibi-icons/key-modern.svg',
+        subTag: '수출 보너스섬',
+        desc: '보너스 +200 / 물류 -100'
+      },
+      {
+        id: 10,
+        name: '목포항',
+        type: 'port',
+        chibi: 'assets/chibi/cell-10.jpg',
+        icon: 'assets/chibi-icons/speedboat.svg',
+        subTag: '다도해 서남권항',
+        price: 200,
+        income: 40
+      },
+      {
+        id: 11,
+        name: '제주항',
+        type: 'port',
+        chibi: 'assets/chibi/cell-11.jpg',
+        icon: 'assets/chibi-icons/island.svg',
+        subTag: '크루즈·특산물항',
+        price: 200,
+        income: 40
+      }
+    ];
+
+    const DICE_PIP_PATTERNS = {
+      1: [4],
+      2: [0, 8],
+      3: [0, 4, 8],
+      4: [0, 2, 6, 8],
+      5: [0, 2, 4, 6, 8],
+      6: [0, 2, 3, 5, 6, 8]
+    };
+
+    /* =========================================================================
+       2. 순수 한국어 항구·무역 상식 4지선다 퀴즈 (18문항)
+       ========================================================================= */
+    const QUIZ_BANK = [
+      {
+        port: '울산항',
+        question: '울산항의 주력 수출 품목으로 가장 알맞은 것은 무엇일까요?',
+        options: ['자동차와 석유화학 제품', '사과와 배 등 과일류', '생수와 감귤', '면직물과 의류'],
+        answer: 0,
+        explanation: '울산항은 대규모 자동차 공장과 석유화학 단지가 밀집해 있어 자동차 및 액체 화물 수출이 활발합니다.'
+      },
+      {
+        port: '부산항',
+        question: '대한민국 최대의 컨테이너 항구이자 세계적인 환적 항구인 곳은 어디일까요?',
+        options: ['목포항', '부산항', '제주항', '포항항'],
+        answer: 1,
+        explanation: '부산항은 한국 전체 컨테이너 물동량의 대부분을 처리하는 대한민국 제1의 무역항입니다.'
+      },
+      {
+        port: '포항항',
+        question: '포항항이 발전하게 된 가장 핵심적인 기간산업은 무엇일까요?',
+        options: ['장난감 제조업', '철강 및 제철 산업', '커피 원두 재배업', '영화 촬영 산업'],
+        answer: 1,
+        explanation: '포항항은 포스코(POSCO)를 중심으로 철광석과 석탄을 들여오고 철강 제품을 수출하는 대표 철강 산업항입니다.'
+      },
+      {
+        port: '인천항',
+        question: '조수 간만의 차가 큰 서해안 인천항에서 배가 안전하게 드나들기 위해 설치한 특수 시설은 무엇일까요?',
+        options: ['케이블카', '갑문(물의 높이를 맞추는 수문)', '풍력 발전기', '지하 터널'],
+        answer: 1,
+        explanation: '인천항은 밀물과 썰물의 높이 차이를 극복하기 위해 갑문 시설을 운영하여 대형 선박의 접안을 돕습니다.'
+      },
+      {
+        port: '광양항',
+        question: '전라남도 광양만에 위치하며 컨테이너 부두와 석유화학·제철 물류를 함께 처리하는 남해안의 대표 복합 물류 항구는?',
+        options: ['광양항', '속초항', '강릉항', '군산항'],
+        answer: 0,
+        explanation: '광양항은 깊은 수심과 넓은 배후 부지를 갖춘 남해안의 핵심 복합 물류 허브 항만입니다.'
+      },
+      {
+        port: '평택항',
+        question: '수도권 남부와 가까우며 대한민국에서 수출입 자동차 처리 물동량이 매우 높은 서해안의 대표 항구는?',
+        options: ['평택항', '제주항', '묵호항', '통영항'],
+        answer: 0,
+        explanation: '평택항은 자동차 전용 부두가 발달해 국산 수출 자동차와 수입 자동차가 가장 많이 오가는 항구로 유명합니다.'
+      },
+      {
+        port: '목포항',
+        question: '전라남도 서남권의 관문 항구로, 다도해 섬 지역 여객선 운항과 조선·해양 산업이 발달한 항구는?',
+        options: ['목포항', '울산항', '동해항', '포항항'],
+        answer: 0,
+        explanation: '목포항은 서남해안 다도해 해상 교통의 중심지이자 영산강 하구와 인접한 역사 깊은 무역항입니다.'
+      },
+      {
+        port: '제주항',
+        question: '섬 지역인 제주도의 생활 물자 공급과 감귤·수산물 반출, 대형 크루즈 여객선 입항을 담당하는 항구는?',
+        options: ['인천항', '제주항', '평택항', '광양항'],
+        answer: 1,
+        explanation: '제주항은 제주도민의 필수 물품 수송과 국제 크루즈 관광의 중심 역할을 수행합니다.'
+      },
+      {
+        port: '무역 상식',
+        question: '다른 나라에서 물건을 사서 우리나라로 들여오는 것을 무엇이라고 부를까요?',
+        options: ['수출', '수입', '환승', '예금'],
+        answer: 1,
+        explanation: '외국으로부터 물품을 구매해 국내로 들여오는 것은 수입, 국내 물품을 외국에 파는 것은 수출입니다.'
+      },
+      {
+        port: '무역 상식',
+        question: '화물을 일정한 크기의 강철 상자에 담아 배, 기차, 트럭으로 쉽게 옮길 수 있게 만든 표준 수송 용기는?',
+        options: ['컨테이너', '비닐봉지', '우체통', '종이봉투'],
+        answer: 0,
+        explanation: '컨테이너는 규격화된 강철 상자로, 하역 시간을 크게 줄여 현대 해상 무역 혁명을 이끌었습니다.'
+      },
+      {
+        port: '무역 상식',
+        question: '외국에서 들어오는 물건에 대해 세관에서 법에 따라 매기는 세금을 무엇이라고 할까요?',
+        options: ['관세', '수도세', '입장료', '수수료'],
+        answer: 0,
+        explanation: '국경을 통과하는 수출입 화물에 부과하는 세금을 관세라고 하며, 세관에서 이를 심사·징수합니다.'
+      },
+      {
+        port: '무역 상식',
+        question: '수출액에서 수입액을 뺀 금액을 무엇이라고 하며, 수출이 수입보다 많을 때 무엇이라고 할까요?',
+        options: ['무역수지 / 무역수지 흑자', '가계부 / 적자', '환율 / 인플레이션', '이자율 / 만기'],
+        answer: 0,
+        explanation: '수출과 수입의 차이를 무역수지라고 하며, 수출이 더 많아 외화를 벌어들인 상태를 무역수지 흑자라고 합니다.'
+      },
+      {
+        port: '무역 상식',
+        question: '수출입 물품이 세관의 검사와 허가를 거쳐 정식으로 국경을 통과하는 절차를 무엇이라고 할까요?',
+        options: ['통관', '체크인', '환전', '분리수거'],
+        answer: 0,
+        explanation: '세관에서 화물의 종류, 수량, 안전성 등을 확인하고 반출입을 허가하는 절차를 통관이라고 합니다.'
+      },
+      {
+        port: '무역 상식',
+        question: '천연가스를 영하 162도 이하로 냉각해 액체 상태로 만들어 부피를 줄여 운반하는 특수 선박은?',
+        options: ['액화천연가스 운반선', '어선', '여객선', '잠수함'],
+        answer: 0,
+        explanation: '대한민국 조선소들은 고부가가치 선박인 액화천연가스 운반선 건조 기술에서 세계 최고 수준을 자랑합니다.'
+      },
+      {
+        port: '무역 상식',
+        question: '목적지 항구로 바로 가지 않고, 부산항 같은 대형 중간 항구에서 다른 배로 화물을 옮겨 싣는 것을 무엇이라 할까요?',
+        options: ['환적', '정박', '폐선', '조업'],
+        answer: 0,
+        explanation: '다른 선박으로 화물을 옮겨 싣는 것을 환적이라고 하며, 부산항은 세계적인 환적 허브 항만입니다.'
+      },
+      {
+        port: '무역 상식',
+        question: '항구 안에서 거대한 크레인을 이용해 배에 화물을 싣고(선적) 내리는(양하) 작업을 통틀어 무엇이라 할까요?',
+        options: ['하역', '항해', '출항', '조타'],
+        answer: 0,
+        explanation: '선박에 화물을 싣고 내리는 일련의 작업을 하역이라고 합니다.'
+      },
+      {
+        port: '무역 상식',
+        question: '대형 선박이 항구 안의 부두에 안전하게 자리를 잡도록 항구 지형을 잘 아는 전문가가 배에 타서 안내하는 일은?',
+        options: ['도선(도선사의 안내)', '대리 운전', '수영', '기상 예보'],
+        answer: 0,
+        explanation: '항만 수로를 숙지한 도선사가 선박에 승선하여 안전하게 부두까지 접안시키는 일을 도선이라고 합니다.'
+      },
+      {
+        port: '무역 상식',
+        question: '배가 항구의 부두 벽에 안전하게 옆으로 붙어 멈추는 것을 가리키는 해운 용어는?',
+        options: ['접안', '이륙', '환승', '표류'],
+        answer: 0,
+        explanation: '선박이 부두나 안벽에 붙어 정박하는 것을 접안이라고 합니다.'
+      }
+    ];
+
+    /* =========================================================================
+       3. 온디맨드 카툰 컨페티 엔진
+       ========================================================================= */
+    const fxCanvas = document.getElementById('fx-canvas');
+    const fxCtx = fxCanvas.getContext('2d');
+    let fxParticles = [];
+    let fxWaves = [];
+    let fxRafId = null;
+
+    function resizeFxCanvas() {
+      fxCanvas.width = window.innerWidth;
+      fxCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeFxCanvas);
+    resizeFxCanvas();
+
+    function spawn3DCelebrationBurst(isUpgrade = false, customX = null, customY = null) {
+      const cx = customX !== null ? customX : window.innerWidth / 2;
+      const cy = customY !== null ? customY : window.innerHeight / 2;
+      const palette = ['#facc15', '#4ade80', '#38bdf8', '#fb7185', '#a855f7', '#ffffff'];
+
+      fxWaves.push({
+        x: cx,
+        y: cy,
+        r: 14,
+        maxR: customX !== null ? 135 : Math.min(window.innerWidth, window.innerHeight) * 0.42,
+        alpha: 0.95,
+        color: isUpgrade ? '#facc15' : '#4ade80'
+      });
+
+      const count = isUpgrade ? 56 : 40;
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.3;
+        const speed = (customX !== null ? 3.5 : 5) + Math.random() * 8;
+        fxParticles.push({
+          x: cx,
+          y: cy,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - 3.5,
+          gravity: 0.24,
+          w: 9 + Math.random() * 6,
+          h: 6 + Math.random() * 5,
+          rot: Math.random() * Math.PI * 2,
+          vRot: (Math.random() - 0.5) * 0.25,
+          color: palette[i % palette.length],
+          alpha: 1
+        });
+      }
+
+      if (!fxRafId) {
+        fxRafId = requestAnimationFrame(stepFxLoop);
+      }
+    }
+
+    function spawnTileCanvasBurst(cellId, isUpgrade = false) {
+      const cellEl = document.getElementById(`board-cell-${cellId}`);
+      if (!cellEl) return;
+      const rect = cellEl.getBoundingClientRect();
+      const cx = rect.left + rect.width * 0.38;
+      const cy = rect.top + rect.height * 0.42;
+      spawn3DCelebrationBurst(isUpgrade, cx, cy);
+    }
+
+    function stepFxLoop() {
+      fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+
+      for (let i = fxWaves.length - 1; i >= 0; i--) {
+        const w = fxWaves[i];
+        w.r += (w.maxR - w.r) * 0.14;
+        w.alpha *= 0.91;
+        fxCtx.save();
+        fxCtx.beginPath();
+        fxCtx.arc(w.x, w.y, w.r, 0, Math.PI * 2);
+        fxCtx.strokeStyle = w.color;
+        fxCtx.globalAlpha = w.alpha;
+        fxCtx.lineWidth = 5;
+        fxCtx.stroke();
+        fxCtx.restore();
+        if (w.alpha < 0.03) fxWaves.splice(i, 1);
+      }
+
+      for (let i = fxParticles.length - 1; i >= 0; i--) {
+        const p = fxParticles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += p.gravity;
+        p.vx *= 0.985;
+        p.rot += p.vRot;
+        p.alpha -= 0.016;
+
+        if (p.alpha <= 0) {
+          fxParticles.splice(i, 1);
+          continue;
+        }
+
+        fxCtx.save();
+        fxCtx.translate(p.x, p.y);
+        fxCtx.rotate(p.rot);
+        fxCtx.scale(1, Math.cos(p.rot * 2));
+        fxCtx.globalAlpha = Math.max(0, p.alpha);
+        fxCtx.fillStyle = p.color;
+        fxCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        fxCtx.restore();
+      }
+
+      if (fxParticles.length > 0 || fxWaves.length > 0) {
+        fxRafId = requestAnimationFrame(stepFxLoop);
+      } else {
+        fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+        fxRafId = null;
+      }
+    }
+
+    /* =========================================================================
+       4. 게임 상태 · 4인 온라인 멀티플레이어 (WebRTC PeerJS + BroadcastChannel) · 효과음
+       ========================================================================= */
+    const STORAGE_KEY = 'korean_port_quiz_marble_best_asset';
+    const MAX_TURNS = 15;
+
+    const CHARACTERS = {
+      boy: {
+        id: 'boy',
+        name: '캡틴 레오',
+        sprite: 'assets/chibi/char-boy.png'
+      },
+      girl: {
+        id: 'girl',
+        name: '항해사 유나',
+        sprite: 'assets/chibi/char-girl.png'
+      }
+    };
+
+    /* 4인 온라인 멀티플레이어 기본 캐릭터 프리셋 (P1~P4) */
+    const PLAYER_PRESETS = [
+      { idx: 0, tag: 'P1', name: '캡틴 레오', sprite: 'assets/chibi/char-boy.png',   color: '#f59e0b', badgeBg: '#2563eb' },
+      { idx: 1, tag: 'P2', name: '항해사 유나', sprite: 'assets/chibi/char-girl.png',  color: '#f43f5e', badgeBg: '#e11d48' },
+      { idx: 2, tag: 'P3', name: '제독 태호',   sprite: 'assets/chibi/chibi-cheer.png', color: '#10b981', badgeBg: '#059669' },
+      { idx: 3, tag: 'P4', name: '여왕 제니',   sprite: 'assets/chibi/chibi-king.png',  color: '#a855f7', badgeBg: '#7c3aed' }
+    ];
+
+    /* 6면체 3D 주사위 각 눈(1~6)이 정면/상단으로 보이도록 하는 목표 회전각 */
+    const CUBE_FACE_ROTATIONS = {
+      1: { rx: -16, ry: 18,  rz: 0 },
+      2: { rx: 74,  ry: 0,   rz: 14 },
+      3: { rx: -16, ry: -72, rz: 0 },
+      4: { rx: -16, ry: 108, rz: 0 },
+      5: { rx: -106,ry: 0,   rz: -14 },
+      6: { rx: -16, ry: 198, rz: 0 }
+    };
+
+    let state = {
+      gameMode: 'online4p', // 'online4p' | 'solo1p'
+      roomCode: '7788',
+      myPlayerIdx: 0,
+      activePlayerIdx: 0,
+      players: [],
+      portOwners: {}, // cellId -> playerIdx (0~3)
+      difficulty: 'easy',
+      character: 'boy',
+      turn: 1,
+      cash: 1500,
+      position: 0,
+      ownedPorts: {}, // cellId -> level (1 | 2)
+      usedQuizIndices: [],
+      wrongNotes: [],
+      isMoving: false,
+      camMode: 'cam-3d'
+    };
+
+    let shipTokenEl = null;
+    let pawnEls = []; // 4인 캐릭터 말 배열
+    let lastBuiltCellId = null;
+    let demoPortCursor = 0;
+    let celebTimer = null;
+    let aiTurnTimer = null;
+    let audioCtx = null;
+
+    /* 실시간 온라인 네트워크 (BroadcastChannel + WebRTC PeerJS 하이브리드) */
+    let netChannel = null;
+    let peerInstance = null;
+    let peerConns = [];
+    let myClientId = 'cid_' + Math.random().toString(36).slice(2, 9);
+    let roomPeersMap = {}; // clientId -> { seatIdx, name, ts }
+
+    function playTone(type) {
+      try {
+        if (!audioCtx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) audioCtx = new AC();
+        }
+        if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'step') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(580, now);
+          osc.frequency.exponentialRampToValueAtTime(820, now + 0.06);
+          gain.gain.setValueAtTime(0.09, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+          osc.start(now);
+          osc.stop(now + 0.07);
+        } else if (type === 'diceHit') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(320 + Math.random() * 140, now);
+          osc.frequency.exponentialRampToValueAtTime(110, now + 0.055);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+          osc.start(now);
+          osc.stop(now + 0.06);
+        } else if (type === 'build' || type === 'landmark') {
+          // 쾅! 쾅! 망치 타격음 + 건설 팡파레 아르페지오
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(180, now);
+          osc.frequency.setValueAtTime(140, now + 0.08);
+          osc.frequency.setValueAtTime(523.25, now + 0.16);
+          osc.frequency.setValueAtTime(659.25, now + 0.24);
+          osc.frequency.setValueAtTime(783.99, now + 0.32);
+          osc.frequency.setValueAtTime(type === 'landmark' ? 1318.5 : 1046.5, now + 0.40);
+          gain.gain.setValueAtTime(0.20, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+          osc.start(now);
+          osc.stop(now + 0.65);
+        } else if (type === 'buy') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.08);
+          osc.frequency.setValueAtTime(783.99, now + 0.16);
+          osc.frequency.setValueAtTime(1046.5, now + 0.24);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+          osc.start(now);
+          osc.stop(now + 0.45);
+        } else if (type === 'bad') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(260, now);
+          osc.frequency.linearRampToValueAtTime(150, now + 0.22);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+          osc.start(now);
+          osc.stop(now + 0.24);
+        }
+      } catch (e) {}
+    }
+
+    function initApp() {
+      const params = new URLSearchParams(window.location.search);
+      const urlRoom = params.get('room');
+      if (urlRoom) {
+        state.roomCode = urlRoom.slice(0, 6);
+        const rInput = document.getElementById('room-code-input');
+        if (rInput) rInput.value = state.roomCode;
+      }
+      initPlayersArray();
+      updateBestRecordUI();
+      buildBoardDOM();
+      renderDiceFace(1);
+      syncCharacterSprites();
+      joinOrSyncOnlineRoom();
+    }
+
+    function initPlayersArray() {
+      const startCash = state.difficulty === 'easy' ? 1500 : 1000;
+      state.players = PLAYER_PRESETS.map((p, idx) => ({
+        idx,
+        tag: p.tag,
+        name: p.name,
+        sprite: p.sprite,
+        color: p.color,
+        badgeBg: p.badgeBg,
+        cash: startCash,
+        position: 0,
+        isBankrupt: false,
+        isHuman: idx === state.myPlayerIdx,
+        isRemoteHuman: false
+      }));
+    }
+
+    function selectGameMode(mode) {
+      state.gameMode = mode === 'solo1p' ? 'solo1p' : 'online4p';
+      document.getElementById('mode-btn-4p').classList.toggle('active', state.gameMode === 'online4p');
+      document.getElementById('mode-btn-1p').classList.toggle('active', state.gameMode === 'solo1p');
+      document.getElementById('online-lobby-box').style.display = state.gameMode === 'online4p' ? 'block' : 'none';
+      document.getElementById('start-main-btn-text').textContent = state.gameMode === 'online4p'
+        ? '4인 온라인 치비 마블 출항 시작!'
+        : '1인 싱글 치비 마블 출항 시작!';
+      playTone('step');
+    }
+
+    function renderOnlineLobbySlots() {
+      const grid = document.getElementById('online-slots-grid');
+      if (!grid) return;
+
+      const remoteSeats = Object.values(roomPeersMap).map(r => r.seatIdx);
+      grid.innerHTML = PLAYER_PRESETS.map((p, idx) => {
+        const isMe = idx === state.myPlayerIdx;
+        const isRemote = !isMe && remoteSeats.includes(idx);
+        const statusText = isMe
+          ? '👑 나 (방장/플레이어)'
+          : (isRemote ? '🟢 온라인 유저 접속됨!' : '🤖 스마트 온라인 AI');
+        return `
+          <div class="online-slot-card ${isMe ? 'my-seat' : ''}" onclick="selectMySeat(${idx})" title="클릭하여 ${p.tag} ${p.name} 슬롯으로 변경">
+            <span class="slot-p-tag" style="background:${p.badgeBg};">${p.tag}</span>
+            <img class="slot-avatar" src="${p.sprite}" alt="${p.name}" />
+            <span class="slot-p-name">${p.name}</span>
+            <span class="slot-p-state">${statusText}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectMySeat(idx) {
+      state.myPlayerIdx = idx;
+      if (idx === 0) selectCharacter('boy');
+      else if (idx === 1) selectCharacter('girl');
+      renderOnlineLobbySlots();
+      broadcastNetMessage({ type: 'HELLO', clientId: myClientId, seatIdx: state.myPlayerIdx });
+      playTone('step');
+    }
+
+    /* =========================================================================
+       실시간 4인 온라인 동기화 (BroadcastChannel + WebRTC PeerJS)
+       ========================================================================= */
+    function joinOrSyncOnlineRoom() {
+      const rInput = document.getElementById('room-code-input');
+      const code = (rInput && rInput.value.trim()) ? rInput.value.trim() : '7788';
+      state.roomCode = code;
+      roomPeersMap = {};
+
+      if (netChannel) {
+        try { netChannel.close(); } catch (e) {}
+      }
+      if ('BroadcastChannel' in window) {
+        netChannel = new BroadcastChannel('kp_marble_room_' + code);
+        netChannel.onmessage = (ev) => handleNetMessage(ev.data);
+      }
+
+      // WebRTC PeerJS 공개 시그널링 서버 연결 (다른 기기/브라우저 간 실시간 P2P 연동)
+      setupPeerJSRoom(code);
+
+      const pill = document.getElementById('online-status-pill');
+      if (pill) {
+        pill.innerHTML = `🟢 온라인 방 <strong>#${code}</strong> 실시간 연결됨 (4인 멀티 준비 완료)`;
+      }
+
+      renderOnlineLobbySlots();
+      broadcastNetMessage({ type: 'HELLO', clientId: myClientId, seatIdx: state.myPlayerIdx });
+    }
+
+    function setupPeerJSRoom(code) {
+      if (typeof Peer === 'undefined') return;
+      try {
+        if (peerInstance) peerInstance.destroy();
+      } catch (e) {}
+
+      const hostPeerId = `kpmarble-room-${code}-host`;
+      try {
+        const peer = new Peer(hostPeerId);
+        peerInstance = peer;
+
+        peer.on('open', () => {
+          const pill = document.getElementById('online-status-pill');
+          if (pill) pill.innerHTML = `🟢 글로벌 온라인 방장 <strong>#${code}</strong> 개설됨 (4인 실시간)`;
+        });
+
+        peer.on('connection', (conn) => {
+          peerConns.push(conn);
+          conn.on('data', (data) => handleNetMessage(data));
+          conn.on('open', () => {
+            conn.send({ type: 'HELLO_ACK', clientId: myClientId, seatIdx: state.myPlayerIdx });
+          });
+        });
+
+        peer.on('error', (err) => {
+          // 이미 방장이 있으면 게스트 피어로 방장에게 자동 접속!
+          if (err && err.type === 'unavailable-id') {
+            connectAsGuestPeer(code, hostPeerId);
+          }
+        });
+      } catch (e) {}
+    }
+
+    function connectAsGuestPeer(code, hostPeerId) {
+      try {
+        const guestPeer = new Peer();
+        peerInstance = guestPeer;
+        guestPeer.on('open', () => {
+          const conn = guestPeer.connect(hostPeerId);
+          peerConns.push(conn);
+          conn.on('open', () => {
+            // 게스트 접속 시 자동으로 비어있는 다음 슬롯(P2~P4) 배정
+            if (state.myPlayerIdx === 0) state.myPlayerIdx = 1;
+            renderOnlineLobbySlots();
+            conn.send({ type: 'HELLO', clientId: myClientId, seatIdx: state.myPlayerIdx });
+            const pill = document.getElementById('online-status-pill');
+            if (pill) pill.innerHTML = `🟢 온라인 방 <strong>#${code}</strong> 참가 완료! (P${state.myPlayerIdx + 1})`;
+          });
+          conn.on('data', (data) => handleNetMessage(data));
+        });
+      } catch (e) {}
+    }
+
+    function broadcastNetMessage(msg) {
+      const payload = { ...msg, roomCode: state.roomCode, senderId: myClientId };
+      if (netChannel) {
+        try { netChannel.postMessage(payload); } catch (e) {}
+      }
+      peerConns.forEach(conn => {
+        try { if (conn.open) conn.send(payload); } catch (e) {}
+      });
+    }
+
+    function handleNetMessage(data) {
+      if (!data || data.senderId === myClientId) return;
+
+      if (data.type === 'HELLO') {
+        if (data.seatIdx === state.myPlayerIdx && myClientId > data.senderId) {
+          state.myPlayerIdx = (state.myPlayerIdx + 1) % 4;
+        }
+        roomPeersMap[data.senderId] = { seatIdx: data.seatIdx };
+        renderOnlineLobbySlots();
+        broadcastNetMessage({ type: 'HELLO_ACK', clientId: myClientId, seatIdx: state.myPlayerIdx });
+      } else if (data.type === 'HELLO_ACK') {
+        roomPeersMap[data.senderId] = { seatIdx: data.seatIdx };
+        renderOnlineLobbySlots();
+      } else if (data.type === 'START_4P_MATCH') {
+        if (!document.getElementById('game-screen').classList.contains('active')) {
+          startGame(true);
+        }
+      } else if (data.type === 'REMOTE_ROLL') {
+        if (state.gameMode === 'online4p' && state.activePlayerIdx === data.playerIdx && !state.isMoving) {
+          executeDiceRollForActivePlayer(data.diceValue, true);
+        }
+      } else if (data.type === 'REMOTE_BUILD') {
+        applyPortBuildOrUpgrade(data.cellId, data.level, data.ownerIdx, data.cost, true);
+      } else if (data.type === 'REMOTE_NEXT_TURN') {
+        if (state.gameMode === 'online4p') {
+          advanceToNextTurn(true);
+        }
+      }
+    }
+
+    function copyInviteLink() {
+      const url = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(state.roomCode)}`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).catch(() => {});
+      }
+      const pill = document.getElementById('online-status-pill');
+      if (pill) {
+        pill.innerHTML = `✨ 초대 링크 복사 완료! 새 탭이나 친구에게 붙여넣으세요 (#${state.roomCode})`;
+      }
+      playTone('buy');
+    }
+
+    function selectCharacter(charKey) {
+      state.character = CHARACTERS[charKey] ? charKey : 'boy';
+      document.getElementById('char-btn-boy').classList.toggle('selected', state.character === 'boy');
+      document.getElementById('char-btn-girl').classList.toggle('selected', state.character === 'girl');
+      PLAYER_PRESETS[0].sprite = state.character === 'boy' ? 'assets/chibi/char-boy.png' : 'assets/chibi/char-girl.png';
+      PLAYER_PRESETS[0].name = state.character === 'boy' ? '캡틴 레오' : '항해사 유나';
+      syncCharacterSprites();
+      renderOnlineLobbySlots();
+    }
+
+    function toggleCharacterInGame() {
+      const next = state.character === 'boy' ? 'girl' : 'boy';
+      selectCharacter(next);
+      if (state.players[state.myPlayerIdx]) {
+        state.players[state.myPlayerIdx].sprite = CHARACTERS[state.character].sprite;
+        state.players[state.myPlayerIdx].name = CHARACTERS[state.character].name;
+      }
+      updateBoardUI();
+      playTone('step');
+    }
+
+    function syncCharacterSprites() {
+      const charInfo = CHARACTERS[state.character] || CHARACTERS.boy;
+      const hudPortrait = document.getElementById('captain-mascot-img');
+      if (hudPortrait) hudPortrait.src = charInfo.sprite;
+      const hudName = document.getElementById('hud-player-name');
+      if (hudName) hudName.textContent = `PLAYER · ${charInfo.name}`;
+      const pawnImg = document.getElementById('board-pawn-img');
+      if (pawnImg) pawnImg.src = charInfo.sprite;
+      const topBarIco = document.getElementById('top-bar-chibi-ico');
+      if (topBarIco) topBarIco.src = charInfo.sprite;
+    }
+
+    function renderDiceFace(value) {
+      const pips = document.querySelectorAll('#dice-pip-grid .dice-pip');
+      const activeIndices = DICE_PIP_PATTERNS[value] || [4];
+      pips.forEach((pip, idx) => {
+        pip.classList.toggle('on', activeIndices.includes(idx));
+        pip.classList.toggle('red-one', value === 1 && idx === 4);
+      });
+    }
+
+    function updateBestRecordUI() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const bestText = document.getElementById('best-asset-text');
+      if (saved && !isNaN(Number(saved))) {
+        bestText.textContent = formatMoney(Number(saved));
+      } else {
+        bestText.textContent = '기록 없음';
+      }
+    }
+
+    function selectDifficulty(level) {
+      state.difficulty = level;
+      document.getElementById('diff-easy').classList.toggle('selected', level === 'easy');
+      document.getElementById('diff-hard').classList.toggle('selected', level === 'hard');
+    }
+
+    function setCameraMode(mode) {
+      state.camMode = mode;
+      const wrapper = document.getElementById('board-grid');
+      wrapper.classList.remove('cam-3d', 'cam-iso', 'cam-flat');
+      wrapper.classList.add(mode);
+
+      document.getElementById('cam-btn-3d').classList.toggle('active-cam', mode === 'cam-3d');
+      document.getElementById('cam-btn-iso').classList.toggle('active-cam', mode === 'cam-iso');
+      document.getElementById('cam-btn-flat').classList.toggle('active-cam', mode === 'cam-flat');
+    }
+
+    function formatMoney(manWon) {
+      return manWon.toLocaleString('ko-KR') + '만 원';
+    }
+
+    function calculatePlayerPortValue(playerIdx = 0) {
+      let total = 0;
+      for (const cellId in state.ownedPorts) {
+        const owner = state.portOwners[cellId] ?? 0;
+        if (state.gameMode === 'solo1p' || owner === playerIdx) {
+          const level = state.ownedPorts[cellId];
+          const cell = BOARD_CELLS[Number(cellId)];
+          if (cell && cell.price) {
+            total += level === 1 ? cell.price : Math.floor(cell.price * 1.5);
+          }
+        }
+      }
+      return total;
+    }
+
+    function calculatePortValue() {
+      return calculatePlayerPortValue(state.myPlayerIdx);
+    }
+
+    function calculatePlayerTotalAsset(playerIdx = 0) {
+      if (state.gameMode === 'solo1p') {
+        return state.cash + calculatePlayerPortValue(0);
+      }
+      const p = state.players[playerIdx];
+      return (p ? p.cash : 0) + calculatePlayerPortValue(playerIdx);
+    }
+
+    function calculateTotalAsset() {
+      return calculatePlayerTotalAsset(state.myPlayerIdx);
+    }
+
+    function calculatePlayerTurnIncome(playerIdx = 0) {
+      let income = 0;
+      for (const cellId in state.ownedPorts) {
+        const owner = state.portOwners[cellId] ?? 0;
+        if (state.gameMode === 'solo1p' || owner === playerIdx) {
+          const level = state.ownedPorts[cellId];
+          const cell = BOARD_CELLS[Number(cellId)];
+          if (cell && cell.income) {
+            income += cell.income * level;
+          }
+        }
+      }
+      return income;
+    }
+
+    function calculateTurnIncome() {
+      return calculatePlayerTurnIncome(state.myPlayerIdx);
+    }
+
+    /* =========================================================================
+       5. 치비 3D 입체 블록 보드 · 타일 위 3D 빌딩/랜드마크 슬롯 · 4인 캐릭터 말 빌드!
+       ========================================================================= */
+    function buildBoardDOM() {
+      const grid = document.getElementById('board-grid');
+      grid.querySelectorAll('.cell').forEach(el => el.remove());
+
+      BOARD_CELLS.forEach(cell => {
+        const div = document.createElement('div');
+        let specialClass = '';
+        if (cell.type === 'start') specialClass = 'special-start';
+        else if (cell.type === 'key1' || cell.type === 'key2') specialClass = 'special-key';
+        else if (cell.type === 'customs') specialClass = 'special-customs';
+
+        div.className = `cell cell-${cell.id} ${specialClass}`;
+        div.id = `board-cell-${cell.id}`;
+
+        let infoHTML = '';
+        if (cell.type === 'port') {
+          infoHTML = `
+            <div class="cell-info" id="cell-info-${cell.id}">
+              인수 ${cell.price}만 · <span class="income">+${cell.income}만/턴</span>
+            </div>
+          `;
+        } else {
+          infoHTML = `<div class="cell-info">${cell.desc}</div>`;
+        }
+
+        div.innerHTML = `
+          <!-- 바닥 타일 받침대 + 위로 불쑥 솟아오른 초선명 3D 치비 디오라마 블록 -->
+          <div class="cell-pedestal">
+            <div class="chibi-3d-block">
+              <div class="chibi-block-top">
+                <img class="chibi-block-img" src="${cell.chibi}" alt="${cell.name}" loading="eager" />
+                <div class="chibi-block-header">
+                  <span class="cell-num">${cell.id}번</span>
+                  <span id="badge-slot-${cell.id}"></span>
+                </div>
+              </div>
+              <!-- 타일 위에 실제로 우뚝 솟아오르는 3D 치비 항구 빌딩(x1) & 황금 랜드마크(x2) 모델 슬롯! -->
+              <div class="tile-3d-building-slot" id="building-slot-${cell.id}"></div>
+              <!-- 3D 입체 블록 하단 두께 절벽 (인수/업그레이드 시 더 두껍게 솟아오름) -->
+              <div class="chibi-block-cliff"></div>
+            </div>
+
+            <div class="cell-body">
+              <div class="cell-title-row">
+                <div class="cell-name-wrap">
+                  <img class="cell-mini-ico" src="${cell.icon}" alt="" />
+                  <div class="cell-name">${cell.name}</div>
+                </div>
+                <div class="cell-sub-tag">${cell.subTag}</div>
+              </div>
+              ${infoHTML}
+            </div>
+          </div>
+        `;
+
+        grid.appendChild(div);
+      });
+
+      /* 4인 캐릭터 말 토큰 생성 (P1~P4) */
+      pawnEls = PLAYER_PRESETS.map((p, idx) => {
+        const el = document.createElement('div');
+        el.className = `ship-token slot-${idx}`;
+        el.id = `pawn-token-${idx}`;
+        el.innerHTML = `
+          <div class="pawn-arrow" id="pawn-arrow-${idx}"></div>
+          <img class="pawn-char-sprite" id="pawn-img-${idx}" src="${p.sprite}" alt="${p.name}" />
+          <div class="pawn-pedestal-ring" style="background:radial-gradient(circle, #ffffff 0%, ${p.color} 72%, #0f172a 100%);"></div>
+          <span class="pawn-player-tag" style="background:${p.badgeBg};">${p.tag}</span>
+        `;
+        return el;
+      });
+      shipTokenEl = pawnEls[0];
+    }
+
+    /* =========================================================================
+       [핵심] 타일 위 3D 집(x1) & 랜드마크(x2) 건설 애니메이션 (빛기둥 + 충격파 + 망치 + 바운스)
+       ========================================================================= */
+    function triggerTileBuildAnimation(cellId, level, ownerIdx = 0) {
+      const cellEl = document.getElementById(`board-cell-${cellId}`);
+      if (!cellEl) return;
+
+      lastBuiltCellId = cellId;
+      const ownerPreset = PLAYER_PRESETS[ownerIdx] || PLAYER_PRESETS[0];
+
+      // 1) 타일 블록 전체 진동 바운스
+      cellEl.classList.remove('constructing-shake');
+      void cellEl.offsetWidth;
+      cellEl.classList.add('constructing-shake');
+      setTimeout(() => cellEl.classList.remove('constructing-shake'), 650);
+
+      // 2) 하늘로 솟구치는 3D 건설 빛기둥 (Light Pillar)
+      const pillar = document.createElement('div');
+      pillar.className = `tile-light-pillar ${level === 2 ? 'gold' : ''}`;
+      cellEl.appendChild(pillar);
+      setTimeout(() => pillar.remove(), 980);
+
+      // 3) 타일 바닥 3D 충격파 링
+      const wave = document.createElement('div');
+      wave.className = 'tile-build-shockwave';
+      cellEl.appendChild(wave);
+      setTimeout(() => wave.remove(), 800);
+
+      // 4) 망치 쾅쾅! 건설 아이콘
+      const hammer = document.createElement('img');
+      hammer.className = 'tile-hammer-fx';
+      hammer.src = 'assets/chibi-icons/hammer-build.svg';
+      cellEl.appendChild(hammer);
+      setTimeout(() => hammer.remove(), 860);
+
+      // 5) 건설 완료 상단 홀로그램 배너
+      const banner = document.createElement('div');
+      banner.className = 'tile-build-banner';
+      banner.textContent = level === 2
+        ? `👑 ${ownerPreset.tag} 황금 랜드마크 x2 건설!`
+        : `🏠 ${ownerPreset.tag} 3D 항구 빌딩 x1 건설!`;
+      cellEl.appendChild(banner);
+      setTimeout(() => banner.remove(), 1450);
+
+      // 6) 해당 타일 위치에서 캔버스 별빛/컨페티 폭발 + 건설 사운드
+      spawnTileCanvasBurst(cellId, level === 2);
+      playTone(level === 2 ? 'landmark' : 'build');
+    }
+
+    /* 상단 바 "3D 건설·업그레이드 이펙트!" 버튼 클릭 시 즉시 타일 위에서 건설/업그레이드 시연 */
+    function demoBuildUpgradeEffect() {
+      const portIds = [1, 2, 4, 5, 7, 8, 10, 11];
+      let targetCellId = BOARD_CELLS[state.position]?.type === 'port'
+        ? state.position
+        : portIds[demoPortCursor % portIds.length];
+      demoPortCursor++;
+
+      const curLv = state.ownedPorts[targetCellId] || 0;
+      const nextLv = curLv === 1 ? 2 : 1;
+      const ownerIdx = state.gameMode === 'online4p' ? state.activePlayerIdx : 0;
+
+      state.ownedPorts[targetCellId] = nextLv;
+      state.portOwners[targetCellId] = ownerIdx;
+
+      triggerTileBuildAnimation(targetCellId, nextLv, ownerIdx);
+      updateBoardUI();
+      show3DCelebrationCard(BOARD_CELLS[targetCellId], nextLv === 2, ownerIdx);
+      addLog(`[3D 건설 이펙트] ${BOARD_CELLS[targetCellId].name}에 ${nextLv === 2 ? '황금 랜드마크(x2)' : '3D 항구 빌딩(x1)'} 건설!`, nextLv === 2 ? 'crown.svg' : 'anchor.svg');
+    }
+
+    function showCellFloatingDelta(cellId, text, isPlus = true) {
+      const cellEl = document.getElementById(`board-cell-${cellId}`);
+      if (!cellEl) return;
+      const badge = document.createElement('div');
+      badge.className = `floating-delta ${isPlus ? 'plus' : 'minus'}`;
+      badge.textContent = text;
+      cellEl.appendChild(badge);
+      setTimeout(() => badge.remove(), 1200);
+    }
+
+    function show3DCelebrationCard(cell, isUpgrade, ownerIdx = 0) {
+      const overlay = document.getElementById('celebration-overlay');
+      const ownerPreset = PLAYER_PRESETS[ownerIdx] || PLAYER_PRESETS[0];
+      document.getElementById('celeb-chibi-img').src = cell.chibi;
+      const celebMascot = document.getElementById('celeb-chibi-mascot');
+      if (celebMascot) {
+        celebMascot.src = isUpgrade ? 'assets/chibi/chibi-king.png' : ownerPreset.sprite;
+      }
+      document.getElementById('celeb-badge').innerHTML = `
+        <img src="assets/chibi-icons/${isUpgrade ? 'landmark-lv2.svg' : 'house-lv1.svg'}" style="width:22px;height:22px;" alt="" />
+        <span>${ownerPreset.tag} ${ownerPreset.name} · ${isUpgrade ? '3D LANDMARK x2 건설!' : '3D 항구 빌딩 x1 건설!'}</span>
+      `;
+      document.getElementById('celeb-title').textContent = isUpgrade
+        ? `${cell.name} 랜드마크 업그레이드!`
+        : `${cell.name} 3D 빌딩 건설 완료!`;
+      document.getElementById('celeb-sub').textContent = isUpgrade
+        ? `매턴 수익 & 통행료 +${cell.income * 2}만 원 달성!`
+        : `매턴 수익 & 통행료 +${cell.income}만 원 확보!`;
+
+      overlay.classList.remove('show');
+      void overlay.offsetWidth;
+      overlay.classList.add('show');
+
+      if (celebTimer) clearTimeout(celebTimer);
+      celebTimer = setTimeout(() => {
+        overlay.classList.remove('show');
+      }, 1450);
+
+      spawn3DCelebrationBurst(isUpgrade);
+    }
+
+    function render4PlayerHUD() {
+      const container4p = document.getElementById('hud-4p-container');
+      const container1p = document.getElementById('hud-1p-container');
+      if (!container4p || !container1p) return;
+
+      if (state.gameMode === 'solo1p') {
+        container4p.style.display = 'none';
+        container1p.style.display = 'flex';
+        return;
+      }
+
+      container4p.style.display = 'grid';
+      container1p.style.display = 'none';
+
+      // 자산 순위 계산 (1st ~ 4th)
+      const ranked = state.players
+        .map(p => ({ idx: p.idx, asset: calculatePlayerTotalAsset(p.idx) }))
+        .sort((a, b) => b.asset - a.asset);
+      const rankLabels = ['1st', '2nd', '3rd', '4th'];
+      const rankMap = {};
+      ranked.forEach((r, i) => { rankMap[r.idx] = rankLabels[i] || '4th'; });
+
+      container4p.innerHTML = state.players.map((p, idx) => {
+        const isTurn = state.activePlayerIdx === idx;
+        const isMe = state.myPlayerIdx === idx;
+        const totalAsset = calculatePlayerTotalAsset(idx);
+        const ownedCnt = Object.keys(state.ownedPorts).filter(cid => state.portOwners[cid] === idx).length;
+        return `
+          <div class="hud-4p-card ${isTurn ? 'active-turn' : ''} ${p.isBankrupt ? 'bankrupt' : ''}">
+            <img class="hud-4p-avatar" src="${p.sprite}" alt="${p.name}" style="background:${p.color};" />
+            <div class="hud-4p-rank">${rankMap[idx]} · ${state.turn}/${MAX_TURNS}턴</div>
+            <div class="hud-4p-body">
+              <div class="hud-4p-title" style="background:${p.badgeBg};">
+                ${p.tag} ${p.name} ${isMe ? '(나)' : '[ONL]'}
+              </div>
+              <div class="hud-4p-line">
+                <span>현금(Gold)</span>
+                <span class="hud-4p-gold">${formatMoney(p.cash)}</span>
+              </div>
+              <div class="hud-4p-line">
+                <span>총자산 · 항구 ${ownedCnt}곳</span>
+                <span class="hud-4p-asset">${formatMoney(totalAsset)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateBoardUI() {
+      if (state.gameMode === 'online4p' && state.players[state.myPlayerIdx]) {
+        state.cash = state.players[state.myPlayerIdx].cash;
+      }
+      const totalAsset = calculateTotalAsset();
+      document.getElementById('turn-display').textContent = `${state.turn} / ${MAX_TURNS}`;
+      document.getElementById('cash-display').textContent = formatMoney(state.cash);
+      document.getElementById('asset-display').textContent = formatMoney(totalAsset);
+
+      const rankNow = getShippingRank(totalAsset, state.cash < 0);
+      const shieldEl = document.getElementById('hud-rank-shield');
+      if (shieldEl) shieldEl.textContent = `1st · ${rankNow.title}`;
+
+      const ownedCount = Object.keys(state.ownedPorts).filter(cid =>
+        state.gameMode === 'solo1p' || state.portOwners[cid] === state.myPlayerIdx
+      ).length;
+      document.getElementById('owned-ports-pill').textContent = `보유 항구: ${ownedCount} / 8곳`;
+
+      const focusPos = state.gameMode === 'online4p'
+        ? (state.players[state.activePlayerIdx]?.position || 0)
+        : state.position;
+      const curCell = BOARD_CELLS[focusPos];
+      if (curCell) {
+        document.getElementById('center-chibi-thumb').src = curCell.chibi;
+        document.getElementById('center-live-title').textContent = `${curCell.name} (${curCell.subTag})`;
+      }
+
+      render4PlayerHUD();
+
+      BOARD_CELLS.forEach(cell => {
+        const cellEl = document.getElementById(`board-cell-${cell.id}`);
+        if (!cellEl) return;
+
+        const isHere = focusPos === cell.id;
+        cellEl.classList.toggle('active-cell', isHere);
+
+        if (cell.type === 'port') {
+          const lv = state.ownedPorts[cell.id] || 0;
+          const ownerIdx = state.portOwners[cell.id] ?? 0;
+          const ownerPreset = PLAYER_PRESETS[ownerIdx] || PLAYER_PRESETS[0];
+
+          cellEl.classList.toggle('owned-lv1', lv === 1);
+          cellEl.classList.toggle('owned-lv2', lv === 2);
+
+          const badgeSlot = document.getElementById(`badge-slot-${cell.id}`);
+          const infoSlot = document.getElementById(`cell-info-${cell.id}`);
+          const buildingSlot = document.getElementById(`building-slot-${cell.id}`);
+          const isJustBuilt = lastBuiltCellId === cell.id;
+
+          if (lv === 1) {
+            badgeSlot.innerHTML = `<span class="owner-badge lv1" style="background:${ownerPreset.badgeBg};color:#fff;"><img src="assets/chibi-icons/house-lv1.svg" alt="" />${ownerPreset.tag} 빌딩 x1</span>`;
+            infoSlot.innerHTML = `${ownerPreset.name} · <span class="income">+${cell.income}만/턴</span>`;
+            if (buildingSlot) {
+              buildingSlot.innerHTML = `
+                <div class="tile-building-model lv1 ${isJustBuilt ? 'just-built' : ''}">
+                  <span class="building-flag-pill" style="background:${ownerPreset.badgeBg};">${ownerPreset.tag} x1</span>
+                  <div class="building-sprite-wrap">
+                    <img class="building-sprite-lv1" src="assets/chibi-icons/house-lv1.svg" alt="3D 항구 빌딩" />
+                  </div>
+                  <div class="building-base-pad" style="background:${ownerPreset.color};color:${ownerPreset.color};"></div>
+                </div>
+              `;
+            }
+          } else if (lv === 2) {
+            badgeSlot.innerHTML = `<span class="owner-badge lv2"><img src="assets/chibi-icons/landmark-lv2.svg" alt="" />${ownerPreset.tag} 랜드마크 x2</span>`;
+            infoSlot.innerHTML = `👑 ${ownerPreset.name} · <span class="income">+${cell.income * 2}만/턴</span>`;
+            if (buildingSlot) {
+              buildingSlot.innerHTML = `
+                <div class="tile-building-model lv2 ${isJustBuilt ? 'just-built' : ''}">
+                  <span class="building-flag-pill" style="background:linear-gradient(90deg,#f59e0b,#b45309);">👑 ${ownerPreset.tag} x2</span>
+                  <div class="building-sprite-wrap">
+                    <img class="building-sprite-lv2-sub" src="assets/chibi-icons/house-lv1.svg" alt="" />
+                    <img class="building-sprite-lv2-main" src="assets/chibi-icons/landmark-lv2.svg" alt="3D 랜드마크 타워" />
+                  </div>
+                  <div class="building-base-pad" style="color:#facc15;"></div>
+                </div>
+              `;
+            }
+          } else {
+            badgeSlot.innerHTML = '';
+            infoSlot.innerHTML = `인수 ${cell.price}만 · <span class="income">+${cell.income}만/턴</span>`;
+            if (buildingSlot) buildingSlot.innerHTML = '';
+          }
+        }
+      });
+
+      lastBuiltCellId = null;
+
+      // 캐릭터 말(Pawns) 배치: 1인 모드면 P1만, 4인 온라인 모드면 P1~P4 모두 배치!
+      if (state.gameMode === 'solo1p') {
+        pawnEls.forEach((el, idx) => {
+          if (idx > 0 && el.parentElement) el.remove();
+        });
+        const targetCell = document.getElementById(`board-cell-${state.position}`);
+        if (targetCell && pawnEls[0]) {
+          pawnEls[0].className = 'ship-token slot-0';
+          const arrow0 = document.getElementById('pawn-arrow-0');
+          if (arrow0) arrow0.style.display = 'block';
+          if (pawnEls[0].parentElement !== targetCell) targetCell.appendChild(pawnEls[0]);
+        }
+      } else {
+        // 각 셀에 몇 명의 플레이어가 서 있는지 계산하여 slot-0 ~ slot-3 자동 정렬
+        const cellOccupants = {};
+        state.players.forEach((p, idx) => {
+          const el = pawnEls[idx];
+          if (!el) return;
+          if (p.isBankrupt) {
+            if (el.parentElement) el.remove();
+            return;
+          }
+          const cId = p.position;
+          const slotIdx = cellOccupants[cId] || 0;
+          cellOccupants[cId] = slotIdx + 1;
+
+          el.className = `ship-token slot-${slotIdx}`;
+          const arrowEl = document.getElementById(`pawn-arrow-${idx}`);
+          if (arrowEl) {
+            arrowEl.style.display = state.activePlayerIdx === idx ? 'block' : 'none';
+          }
+          const cellEl = document.getElementById(`board-cell-${cId}`);
+          if (cellEl && el.parentElement !== cellEl) {
+            cellEl.appendChild(el);
+          }
+        });
+      }
+    }
+
+    function addLog(message, iconFile = 'ship.svg') {
+      const cleanIcon = iconFile.replace('.png', '.svg');
+      const logBox = document.getElementById('event-log');
+      const item = document.createElement('div');
+      item.className = 'log-entry';
+      item.innerHTML = `
+        <img class="log-ico" src="assets/chibi-icons/${cleanIcon}" alt="" />
+        <span class="turn-tag">[${state.turn}턴]</span>
+        <span>${message}</span>
+      `;
+      logBox.prepend(item);
+    }
+
+    function setTopBanner(text) {
+      const banner = document.getElementById('top-turn-banner');
+      if (banner) banner.textContent = text;
+    }
+
+    /* =========================================================================
+       6. 게임 시작 (1인 / 4인 온라인) · 3D 물리 주사위 낙하 · 캐릭터 점프 이동
+       ========================================================================= */
+    function startGame(fromRemote = false) {
+      if (aiTurnTimer) clearTimeout(aiTurnTimer);
+      state.turn = 1;
+      state.cash = state.difficulty === 'easy' ? 1500 : 1000;
+      state.position = 0;
+      state.activePlayerIdx = 0;
+      state.ownedPorts = {};
+      state.portOwners = {};
+      state.usedQuizIndices = [];
+      state.wrongNotes = [];
+      state.isMoving = false;
+      lastBuiltCellId = null;
+
+      initPlayersArray();
+
+      // 온라인 방에 연결된 다른 탭/유저 슬롯 표시 반영
+      Object.values(roomPeersMap).forEach(peerInfo => {
+        if (state.players[peerInfo.seatIdx]) {
+          state.players[peerInfo.seatIdx].isRemoteHuman = true;
+        }
+      });
+
+      document.getElementById('event-log').innerHTML = '';
+      renderDiceFace(1);
+      document.getElementById('dice-result-callout').classList.remove('show');
+      syncCharacterSprites();
+
+      const topLabel = document.getElementById('top-bar-mode-label');
+      if (topLabel) {
+        topLabel.textContent = state.gameMode === 'online4p'
+          ? `한국 항구 퀴즈 마블 · 🌐 4인 실시간 온라인 방 #${state.roomCode}`
+          : `한국 항구 퀴즈 마블 · ⚓ 1인 클래식 퀴즈 마블`;
+      }
+
+      switchScreen('game-screen');
+      updateBoardUI();
+
+      if (state.gameMode === 'online4p') {
+        if (!fromRemote) {
+          broadcastNetMessage({ type: 'START_4P_MATCH' });
+        }
+        addLog(`🌐 4인 실시간 온라인 대전 시작! (방 코드 #${state.roomCode} · P1~P4 출항!)`, 'users-online.svg');
+        prepareActivePlayerTurn();
+      } else {
+        document.getElementById('roll-btn').disabled = false;
+        document.getElementById('my-turn-ribbon').textContent = 'My Turn!';
+        setTopBanner(`My Turn! · 1턴 주사위를 굴려 출항하세요!`);
+        const charInfo = CHARACTERS[state.character] || CHARACTERS.boy;
+        addLog(`${charInfo.name} 출항 시작! (시작 자금: ${formatMoney(state.cash)})`, 'anchor.svg');
+      }
+    }
+
+    function prepareActivePlayerTurn() {
+      if (state.gameMode !== 'online4p') return;
+      const curP = state.players[state.activePlayerIdx];
+      if (!curP || curP.isBankrupt) {
+        advanceToNextTurn(true);
+        return;
+      }
+
+      const isMyTurn = state.activePlayerIdx === state.myPlayerIdx;
+      const ribbon = document.getElementById('my-turn-ribbon');
+      const rollBtn = document.getElementById('roll-btn');
+
+      if (isMyTurn) {
+        ribbon.textContent = `My Turn! (${curP.tag})`;
+        rollBtn.disabled = false;
+        setTopBanner(`🎲 내 차례 (${curP.tag} ${curP.name}) · [${state.turn}/${MAX_TURNS}턴] 주사위를 굴려주세요!`);
+      } else {
+        ribbon.textContent = `${curP.tag} Turn`;
+        rollBtn.disabled = true;
+        setTopBanner(`🌐 ${curP.tag} ${curP.name} 님의 턴 진행 중... [${state.turn}/${MAX_TURNS}턴]`);
+
+        // 원격 유저가 접속해 있지 않은 슬롯이면 스마트 온라인 AI가 0.85초 후 자동으로 주사위를 던짐!
+        if (!curP.isRemoteHuman) {
+          if (aiTurnTimer) clearTimeout(aiTurnTimer);
+          aiTurnTimer = setTimeout(() => {
+            if (state.activePlayerIdx === curP.idx && !state.isMoving) {
+              const aiDice = Math.floor(Math.random() * 6) + 1;
+              executeDiceRollForActivePlayer(aiDice, false);
+            }
+          }, 850);
+        }
+      }
+    }
+
+    function switchScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    function triggerImpactRing(xOffsetPx) {
+      const ring = document.getElementById('dice-impact-ring');
+      if (!ring) return;
+      ring.style.marginLeft = `${xOffsetPx}px`;
+      ring.classList.remove('pop');
+      void ring.offsetWidth;
+      ring.classList.add('pop');
+    }
+
+    /* 위에서 잔디 광장으로 떨어지며 3번 통통 튀는 60FPS 3D 정육면체 주사위 물리 시뮬레이션 */
+    function animate3DDiceDrop(finalValue, onComplete) {
+      const anchor = document.getElementById('cube-dice-anchor');
+      const cube = document.getElementById('cube-dice-3d');
+      const shadow = document.getElementById('dice-floor-shadow');
+      const callout = document.getElementById('dice-result-callout');
+
+      callout.classList.remove('show');
+
+      const targetRot = CUBE_FACE_ROTATIONS[finalValue] || CUBE_FACE_ROTATIONS[1];
+      const startRx = targetRot.rx + 720 + (Math.random() > 0.5 ? 360 : -360);
+      const startRy = targetRot.ry + 1080;
+      const startRz = targetRot.rz + 360;
+
+      const duration = 920; // ms
+      const startTime = performance.now();
+      let bounce1Played = false;
+      let bounce2Played = false;
+      let bounce3Played = false;
+
+      function stepFrame(now) {
+        const p = Math.min(1, (now - startTime) / duration);
+
+        const x = -115 * Math.pow(1 - p, 1.45);
+
+        let h = 0;
+        if (p < 0.36) {
+          const u = p / 0.36;
+          h = 185 * (1 - u * u);
+        } else if (p < 0.68) {
+          if (!bounce1Played) {
+            bounce1Played = true;
+            playTone('diceHit');
+            triggerImpactRing(x);
+            renderDiceFace(Math.floor(Math.random() * 6) + 1);
+          }
+          const u = (p - 0.36) / 0.32;
+          h = 74 * 4 * u * (1 - u);
+        } else if (p < 0.88) {
+          if (!bounce2Played) {
+            bounce2Played = true;
+            playTone('diceHit');
+            triggerImpactRing(x);
+            renderDiceFace(Math.floor(Math.random() * 6) + 1);
+          }
+          const u = (p - 0.68) / 0.20;
+          h = 26 * 4 * u * (1 - u);
+        } else {
+          if (!bounce3Played) {
+            bounce3Played = true;
+            playTone('diceHit');
+            triggerImpactRing(x);
+            renderDiceFace(finalValue);
+          }
+          const u = (p - 0.88) / 0.12;
+          h = 7 * 4 * u * (1 - u);
+        }
+
+        const ease = 1 - Math.pow(1 - p, 3);
+        const rx = startRx + (targetRot.rx - startRx) * ease;
+        const ry = startRy + (targetRot.ry - startRy) * ease;
+        const rz = startRz + (targetRot.rz - startRz) * ease;
+
+        const scale = 1 + (h / 420);
+        anchor.style.transform = `translate3d(${x.toFixed(1)}px, ${(-h).toFixed(1)}px, 0px) scale(${scale.toFixed(3)})`;
+        cube.style.transform = `rotateX(${rx.toFixed(1)}deg) rotateY(${ry.toFixed(1)}deg) rotateZ(${rz.toFixed(1)}deg)`;
+
+        const shadowScale = Math.max(0.35, 1.15 - h / 210);
+        const shadowAlpha = Math.max(0.18, 0.72 - h / 280);
+        shadow.style.marginLeft = `${x.toFixed(1)}px`;
+        shadow.style.transform = `translate(-50%, -50%) scale(${shadowScale.toFixed(2)})`;
+        shadow.style.opacity = shadowAlpha.toFixed(2);
+
+        if (p < 1) {
+          requestAnimationFrame(stepFrame);
+        } else {
+          renderDiceFace(finalValue);
+          callout.textContent = `🎲 주사위 [${finalValue}]!`;
+          callout.classList.add('show');
+          setTimeout(() => {
+            if (onComplete) onComplete();
+          }, 220);
+        }
+      }
+
+      requestAnimationFrame(stepFrame);
+    }
+
+    function rollDice() {
+      if (state.isMoving) return;
+      if (state.gameMode === 'online4p' && state.activePlayerIdx !== state.myPlayerIdx) return;
+
+      const finalDice = Math.floor(Math.random() * 6) + 1;
+      if (state.gameMode === 'online4p') {
+        broadcastNetMessage({ type: 'REMOTE_ROLL', playerIdx: state.myPlayerIdx, diceValue: finalDice });
+      }
+      executeDiceRollForActivePlayer(finalDice, false);
+    }
+
+    function executeDiceRollForActivePlayer(finalDice, isRemoteCall = false) {
+      if (state.isMoving) return;
+      state.isMoving = true;
+
+      const rollBtn = document.getElementById('roll-btn');
+      rollBtn.disabled = true;
+
+      const activeP = state.gameMode === 'online4p'
+        ? state.players[state.activePlayerIdx]
+        : { idx: 0, tag: 'PLAYER', name: CHARACTERS[state.character].name };
+
+      setTopBanner(`🎲 ${activeP.tag} ${activeP.name} · 3D 주사위가 광장에 떨어집니다!`);
+
+      animate3DDiceDrop(finalDice, () => {
+        processTurnMovement(finalDice);
+      });
+    }
+
+    function processTurnMovement(diceValue) {
+      const pIdx = state.gameMode === 'online4p' ? state.activePlayerIdx : 0;
+      const curP = state.gameMode === 'online4p' ? state.players[pIdx] : null;
+      const actorName = curP ? `${curP.tag} ${curP.name}` : CHARACTERS[state.character].name;
+      const activePawn = state.gameMode === 'online4p' ? pawnEls[pIdx] : pawnEls[0];
+
+      const turnIncome = calculatePlayerTurnIncome(pIdx);
+      if (turnIncome > 0) {
+        if (curP) curP.cash += turnIncome;
+        else state.cash += turnIncome;
+        addLog(`${actorName} · 보유 항구 턴 수익 +${formatMoney(turnIncome)} 입금!`, 'coin.svg');
+      }
+
+      addLog(`주사위 [${diceValue}]! ${actorName} 캐릭터가 전진합니다!`, 'dice.svg');
+      setTopBanner(`주사위 [${diceValue}]! ${actorName} 이동 중...`);
+
+      if (activePawn) activePawn.classList.add('pawn-hopping');
+
+      let stepsLeft = diceValue;
+      const stepTimer = setInterval(() => {
+        if (curP) {
+          curP.position = (curP.position + 1) % BOARD_CELLS.length;
+          if (pIdx === state.myPlayerIdx) state.position = curP.position;
+        } else {
+          state.position = (state.position + 1) % BOARD_CELLS.length;
+        }
+        const nowPos = curP ? curP.position : state.position;
+        stepsLeft--;
+        playTone('step');
+
+        if (nowPos === 0) {
+          if (curP) curP.cash += 200;
+          else state.cash += 200;
+          showCellFloatingDelta(0, '+200만 원', true);
+          addLog(`${actorName} 출발지 ${stepsLeft > 0 ? '통과' : '도착'}! 해운 지원금 +200만 원 획득!`, 'compass.svg');
+        }
+
+        updateBoardUI();
+
+        if (stepsLeft <= 0) {
+          clearInterval(stepTimer);
+          if (activePawn) activePawn.classList.remove('pawn-hopping');
+          const arrivedCell = BOARD_CELLS[nowPos];
+          setTopBanner(`[${state.turn}턴] ${actorName} -> ${arrivedCell.name} 도착!`);
+          setTimeout(() => {
+            handleCellArrival(arrivedCell);
+          }, 200);
+        }
+      }, 190);
+    }
+
+    function addPlayerCash(pIdx, delta) {
+      if (state.gameMode === 'online4p' && state.players[pIdx]) {
+        state.players[pIdx].cash += delta;
+        if (pIdx === state.myPlayerIdx) state.cash = state.players[pIdx].cash;
+      } else {
+        state.cash += delta;
+      }
+    }
+
+    function getPlayerCash(pIdx) {
+      if (state.gameMode === 'online4p' && state.players[pIdx]) {
+        return state.players[pIdx].cash;
+      }
+      return state.cash;
+    }
+
+    /* =========================================================================
+       7. 칸 도착 이벤트 · 통행료 지불 · 3D 집/랜드마크 건설 · 치비 퀴즈 모달
+       ========================================================================= */
+    function handleCellArrival(cell) {
+      const pIdx = state.gameMode === 'online4p' ? state.activePlayerIdx : 0;
+      const isMe = state.gameMode === 'solo1p' || pIdx === state.myPlayerIdx;
+      const actor = state.gameMode === 'online4p' ? state.players[pIdx] : { tag: 'P1', name: CHARACTERS[state.character].name };
+
+      if (cell.type === 'start') {
+        finishTurn();
+        return;
+      }
+
+      if (cell.type === 'customs') {
+        addPlayerCash(pIdx, -100);
+        showCellFloatingDelta(cell.id, '-100만 원', false);
+        playTone('bad');
+        addLog(`${actor.tag} ${actor.name} · 세관 검사소 통관 지연 벌금 -100만 원.`, 'siren.svg');
+        updateBoardUI();
+        if (isMe) {
+          showSimpleEventModal(
+            cell,
+            '세관 검사소 통관 지연!',
+            '수출입 화물 서류 심사가 길어져 통관 지연 벌금 100만 원을 납부했습니다.',
+            '-100만 원 차감',
+            false
+          );
+        } else {
+          setTimeout(() => finishTurn(), 750);
+        }
+        return;
+      }
+
+      if (cell.type === 'key1' || cell.type === 'key2') {
+        const isKey1 = cell.type === 'key1';
+        const isGood = Math.random() < 0.55;
+        const bonusAmt = isKey1 ? 150 : 200;
+        if (isGood) {
+          addPlayerCash(pIdx, bonusAmt);
+          showCellFloatingDelta(cell.id, `+${bonusAmt}만 원`, true);
+          playTone('buy');
+          addLog(`${actor.tag} ${actor.name} · 황금열쇠 보너스 +${bonusAmt}만 원 획득!`, isKey1 ? 'key-gold.svg' : 'key-modern.svg');
+          updateBoardUI();
+          if (isMe) {
+            showSimpleEventModal(cell, '황금열쇠: 무역 대호황!', `해상 무역 보너스 +${bonusAmt}만 원을 받았습니다!`, `+${bonusAmt}만 원 획득`, true);
+          } else {
+            setTimeout(() => finishTurn(), 750);
+          }
+        } else {
+          addPlayerCash(pIdx, -100);
+          showCellFloatingDelta(cell.id, '-100만 원', false);
+          playTone('bad');
+          addLog(`${actor.tag} ${actor.name} · 황금열쇠 해상 복구비 -100만 원 차감.`, isKey1 ? 'key-gold.svg' : 'key-modern.svg');
+          updateBoardUI();
+          if (isMe) {
+            showSimpleEventModal(cell, '황금열쇠: 해상 기상 악화!', '선박 정비 및 물류 비용으로 100만 원을 지출했습니다.', '-100만 원 차감', false);
+          } else {
+            setTimeout(() => finishTurn(), 750);
+          }
+        }
+        return;
+      }
+
+      if (cell.type === 'port') {
+        // 4인 온라인 모드에서 다른 플레이어가 소유한 항구에 도착한 경우: 먼저 통행료 지불!
+        const currentLv = state.ownedPorts[cell.id] || 0;
+        const ownerIdx = state.portOwners[cell.id];
+        if (state.gameMode === 'online4p' && currentLv > 0 && ownerIdx !== undefined && ownerIdx !== pIdx) {
+          const ownerP = state.players[ownerIdx];
+          const toll = cell.income * currentLv;
+          addPlayerCash(pIdx, -toll);
+          addPlayerCash(ownerIdx, toll);
+          showCellFloatingDelta(cell.id, `통행료 -${toll}만`, false);
+          playTone('bad');
+          addLog(`💸 ${actor.tag} ${actor.name} -> ${ownerP.tag} ${ownerP.name}에게 [${cell.name}] 항구 통행료 ${formatMoney(toll)} 지불!`, 'coin.svg');
+          updateBoardUI();
+        }
+
+        if (isMe) {
+          openPortQuizModal(cell);
+        } else {
+          // 온라인 AI 또는 원격 플레이어의 항구 퀴즈 & 3D 빌딩 건설 처리
+          simulateOnlinePlayerPortAction(cell, pIdx);
+        }
+      }
+    }
+
+    function simulateOnlinePlayerPortAction(cell, pIdx) {
+      const actor = state.players[pIdx];
+      if (!actor || actor.isRemoteHuman) {
+        // 원격 유저는 본인의 탭에서 REMOTE_BUILD / REMOTE_NEXT_TURN 이벤트를 전송함
+        return;
+      }
+
+      setTimeout(() => {
+        const isCorrect = Math.random() < 0.76;
+        if (isCorrect) {
+          addPlayerCash(pIdx, 100);
+          showCellFloatingDelta(cell.id, '+100만 원', true);
+          addLog(`🤖 ${actor.tag} ${actor.name} · [${cell.name}] 퀴즈 정답! (+100만 원)`, 'check.svg');
+
+          const curLv = state.ownedPorts[cell.id] || 0;
+          const ownerIdx = state.portOwners[cell.id];
+
+          if (curLv === 0 && getPlayerCash(pIdx) >= cell.price) {
+            applyPortBuildOrUpgrade(cell.id, 1, pIdx, cell.price, false);
+          } else if (curLv === 1 && ownerIdx === pIdx) {
+            const upCost = Math.floor(cell.price * 0.5);
+            if (getPlayerCash(pIdx) >= upCost) {
+              applyPortBuildOrUpgrade(cell.id, 2, pIdx, upCost, false);
+            }
+          } else if (curLv === 1 && ownerIdx !== pIdx) {
+            const takeoverCost = Math.floor(cell.price * 1.5);
+            if (getPlayerCash(pIdx) >= takeoverCost) {
+              addPlayerCash(ownerIdx, cell.price);
+              applyPortBuildOrUpgrade(cell.id, 1, pIdx, takeoverCost, false);
+            }
+          }
+        } else {
+          addPlayerCash(pIdx, -50);
+          showCellFloatingDelta(cell.id, '-50만 원', false);
+          addLog(`🤖 ${actor.tag} ${actor.name} · [${cell.name}] 퀴즈 오답 (-50만 원)`, 'cross.svg');
+        }
+        updateBoardUI();
+        setTimeout(() => finishTurn(), 800);
+      }, 650);
+    }
+
+    function showSimpleEventModal(cell, title, desc, badgeText, isGoodEvent = true) {
+      const modal = document.getElementById('quiz-modal');
+      document.getElementById('modal-chibi-bg').src = cell.chibi;
+      document.getElementById('modal-badge-ico').src = cell.icon;
+      document.getElementById('modal-badge-text').textContent = badgeText;
+      document.getElementById('modal-stage-mascot').src = isGoodEvent
+        ? 'assets/chibi/chibi-king.png'
+        : 'assets/chibi/chibi-oops.png';
+      document.getElementById('modal-title').innerHTML = `<img src="${cell.icon}" style="width:30px;height:30px;" alt="" /> <span>${title}</span>`;
+      document.getElementById('modal-question').textContent = desc;
+      document.getElementById('modal-options').innerHTML = '';
+
+      const fb = document.getElementById('modal-feedback');
+      fb.classList.add('show');
+      document.getElementById('feedback-title').textContent = '';
+      document.getElementById('feedback-desc').textContent = '확인을 누르면 다음 턴으로 넘어갑니다.';
+      document.getElementById('feedback-actions').innerHTML = `
+        <button type="button" class="action-btn btn-buy" onclick="closeModalAndFinishTurn()">확인</button>
+      `;
+
+      modal.classList.add('show');
+    }
+
+    function pickQuizForPort(portName) {
+      let portMatches = [];
+      let generalMatches = [];
+
+      QUIZ_BANK.forEach((q, idx) => {
+        if (!state.usedQuizIndices.includes(idx)) {
+          if (q.port === portName) portMatches.push({ q, idx });
+          else generalMatches.push({ q, idx });
+        }
+      });
+
+      let chosen;
+      if (portMatches.length > 0) {
+        chosen = portMatches[Math.floor(Math.random() * portMatches.length)];
+      } else if (generalMatches.length > 0) {
+        chosen = generalMatches[Math.floor(Math.random() * generalMatches.length)];
+      } else {
+        state.usedQuizIndices = [];
+        const randIdx = Math.floor(Math.random() * QUIZ_BANK.length);
+        chosen = { q: QUIZ_BANK[randIdx], idx: randIdx };
+      }
+
+      state.usedQuizIndices.push(chosen.idx);
+      return chosen.q;
+    }
+
+    function openPortQuizModal(cell) {
+      const quiz = pickQuizForPort(cell.name);
+      const modal = document.getElementById('quiz-modal');
+      const charInfo = CHARACTERS[state.character] || CHARACTERS.boy;
+
+      document.getElementById('modal-chibi-bg').src = cell.chibi;
+      document.getElementById('modal-badge-ico').src = cell.icon;
+      document.getElementById('modal-badge-text').textContent = `${cell.name} · 무역 상식 퀴즈`;
+      document.getElementById('modal-stage-mascot').src = charInfo.sprite;
+      document.getElementById('modal-title').innerHTML = `<img src="${cell.icon}" style="width:30px;height:30px;" alt="" /> <span>${cell.name} 도착! 퀴즈 타임!</span>`;
+      document.getElementById('modal-question').textContent = `Q. ${quiz.question}`;
+
+      const optionsBox = document.getElementById('modal-options');
+      optionsBox.innerHTML = '';
+
+      const fb = document.getElementById('modal-feedback');
+      fb.classList.remove('show');
+
+      quiz.options.forEach((optText, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'option-btn';
+        btn.textContent = `${idx + 1}. ${optText}`;
+        btn.onclick = () => submitQuizAnswer(cell, quiz, idx, btn);
+        optionsBox.appendChild(btn);
+      });
+
+      modal.classList.add('show');
+    }
+
+    function submitQuizAnswer(cell, quiz, selectedIdx, clickedBtn) {
+      const allBtns = document.querySelectorAll('#modal-options .option-btn');
+      allBtns.forEach(b => (b.disabled = true));
+
+      const isCorrect = selectedIdx === quiz.answer;
+      allBtns[quiz.answer].classList.add('correct');
+      if (!isCorrect) {
+        clickedBtn.classList.add('wrong');
+      }
+
+      const fb = document.getElementById('modal-feedback');
+      const fbTitle = document.getElementById('feedback-title');
+      const fbDesc = document.getElementById('feedback-desc');
+      const fbActions = document.getElementById('feedback-actions');
+      fb.classList.add('show');
+
+      const myIdx = state.gameMode === 'online4p' ? state.myPlayerIdx : 0;
+
+      if (isCorrect) {
+        addPlayerCash(myIdx, 100);
+        showCellFloatingDelta(cell.id, '+100만 원', true);
+        playTone('buy');
+        document.getElementById('modal-stage-mascot').src = 'assets/chibi/chibi-cheer.png';
+        syncCharacterSprites();
+        addLog(`[${cell.name}] 퀴즈 정답! 보너스 +100만 원 획득!`, 'check.svg');
+        updateBoardUI();
+
+        fbTitle.style.color = '#059669';
+        fbTitle.innerHTML = `<img src="assets/chibi-icons/check.svg" style="width:24px;height:24px;" alt="" /> <span>정답입니다! (보너스 +100만 원 지급)</span>`;
+
+        const currentLv = state.ownedPorts[cell.id] || 0;
+        const ownerIdx = state.portOwners[cell.id] ?? 0;
+        const myCash = getPlayerCash(myIdx);
+
+        if (currentLv === 0) {
+          if (myCash >= cell.price) {
+            fbDesc.innerHTML = `${quiz.explanation}<br><br>현재 <strong>${cell.name}</strong>은(는) 빈 항구입니다.<br>인수가 <strong>${formatMoney(cell.price)}</strong>을 지불하고 <strong>3D 항구 빌딩(x1)</strong>을 건설할까요? (매턴 수익 +${formatMoney(cell.income)})`;
+            fbActions.innerHTML = `
+              <button type="button" class="action-btn btn-buy" onclick="buyPort(${cell.id})">
+                <img src="assets/chibi-icons/house-lv1.svg" style="width:24px;height:24px;" alt="" />
+                3D 빌딩 건설·인수 (-${cell.price}만)
+              </button>
+              <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">지나가기</button>
+            `;
+          } else {
+            fbDesc.innerHTML = `${quiz.explanation}<br><br>항구를 인수하기에 보유 현금(${formatMoney(myCash)})이 부족합니다. (인수가: ${formatMoney(cell.price)})`;
+            fbActions.innerHTML = `
+              <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">확인</button>
+            `;
+          }
+        } else if (currentLv === 1 && (state.gameMode === 'solo1p' || ownerIdx === myIdx)) {
+          const upgradeCost = Math.floor(cell.price * 0.5);
+          if (myCash >= upgradeCost) {
+            fbDesc.innerHTML = `${quiz.explanation}<br><br>내 항구 <strong>${cell.name}</strong>에 도착했습니다!<br>인수가의 50%인 <strong>${formatMoney(upgradeCost)}</strong>을 지불해 <strong>3D 황금 랜드마크(x2) 업그레이드</strong>를 건설할까요? (매턴 수익 ${cell.income}만 → ${cell.income * 2}만)`;
+            fbActions.innerHTML = `
+              <button type="button" class="action-btn btn-upgrade" onclick="upgradePort(${cell.id})">
+                <img src="assets/chibi-icons/landmark-lv2.svg" style="width:24px;height:24px;" alt="" />
+                3D 랜드마크 건설 (-${upgradeCost}만)
+              </button>
+              <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">유지하기</button>
+            `;
+          } else {
+            fbDesc.innerHTML = `${quiz.explanation}<br><br>업그레이드 비용(${formatMoney(upgradeCost)})이 부족하여 현재 상태(x1)를 유지합니다.`;
+            fbActions.innerHTML = `
+              <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">확인</button>
+            `;
+          }
+        } else if (currentLv === 1 && state.gameMode === 'online4p' && ownerIdx !== myIdx) {
+          const takeoverCost = Math.floor(cell.price * 1.5);
+          const prevOwner = state.players[ownerIdx];
+          if (myCash >= takeoverCost) {
+            fbDesc.innerHTML = `${quiz.explanation}<br><br>현재 <strong>${prevOwner.tag} ${prevOwner.name}</strong>의 항구입니다!<br>인수 비용 <strong>${formatMoney(takeoverCost)}</strong>을 지불하고 내 항구로 <strong>강제 인수(Takeover)</strong>할까요?`;
+            fbActions.innerHTML = `
+              <button type="button" class="action-btn btn-upgrade" onclick="takeoverOtherPort(${cell.id}, ${ownerIdx}, ${takeoverCost})">
+                <img src="assets/chibi-icons/hammer-build.svg" style="width:24px;height:24px;" alt="" />
+                항구 강제 인수하기 (-${takeoverCost}만)
+              </button>
+              <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">지나가기</button>
+            `;
+          } else {
+            fbDesc.innerHTML = `${quiz.explanation}<br><br>다른 플레이어의 항구 인수 비용(${formatMoney(takeoverCost)})이 부족합니다.`;
+            fbActions.innerHTML = `
+              <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">확인</button>
+            `;
+          }
+        } else {
+          fbDesc.innerHTML = `${quiz.explanation}<br><br><strong>${cell.name}</strong>은(는) 이미 최고 단계 <strong>3D 황금 랜드마크(x2)</strong>로 건설된 항구입니다!`;
+          fbActions.innerHTML = `
+            <button type="button" class="action-btn btn-buy" onclick="closeModalAndFinishTurn()">확인</button>
+          `;
+        }
+      } else {
+        addPlayerCash(myIdx, -50);
+        showCellFloatingDelta(cell.id, '-50만 원', false);
+        playTone('bad');
+        document.getElementById('modal-stage-mascot').src = 'assets/chibi/chibi-oops.png';
+        syncCharacterSprites();
+        addLog(`[${cell.name}] 퀴즈 오답! 벌금 -50만 원 차감.`, 'cross.svg');
+        updateBoardUI();
+
+        state.wrongNotes.push({
+          port: cell.name,
+          question: quiz.question,
+          myAnswer: quiz.options[selectedIdx],
+          correctAnswer: quiz.options[quiz.answer],
+          explanation: quiz.explanation
+        });
+
+        fbTitle.style.color = '#e11d48';
+        fbTitle.innerHTML = `<img src="assets/chibi-icons/cross.svg" style="width:24px;height:24px;" alt="" /> <span>앗, 오답입니다! (벌금 -50만 원 차감)</span>`;
+        fbDesc.innerHTML = `정답은 <strong>[${quiz.answer + 1}번: ${quiz.options[quiz.answer]}]</strong> 입니다.<br>${quiz.explanation}<br><br>퀴즈를 틀려 이번 턴에는 3D 빌딩을 건설할 수 없으며, 오답 노트에 기록되었습니다.`;
+        fbActions.innerHTML = `
+          <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">확인</button>
+        `;
+      }
+    }
+
+    function applyPortBuildOrUpgrade(cellId, level, ownerIdx, cost, fromRemote = false) {
+      const cell = BOARD_CELLS[cellId];
+      if (!cell) return;
+      addPlayerCash(ownerIdx, -cost);
+      state.ownedPorts[cellId] = level;
+      state.portOwners[cellId] = ownerIdx;
+
+      const ownerPreset = PLAYER_PRESETS[ownerIdx] || PLAYER_PRESETS[0];
+      if (level === 1) {
+        addLog(`🏗️ ${ownerPreset.tag} ${ownerPreset.name} · [${cell.name}] 3D 항구 빌딩(x1) 건설 완료! (매턴 +${cell.income}만)`, 'house-lv1.svg');
+      } else {
+        addLog(`👑 ${ownerPreset.tag} ${ownerPreset.name} · [${cell.name}] 3D 황금 랜드마크(x2) 업그레이드 완성! (매턴 +${cell.income * 2}만)`, 'landmark-lv2.svg');
+      }
+
+      triggerTileBuildAnimation(cellId, level, ownerIdx);
+      updateBoardUI();
+      show3DCelebrationCard(cell, level === 2, ownerIdx);
+
+      if (!fromRemote && state.gameMode === 'online4p') {
+        broadcastNetMessage({
+          type: 'REMOTE_BUILD',
+          cellId,
+          level,
+          ownerIdx,
+          cost
+        });
+      }
+    }
+
+    function buyPort(cellId) {
+      const cell = BOARD_CELLS[cellId];
+      const myIdx = state.gameMode === 'online4p' ? state.myPlayerIdx : 0;
+      if (getPlayerCash(myIdx) >= cell.price) {
+        applyPortBuildOrUpgrade(cellId, 1, myIdx, cell.price, false);
+      }
+      closeModalAndFinishTurn();
+    }
+
+    function upgradePort(cellId) {
+      const cell = BOARD_CELLS[cellId];
+      const myIdx = state.gameMode === 'online4p' ? state.myPlayerIdx : 0;
+      const upgradeCost = Math.floor(cell.price * 0.5);
+      if (getPlayerCash(myIdx) >= upgradeCost) {
+        applyPortBuildOrUpgrade(cellId, 2, myIdx, upgradeCost, false);
+      }
+      closeModalAndFinishTurn();
+    }
+
+    function takeoverOtherPort(cellId, prevOwnerIdx, takeoverCost) {
+      const cell = BOARD_CELLS[cellId];
+      const myIdx = state.gameMode === 'online4p' ? state.myPlayerIdx : 0;
+      if (getPlayerCash(myIdx) >= takeoverCost) {
+        addPlayerCash(prevOwnerIdx, cell.price);
+        applyPortBuildOrUpgrade(cellId, 1, myIdx, takeoverCost, false);
+      }
+      closeModalAndFinishTurn();
+    }
+
+    function closeModalAndFinishTurn() {
+      document.getElementById('quiz-modal').classList.remove('show');
+      finishTurn();
+    }
+
+    function finishTurn() {
+      updateBoardUI();
+
+      if (state.gameMode === 'solo1p') {
+        if (state.cash < 0) {
+          addLog('보유 현금이 모두 소진되어 파산했습니다!', 'siren.svg');
+          setTimeout(() => endGame(true), 450);
+          return;
+        }
+        if (state.turn >= MAX_TURNS) {
+          setTimeout(() => endGame(false), 450);
+          return;
+        }
+        state.turn++;
+        state.isMoving = false;
+        updateBoardUI();
+        setTopBanner(`Change Turn · My Turn! [${state.turn} / ${MAX_TURNS}턴] 주사위를 굴려주세요!`);
+        document.getElementById('roll-btn').disabled = false;
+      } else {
+        // 4인 온라인 멀티플레이 턴 전환
+        const curP = state.players[state.activePlayerIdx];
+        if (curP && curP.cash < 0 && !curP.isBankrupt) {
+          curP.isBankrupt = true;
+          addLog(`💥 ${curP.tag} ${curP.name} 파산!`, 'siren.svg');
+        }
+        broadcastNetMessage({ type: 'REMOTE_NEXT_TURN' });
+        advanceToNextTurn(false);
+      }
+    }
+
+    function advanceToNextTurn(fromRemote = false) {
+      state.isMoving = false;
+      const alivePlayers = state.players.filter(p => !p.isBankrupt);
+      if (alivePlayers.length <= 1 || state.players[state.myPlayerIdx]?.isBankrupt) {
+        setTimeout(() => endGame(state.players[state.myPlayerIdx]?.isBankrupt || false), 450);
+        return;
+      }
+
+      let nextIdx = state.activePlayerIdx;
+      let wrapped = false;
+      for (let step = 0; step < 4; step++) {
+        nextIdx = (nextIdx + 1) % 4;
+        if (nextIdx === 0) wrapped = true;
+        if (!state.players[nextIdx].isBankrupt) break;
+      }
+
+      if (wrapped) {
+        if (state.turn >= MAX_TURNS) {
+          setTimeout(() => endGame(false), 450);
+          return;
+        }
+        state.turn++;
+      }
+
+      state.activePlayerIdx = nextIdx;
+      updateBoardUI();
+      prepareActivePlayerTurn();
+    }
+
+    /* =========================================================================
+       8. 게임 종료 및 해운 등급 · 오답 노트
+       ========================================================================= */
+    function getShippingRank(totalAsset, isBankrupt) {
+      if (isBankrupt || totalAsset < 1200) {
+        return { title: '수습 선원', icon: 'anchor.svg' };
+      } else if (totalAsset < 2200) {
+        return { title: '일등 항해사', icon: 'medal.svg' };
+      } else if (totalAsset < 3200) {
+        return { title: '베테랑 선장', icon: 'trident.svg' };
+      } else {
+        return { title: '대한민국 해운왕', icon: 'crown.svg' };
+      }
+    }
+
+    function endGame(isBankrupt) {
+      if (aiTurnTimer) clearTimeout(aiTurnTimer);
+      const portValue = calculatePortValue();
+      const totalAsset = Math.max(0, state.cash + portValue);
+
+      const prevBest = Number(localStorage.getItem(STORAGE_KEY) || 0);
+      let isNewRecord = false;
+      if (totalAsset > prevBest) {
+        localStorage.setItem(STORAGE_KEY, String(totalAsset));
+        isNewRecord = true;
+      }
+      const bestNow = Math.max(prevBest, totalAsset);
+
+      if (state.gameMode === 'online4p') {
+        const standings = state.players
+          .map(p => ({ ...p, total: calculatePlayerTotalAsset(p.idx) }))
+          .sort((a, b) => b.total - a.total);
+        const winner = standings[0];
+        document.getElementById('result-main-title').textContent = `🏆 1위 우승: ${winner.tag} ${winner.name}!`;
+        document.getElementById('result-sub-msg').textContent = standings
+          .map((s, i) => `${i + 1}위 ${s.tag} ${s.name}(${formatMoney(s.total)})`)
+          .join(' · ');
+      } else {
+        document.getElementById('result-main-title').textContent = isBankrupt
+          ? '파산으로 항해 중단!'
+          : '15턴 항해 완주 성공!';
+        document.getElementById('result-sub-msg').textContent = isBankrupt
+          ? '자금이 부족하여 항해를 끝까지 마치지 못했습니다. 다시 도전해 보세요!'
+          : '대한민국의 8대 무역항을 순항하며 멋진 무역 성과를 거두었습니다!';
+      }
+
+      const resultSticker = document.getElementById('result-chibi-sticker');
+      if (resultSticker) {
+        resultSticker.src = isBankrupt ? 'assets/chibi/chibi-oops.png' : 'assets/chibi/chibi-king.png';
+      }
+
+      const rankInfo = getShippingRank(totalAsset, isBankrupt);
+      document.getElementById('final-rank-title').innerHTML = `
+        <img src="assets/chibi-icons/${rankInfo.icon}" style="width:44px;height:44px;" alt="" />
+        <span>${rankInfo.title}</span>
+      `;
+      document.getElementById('new-record-badge').style.display = isNewRecord ? 'inline-flex' : 'none';
+
+      document.getElementById('final-cash').textContent = formatMoney(state.cash);
+      document.getElementById('final-port-value').textContent = formatMoney(portValue);
+      document.getElementById('final-total-asset').textContent = formatMoney(totalAsset);
+      document.getElementById('final-best-asset').textContent = formatMoney(bestNow);
+
+      document.getElementById('wrong-note-btn-label').textContent = `오답 노트 보기 (${state.wrongNotes.length})`;
+      renderWrongNotes();
+
+      switchScreen('result-screen');
+      if (!isBankrupt) spawn3DCelebrationBurst(true);
+    }
+
+    function renderWrongNotes() {
+      const box = document.getElementById('wrong-note-box');
+      box.classList.remove('show');
+
+      if (state.wrongNotes.length === 0) {
+        box.innerHTML = `<p style="color:#059669; font-size:0.95rem; text-align:center;">틀린 문제가 하나도 없습니다! 완벽한 무역 상식 박사님이시네요!</p>`;
+        return;
+      }
+
+      box.innerHTML = state.wrongNotes.map((item, i) => `
+        <div class="wrong-item">
+          <div style="color:#1d4ed8; margin-bottom:3px;">#${i + 1} [${item.port}] ${item.question}</div>
+          <div style="color:#e11d48;">내가 고른 답: ${item.myAnswer}</div>
+          <div style="color:#059669;">정답: ${item.correctAnswer}</div>
+          <div style="color:#475569; margin-top:3px;">해설: ${item.explanation}</div>
+        </div>
+      `).join('');
+    }
+
+    function toggleWrongNotes() {
+      const box = document.getElementById('wrong-note-box');
+      box.classList.toggle('show');
+    }
+
+    function resetToStart() {
+      if (aiTurnTimer) clearTimeout(aiTurnTimer);
+      updateBestRecordUI();
+      renderOnlineLobbySlots();
+      switchScreen('start-screen');
+    }
+
+    // "Siêu Cờ Tỷ Phú / Billion Marble" 스타일 항구 매각 (Sell Asset) 기능
+    function sellAssetAction() {
+      const myPortIds = Object.keys(state.ownedPorts).map(Number);
+      if (myPortIds.length === 0) {
+        sfx.wrong();
+        addLog(`매각할 보유 항구가 없습니다! 먼저 항구를 인수해 보세요.`, 'siren.svg');
+        setTopBanner(`보유 중인 항구가 없어 매각할 수 없습니다!`);
+        return;
+      }
+      // 가장 먼저 보유한 항구(또는 현재 위치한 내 항구)를 80% 가격으로 즉시 매각
+      const targetId = myPortIds.includes(state.position) ? state.position : myPortIds[0];
+      const cell = BOARD_CELLS[targetId];
+      const lv = state.ownedPorts[targetId] || 1;
+      const baseValue = lv === 2 ? Math.round(cell.cost * 1.5) : cell.cost;
+      const sellPrice = Math.round(baseValue * 0.8);
+
+      delete state.ownedPorts[targetId];
+      delete state.portOwners[targetId];
+      state.cash += sellPrice;
+      if (state.gameMode === 'online4p' && state.players[state.myPlayerIdx]) {
+        state.players[state.myPlayerIdx].cash = state.cash;
+        delete state.players[state.myPlayerIdx].ownedPorts[targetId];
+      }
+
+      sfx.coin();
+      spawnFloatingMoney(`+${sellPrice}만 (항구 매각)`, true);
+      addLog(`[항구 매각] ${cell.name} 매각 완료! 현금 +${formatMoney(sellPrice)} 확보!`, 'coin.svg');
+      setTopBanner(`${cell.name} 매각 완료! +${formatMoney(sellPrice)} 현금 확보!`);
+      updateBoardUI();
+    }
+
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>

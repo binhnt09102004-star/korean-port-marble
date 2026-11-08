@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs>
+    <filter id="st" x="-15%" y="-15%" width="130%" height="135%">
+      <feDropShadow dx="0" dy="5" stdDeviation="3" flood-color="#2d1b4e" flood-opacity="0.32"/>
+    </filter>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fffbeb"/>
+      <stop offset="100%" stop-color="#fde68a"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff3b0"/>
+      <stop offset="55%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#bae6fd"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+    <linearGradient id="pink" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fecdd3"/>
+      <stop offset="100%" stop-color="#fb7185"/>
+    </linearGradient>
+    <linearGradient id="mint" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a7f3d0"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <g filter="url(#st)">
+    <circle cx="60" cy="60" r="53" fill="#ffffff"/>
+    <circle cx="60" cy="60" r="47" fill="url(#bg)" stroke="#3b234a" stroke-width="4.5"/>
+    <ellipse cx="60" cy="29" rx="28" ry="10" fill="#ffffff" opacity="0.58"/>
+    
+    <circle cx="60" cy="60" r="34" fill="url(#gold)" stroke="#3b234a" stroke-width="4.5"/>
+    <circle cx="60" cy="60" r="26" fill="#fef08a" stroke="#d97706" stroke-width="2.5" stroke-dasharray="6 4"/>
+    
+  <g transform="translate(60,62) scale(0.95)">
+    <ellipse cx="-13" cy="3" rx="5.5" ry="3.2" fill="#fb7185" opacity="0.68"/>
+    <ellipse cx="13" cy="3" rx="5.5" ry="3.2" fill="#fb7185" opacity="0.68"/>
+    <circle cx="-9" cy="-2" r="4.3" fill="#3b211e"/>
+    <circle cx="-10.5" cy="-3.5" r="1.7" fill="#ffffff"/>
+    <circle cx="9" cy="-2" r="4.3" fill="#3b211e"/>
+    <circle cx="7.5" cy="-3.5" r="1.7" fill="#ffffff"/>
+    <path d="M-4,2 Q0,6.5 4,2" fill="none" stroke="#3b211e" stroke-width="2.7" stroke-linecap="round"/>
+  </g>
+
+  
+  </g>
+</svg>
