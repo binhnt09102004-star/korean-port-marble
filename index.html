@@ -6,12 +6,12 @@
   <title>한국 항구 퀴즈 마블 - 4인 온라인 & 3D 치비 건설 에디션</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Gowun+Dodum&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Fredoka:wght@600;700&family=Gowun+Dodum&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
   <!-- WebRTC P2P 4인 온라인 멀티플레이어 엔진 (PeerJS) -->
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <style>
     /* =========================================================================
-       귀엽고 친근한 한국어 치비(Chibi) 전용 웹폰트 (CookieRun + 나눔스퀘어라운드)
+       귀엽고 친근한 한국어 & 베트남어 치비(Chibi) 전용 웹폰트 (CookieRun + Baloo 2 + Nunito)
        ========================================================================= */
     @font-face {
       font-family: 'CookieRun-Regular';
@@ -36,12 +36,64 @@
     }
 
     :root {
-      --font-chibi-title: 'CookieRun-Bold', 'CookieRun-Regular', 'Fredoka', 'NanumSquareRound', sans-serif;
-      --font-chibi-body: 'NanumSquareRound', 'CookieRun-Regular', 'Gowun Dodum', 'Malgun Gothic', sans-serif;
+      --font-chibi-title: 'CookieRun-Bold', 'Baloo 2', 'Nunito', 'CookieRun-Regular', 'Fredoka', 'NanumSquareRound', sans-serif;
+      --font-chibi-body: 'NanumSquareRound', 'Nunito', 'Baloo 2', 'CookieRun-Regular', 'Gowun Dodum', 'Malgun Gothic', sans-serif;
       --font-cartoon: var(--font-chibi-title);
       --ink-dark: #2b2118;
       --ink-navy: #253b6e;
       --chibi-outline: #3b2818;
+    }
+
+    /* 글로벌 한/베 2개국어 실시간 전환 바 (🇻🇳 Tiếng Việt / 🇰🇷+🇻🇳 Song Ngữ / 🇰🇷 한국어) */
+    .global-lang-bar {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+      border: 3px solid #1e3a8a;
+      box-shadow: 0 4px 0 #1e3a8a;
+      border-radius: 999px;
+      padding: 4px 8px;
+      z-index: 120;
+    }
+    .lang-bar-label {
+      font-family: var(--font-chibi-title);
+      font-size: 0.76rem;
+      color: #1e3a8a;
+      padding: 0 4px;
+    }
+    .lang-pill-btn {
+      font-family: var(--font-chibi-title);
+      font-size: 0.78rem;
+      padding: 4px 11px;
+      border-radius: 999px;
+      border: 2px solid transparent;
+      background: rgba(255, 255, 255, 0.7);
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.14s ease;
+    }
+    .lang-pill-btn:hover {
+      transform: translateY(-1px);
+      background: #ffffff;
+    }
+    .lang-pill-btn.active {
+      background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+      color: #ffffff;
+      border-color: #7f1d1d;
+      box-shadow: 0 2px 0 #7f1d1d;
+    }
+    .lang-pill-btn.active-ko {
+      background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+      color: #ffffff;
+      border-color: #1e3a8a;
+      box-shadow: 0 2px 0 #1e3a8a;
+    }
+    .lang-pill-btn.active-bi {
+      background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      border-color: #064e3b;
+      box-shadow: 0 2px 0 #064e3b;
     }
 
     * {
@@ -2334,6 +2386,16 @@
   <canvas id="fx-canvas"></canvas>
 
   <div class="app-container">
+    <!-- 글로벌 한국어 / 베트남어 / 한·베 병기 실시간 전환 바 -->
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+      <div class="global-lang-bar" id="global-lang-bar">
+        <span class="lang-bar-label">🌐 언어 / Ngôn ngữ:</span>
+        <button type="button" class="lang-pill-btn" data-lang="vi" onclick="setLanguage('vi')">🇻🇳 Tiếng Việt</button>
+        <button type="button" class="lang-pill-btn active-bi" data-lang="bi" onclick="setLanguage('bi')">🇰🇷+🇻🇳 Song Ngữ</button>
+        <button type="button" class="lang-pill-btn" data-lang="ko" onclick="setLanguage('ko')">🇰🇷 한국어</button>
+      </div>
+    </div>
+
     <!-- 1. 시작 화면 -->
     <section id="start-screen" class="screen active">
       <div class="cartoon-panel">
@@ -2344,23 +2406,23 @@
           <img class="hero-chibi-mascot-right" src="assets/chibi/char-girl.png" alt="항해사 유나 치비" />
           <div class="hero-ribbon">
             <img src="assets/chibi-icons/compass.svg" style="width:22px;height:22px;" alt="" />
-            3D 치비 캐릭터 & 카와이 아일랜드 에디션
+            <span id="ui-hero-ribbon">3D 치비 캐릭터 & 카와이 아일랜드 에디션</span>
           </div>
-          <h1 class="game-title">한국 항구 퀴즈 마블</h1>
-          <p class="game-subtitle">3D 주사위를 광장에 던져 귀여운 치비 캐릭터와 함께 8대 무역항을 인수하세요!</p>
+          <h1 class="game-title" id="ui-main-title">한국 항구 퀴즈 마블</h1>
+          <p class="game-subtitle" id="ui-main-subtitle">3D 주사위를 광장에 던져 귀여운 치비 캐릭터와 함께 8대 무역항을 인수하세요!</p>
         </div>
 
         <div class="best-record-box">
           <img src="assets/chibi-icons/trophy.svg" style="width:30px;height:30px;" alt="" />
-          <span>최고 자산 기록: <strong id="best-asset-text">기록 없음</strong></span>
+          <span><span id="ui-best-record-label">최고 자산 기록:</span> <strong id="best-asset-text">기록 없음</strong></span>
         </div>
 
         <div class="rules-box">
           <h3>
             <img src="assets/chibi/chibi-cheer.png" style="width:34px;height:34px;object-fit:contain;" alt="" />
-            치비 선장님의 항해 규칙 안내
+            <span id="ui-rules-heading">치비 선장님의 항해 규칙 안내</span>
           </h3>
-          <ul class="rules-list">
+          <ul class="rules-list" id="ui-rules-list">
             <li><strong>총 15턴</strong> 동안 3D 입체 주사위(1~6)를 중앙 광장에 굴려 치비 캐릭터가 보드 위를 점프 이동합니다.</li>
             <li>매 턴 이동 시 보유한 항구의 <strong>턴 수익이 자동 입금</strong>되며, 출발지 통과·도착 시 <strong>지원금 +200만 원</strong>을 받습니다.</li>
             <li>항구 칸에 도착하면 <strong>순수 한국어 무역·항구 상식 4지선다 퀴즈</strong>가 열립니다!</li>
@@ -2370,15 +2432,15 @@
         </div>
 
         <div class="difficulty-section">
-          <div class="difficulty-label">게임 플레이 모드 선택</div>
+          <div class="difficulty-label" id="ui-mode-label">게임 플레이 모드 선택</div>
           <div class="mode-switch-tabs">
             <button type="button" class="mode-tab-btn active" id="mode-btn-4p" onclick="selectGameMode('online4p')">
               <img src="assets/chibi-icons/users-online.svg" style="width:28px;height:28px;" alt="" />
-              <span>4인 실시간 온라인 대전</span>
+              <span id="ui-mode-4p-text">4인 실시간 온라인 대전</span>
             </button>
             <button type="button" class="mode-tab-btn" id="mode-btn-1p" onclick="selectGameMode('solo1p')">
               <img src="assets/chibi-icons/compass.svg" style="width:26px;height:26px;" alt="" />
-              <span>1인 싱글 퀴즈 마블</span>
+              <span id="ui-mode-1p-text">1인 싱글 퀴즈 마블</span>
             </button>
           </div>
 
@@ -2387,16 +2449,41 @@
             <div class="online-room-bar">
               <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                 <img src="assets/chibi-icons/users-online.svg" style="width:22px;height:22px;" alt="" />
-                <span style="font-family:var(--font-chibi-title);font-size:0.86rem;color:#1e3a8a;">방 코드:</span>
+                <span id="ui-nick-label" style="font-family:var(--font-chibi-title);font-size:0.84rem;color:#1e3a8a;">내 이름:</span>
+                <input type="text" id="player-nick-input" class="room-code-input" style="width:115px;" placeholder="닉네임 / Tên" maxlength="12" oninput="updateMyNickname(this.value)" />
+                <span id="ui-room-code-label" style="font-family:var(--font-chibi-title);font-size:0.84rem;color:#1e3a8a;margin-left:4px;">방 코드:</span>
                 <input type="text" id="room-code-input" class="room-code-input" value="7788" maxlength="6" />
-                <button type="button" class="mini-lobby-btn" onclick="joinOrSyncOnlineRoom()">방 접속·동기화</button>
-                <button type="button" class="mini-lobby-btn gold" onclick="copyInviteLink()">초대 링크 복사</button>
+                <button type="button" class="mini-lobby-btn" id="ui-room-join-btn" onclick="joinOrSyncOnlineRoom()">방 접속·동기화</button>
+                <button type="button" class="mini-lobby-btn" id="ui-room-new-btn" style="background:#38bdf8;color:#0f172a;" onclick="createNewRandomRoom()">🎲 새 방</button>
+                <button type="button" class="mini-lobby-btn gold" id="ui-room-copy-btn" onclick="copyInviteLink(true)">🔗 초대 링크 & QR</button>
               </div>
               <span class="online-status-pill" id="online-status-pill">🟢 온라인 채널 준비 완료 (#7788)</span>
             </div>
 
-            <div style="font-size:0.78rem;color:#334155;margin-bottom:8px;">
-              💡 다른 브라우저/탭/기기에서 같은 <strong>방 코드(7788)</strong>로 접속하면 실시간 연동되며, 빈자리는 <strong>스마트 치비 AI</strong>가 자동으로 함께 플레이합니다! (클릭하여 내 캐릭터 변경)
+            <!-- 친구 초대 링크 + QR 코드 카드 (토글 표시) -->
+            <div id="invite-share-panel" style="display:none;background:#ffffff;border:3px solid #1e3a8a;border-radius:16px;padding:10px 14px;margin-bottom:10px;box-shadow:0 4px 0 #1e3a8a;">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                <div style="flex:1;min-width:210px;text-align:left;">
+                  <div id="ui-invite-panel-title" style="font-family:var(--font-chibi-title);font-size:0.95rem;color:#1e3a8a;margin-bottom:4px;">
+                    🎉 친구 초대 링크가 복사되었습니다! (Đã copy link mời bạn bè!)
+                  </div>
+                  <div id="ui-invite-panel-desc" style="font-size:0.78rem;color:#334155;line-height:1.45;margin-bottom:6px;">
+                    아래 링크를 카톡/Zalo/메신저로 친구에게 보내거나, 휴대폰 카메라로 우측 <strong>QR 코드</strong>를 스캔하면 같은 방으로 즉시 들어옵니다!
+                  </div>
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <input type="text" id="invite-url-readonly" readonly style="flex:1;padding:6px 10px;border:2px solid #0284c7;border-radius:10px;font-size:0.78rem;font-weight:800;color:#0369a1;background:#f0f9ff;" onclick="this.select()" />
+                    <button type="button" class="mini-lobby-btn gold" onclick="copyInviteLink(false)" id="ui-copy-again-btn">복사 / Copy</button>
+                  </div>
+                </div>
+                <div style="text-align:center;background:#f8fafc;border:2.5px solid #1e3a8a;border-radius:12px;padding:6px;">
+                  <img id="invite-qr-img" src="" alt="Room QR Code" style="width:96px;height:96px;display:block;border-radius:6px;" />
+                  <span style="font-size:0.68rem;font-weight:800;color:#1e3a8a;">SCAN QR</span>
+                </div>
+              </div>
+            </div>
+
+            <div id="ui-lobby-hint" style="font-size:0.78rem;color:#334155;margin-bottom:8px;">
+              💡 다른 브라우저/탭/기기에서 같은 <strong>방 코드(7788)</strong>로 접속하면 실시간 연동되며, 빈자리는 <strong>스마트 치비 AI</strong>가 자동으로 함께 플레이합니다! (클릭하여 내 슬롯 변경)
             </div>
 
             <div class="online-slots-grid" id="online-slots-grid">
@@ -2404,38 +2491,38 @@
             </div>
           </div>
 
-          <div class="difficulty-label">내 대표 치비 캐릭터 선택</div>
+          <div class="difficulty-label" id="ui-char-select-label">내 대표 치비 캐릭터 선택</div>
           <div class="char-select-grid">
             <button type="button" class="char-select-btn selected" id="char-btn-boy" onclick="selectCharacter('boy')">
               <img class="char-select-thumb" src="assets/chibi/char-boy.png" alt="캡틴 레오" />
               <div>
-                <span class="diff-title">캡틴 레오</span>
-                <span class="diff-desc">황금 해운 제독 (P1)</span>
+                <span class="diff-title" id="ui-char-boy-name">캡틴 레오</span>
+                <span class="diff-desc" id="ui-char-boy-desc">황금 해운 제독 (P1)</span>
               </div>
             </button>
             <button type="button" class="char-select-btn" id="char-btn-girl" onclick="selectCharacter('girl')">
               <img class="char-select-thumb" src="assets/chibi/char-girl.png" alt="항해사 유나" />
               <div>
-                <span class="diff-title">항해사 유나</span>
-                <span class="diff-desc">글로벌 무역 여왕 (P2)</span>
+                <span class="diff-title" id="ui-char-girl-name">항해사 유나</span>
+                <span class="diff-desc" id="ui-char-girl-desc">글로벌 무역 여왕 (P2)</span>
               </div>
             </button>
           </div>
 
-          <div class="difficulty-label">난이도 선택 (시작 자금 설정)</div>
+          <div class="difficulty-label" id="ui-diff-label">난이도 선택 (시작 자금 설정)</div>
           <div class="difficulty-buttons">
             <button type="button" class="diff-btn selected" id="diff-easy" onclick="selectDifficulty('easy')">
               <img src="assets/chibi-icons/money-bag.svg" style="width:40px;height:40px;" alt="" />
               <div>
-                <span class="diff-title">쉬움 모드</span>
-                <span class="diff-desc">시작 자금 1,500만 원</span>
+                <span class="diff-title" id="ui-diff-easy-title">쉬움 모드</span>
+                <span class="diff-desc" id="ui-diff-easy-desc">시작 자금 1,500만 원</span>
               </div>
             </button>
             <button type="button" class="diff-btn" id="diff-hard" onclick="selectDifficulty('hard')">
               <img src="assets/chibi-icons/trident.svg" style="width:40px;height:40px;" alt="" />
               <div>
-                <span class="diff-title">어려움 모드</span>
-                <span class="diff-desc">시작 자금 1,000만 원</span>
+                <span class="diff-title" id="ui-diff-hard-title">어려움 모드</span>
+                <span class="diff-desc" id="ui-diff-hard-desc">시작 자금 1,000만 원</span>
               </div>
             </button>
           </div>
@@ -2456,18 +2543,22 @@
           <span id="top-bar-mode-label">한국 항구 퀴즈 마블 · 4인 온라인 & 3D 건설</span>
         </div>
         <div class="cam-btn-group">
+          <button type="button" class="view-toggle-btn" style="background:#dcfce7;border-color:#059669;color:#065f46;" onclick="copyInviteLink(true)" title="친구 초대 링크를 복사합니다!">
+            <img src="assets/chibi-icons/users-online.svg" style="width:18px;height:18px;" alt="" />
+            <span id="ui-ingame-invite-btn">🔗 친구 초대</span>
+          </button>
           <button type="button" class="view-toggle-btn" style="background:#fde047;border-color:#b45309;" onclick="demoBuildUpgradeEffect()" title="현재 항구 또는 무작위 항구에 3D 빌딩/랜드마크 건설 이펙트를 즉시 시연합니다!">
             <img src="assets/chibi-icons/hammer-build.svg" style="width:18px;height:18px;" alt="" />
-            3D 건설·업그레이드 이펙트!
+            <span id="ui-demo-build-btn">3D 건설·업그레이드 이펙트!</span>
           </button>
           <button type="button" class="view-toggle-btn active-cam" id="cam-btn-3d" onclick="setCameraMode('cam-3d')">
-            초선명 3D 블록
+            3D Block
           </button>
           <button type="button" class="view-toggle-btn" id="cam-btn-iso" onclick="setCameraMode('cam-iso')">
-            3D 테이블 기울기
+            3D Iso
           </button>
           <button type="button" class="view-toggle-btn" id="cam-btn-flat" onclick="setCameraMode('cam-flat')">
-            2D 평면
+            2D Flat
           </button>
         </div>
       </div>
@@ -2491,8 +2582,8 @@
                 <div class="roll-btn-left">
                   <img src="assets/chibi-icons/dice.svg" style="width:28px;height:28px;" alt="" />
                   <div>
-                    <div style="font-size:0.9rem;">주사위 굴리기</div>
-                    <div style="font-size:0.65rem;color:#fde047;">Dice Rolling</div>
+                    <div id="ui-roll-btn-main" style="font-size:0.9rem;">주사위 굴리기</div>
+                    <div id="ui-roll-btn-sub" style="font-size:0.65rem;color:#fde047;">Dice Rolling</div>
                   </div>
                 </div>
                 <div class="dice-box" id="dice-box" title="주사위 눈">
@@ -2507,8 +2598,8 @@
                 <div style="display:flex;align-items:center;gap:6px;">
                   <img src="assets/chibi-icons/house-lv1.svg" style="width:20px;height:20px;" alt="" />
                   <div style="text-align:left;line-height:1.1;">
-                    <div style="font-size:0.78rem;color:#ffffff;">항구 매각</div>
-                    <div style="font-size:0.6rem;color:#fde047;">Sell Asset</div>
+                    <div id="ui-sell-btn-main" style="font-size:0.78rem;color:#ffffff;">항구 매각</div>
+                    <div id="ui-sell-btn-sub" style="font-size:0.6rem;color:#fde047;">Sell Asset</div>
                   </div>
                 </div>
                 <img src="assets/chibi-icons/coin.svg" style="width:18px;height:18px;" alt="" />
@@ -2582,17 +2673,17 @@
         <div class="marble-player-card" onclick="toggleCharacterInGame()" title="클릭하여 치비 캐릭터 변경 (캡틴 레오 / 항해사 유나)">
           <div class="player-portrait-frame">
             <img id="captain-mascot-img" src="assets/chibi/char-boy.png" alt="플레이어 치비 캐릭터" />
-            <div class="portrait-switch-hint">캐릭터 변경</div>
+            <div class="portrait-switch-hint" id="ui-switch-char-hint">캐릭터 변경</div>
           </div>
           <div class="player-rank-shield" id="hud-rank-shield">1st · 선장</div>
           <div class="player-hud-info">
             <div class="player-hud-header" id="hud-player-name">PLAYER · 캡틴 레오</div>
             <div class="player-hud-row">
-              <span class="hud-key">보유 현금 (Gold)</span>
+              <span class="hud-key" id="ui-hud-gold-label">보유 현금 (Gold)</span>
               <span class="hud-val-gold" id="cash-display">1,500만 원</span>
             </div>
             <div class="player-hud-row">
-              <span class="hud-key">총자산 (Asset)</span>
+              <span class="hud-key" id="ui-hud-asset-label">총자산 (Asset)</span>
               <span class="hud-val-asset" id="asset-display">1,500만 원</span>
             </div>
           </div>
@@ -2602,14 +2693,14 @@
           <div class="status-Hud-item">
             <div class="status-Hud-label">
               <img src="assets/chibi-icons/compass.svg" alt="" />
-              현재 턴 (Turn)
+              <span id="ui-hud-turn-label">현재 턴 (Turn)</span>
             </div>
             <div class="status-Hud-value" id="turn-display">1 / 15</div>
           </div>
           <div class="status-Hud-item">
             <div class="status-Hud-label">
               <img src="assets/chibi-icons/anchor.svg" alt="" />
-              보유 무역항
+              <span id="ui-hud-ports-label">보유 무역항</span>
             </div>
             <div class="status-Hud-value" id="owned-ports-pill">보유 항구: 0 / 8곳</div>
           </div>
@@ -2629,32 +2720,32 @@
         </div>
 
         <div class="rank-badge-box">
-          <div class="rank-label">최종 달성 해운 등급</div>
+          <div class="rank-label" id="ui-final-rank-label">최종 달성 해운 등급</div>
           <div class="rank-title" id="final-rank-title">
             <img src="assets/chibi-icons/crown.svg" style="width:42px;height:42px;" alt="" />
             <span>베테랑 선장</span>
           </div>
           <div id="new-record-badge" class="new-record-tag" style="display: none;">
             <img src="assets/chibi-icons/sparkles.svg" style="width:18px;height:18px;" alt="" />
-            최고 자산 기록 경신!
+            <span id="ui-new-record-text">최고 자산 기록 경신!</span>
           </div>
         </div>
 
         <div class="result-stats">
           <div class="result-stat-item">
-            <div class="stat-label"><img src="assets/chibi-icons/money-bag.svg" alt="" /> 최종 보유 현금</div>
+            <div class="stat-label"><img src="assets/chibi-icons/money-bag.svg" alt="" /> <span id="ui-stat-cash">최종 보유 현금</span></div>
             <div class="stat-value cash" id="final-cash">0만 원</div>
           </div>
           <div class="result-stat-item">
-            <div class="stat-label"><img src="assets/chibi-icons/crane.svg" alt="" /> 보유 항구 평가액</div>
+            <div class="stat-label"><img src="assets/chibi-icons/crane.svg" alt="" /> <span id="ui-stat-port">보유 항구 평가액</span></div>
             <div class="stat-value" id="final-port-value">0만 원</div>
           </div>
           <div class="result-stat-item">
-            <div class="stat-label"><img src="assets/chibi-icons/coin.svg" alt="" /> 최종 총자산</div>
+            <div class="stat-label"><img src="assets/chibi-icons/coin.svg" alt="" /> <span id="ui-stat-asset">최종 총자산</span></div>
             <div class="stat-value asset" id="final-total-asset">0만 원</div>
           </div>
           <div class="result-stat-item">
-            <div class="stat-label"><img src="assets/chibi-icons/trophy.svg" alt="" /> 역대 최고 기록</div>
+            <div class="stat-label"><img src="assets/chibi-icons/trophy.svg" alt="" /> <span id="ui-stat-best">역대 최고 기록</span></div>
             <div class="stat-value" id="final-best-asset">0만 원</div>
           </div>
         </div>
@@ -2666,7 +2757,7 @@
           </button>
           <button type="button" class="action-btn btn-buy" onclick="resetToStart()">
             <img src="assets/chibi-icons/ship.svg" style="width:24px;height:24px;" alt="" />
-            <span>다시 출항하기</span>
+            <span id="ui-restart-btn-label">다시 출항하기</span>
           </button>
         </div>
 
@@ -2678,6 +2769,14 @@
   <!-- 치비 퀴즈 및 이벤트 모달창 -->
   <div class="modal-overlay" id="quiz-modal">
     <div class="modal-card">
+      <!-- 모달 내부에서도 즉시 한/베 언어 전환 가능! -->
+      <div style="display:flex;justify-content:flex-end;margin-bottom:6px;">
+        <div class="global-lang-bar" style="transform:scale(0.92);transform-origin:right center;">
+          <button type="button" class="lang-pill-btn" data-lang="vi" onclick="setLanguage('vi')">🇻🇳 Tiếng Việt</button>
+          <button type="button" class="lang-pill-btn active-bi" data-lang="bi" onclick="setLanguage('bi')">🇰🇷+🇻🇳 Song Ngữ</button>
+          <button type="button" class="lang-pill-btn" data-lang="ko" onclick="setLanguage('ko')">🇰🇷 한국어</button>
+        </div>
+      </div>
       <div class="modal-cartoon-stage" id="modal-cartoon-stage">
         <img id="modal-chibi-bg" class="modal-chibi-bg" src="assets/chibi/cell-1.jpg" alt="치비 항구 일러스트" />
         <div class="modal-chibi-shade"></div>
@@ -2723,116 +2822,144 @@
       {
         id: 0,
         name: '출발',
+        nameVi: 'Xuất Phát',
         type: 'start',
         chibi: 'assets/chibi/cell-0.jpg',
         icon: 'assets/chibi-icons/compass.svg',
         subTag: '해운 지원 본부',
-        desc: '통과·도착 +200만'
+        subTagVi: 'Trụ sở Hàng hải',
+        desc: '통과·도착 +200만',
+        descVi: 'Qua/Đến +200 Tr'
       },
       {
         id: 1,
         name: '울산항',
+        nameVi: 'Cảng Ulsan',
         type: 'port',
         chibi: 'assets/chibi/cell-1.jpg',
         icon: 'assets/chibi-icons/fuel.svg',
         subTag: '자동차·석유화학',
+        subTagVi: 'Ô tô · Hóa dầu',
         price: 300,
         income: 60
       },
       {
         id: 2,
         name: '부산항',
+        nameVi: 'Cảng Busan',
         type: 'port',
         chibi: 'assets/chibi/cell-2.jpg',
         icon: 'assets/chibi-icons/cargo-ship.svg',
         subTag: '최대 컨테이너항',
+        subTagVi: 'Cảng Container số 1',
         price: 400,
         income: 80
       },
       {
         id: 3,
         name: '황금열쇠',
+        nameVi: 'Chìa Khóa Vàng',
         type: 'key1',
         chibi: 'assets/chibi/cell-3.jpg',
         icon: 'assets/chibi-icons/key-gold.svg',
         subTag: '해상 보물섬',
-        desc: '호황 +150 / 태풍 -100'
+        subTagVi: 'Đảo Kho Báu',
+        desc: '호황 +150 / 태풍 -100',
+        descVi: 'Thịnh +150 / Bão -100'
       },
       {
         id: 4,
         name: '인천항',
+        nameVi: 'Cảng Incheon',
         type: 'port',
         chibi: 'assets/chibi/cell-4.jpg',
         icon: 'assets/chibi-icons/bridge.svg',
         subTag: '수도권 갑문항',
+        subTagVi: 'Cảng Âu Tàu Thủ Đô',
         price: 350,
         income: 70
       },
       {
         id: 5,
         name: '광양항',
+        nameVi: 'Cảng Gwangyang',
         type: 'port',
         chibi: 'assets/chibi/cell-5.jpg',
         icon: 'assets/chibi-icons/crane.svg',
         subTag: '복합 물류 허브',
+        subTagVi: 'Trung tâm Logistics',
         price: 300,
         income: 60
       },
       {
         id: 6,
         name: '세관 검사소',
+        nameVi: 'Trạm Hải Quan',
         type: 'customs',
         chibi: 'assets/chibi/cell-6.jpg',
         icon: 'assets/chibi-icons/siren.svg',
         subTag: '통관 검문소',
-        desc: '통관 지연 -100만'
+        subTagVi: 'Kiểm tra thông quan',
+        desc: '통관 지연 -100만',
+        descVi: 'Chậm thông quan -100Tr'
       },
       {
         id: 7,
         name: '평택항',
+        nameVi: 'Cảng Pyeongtaek',
         type: 'port',
         chibi: 'assets/chibi/cell-7.jpg',
         icon: 'assets/chibi-icons/car.svg',
         subTag: '수출 자동차항',
+        subTagVi: 'Cảng xuất khẩu Ô tô',
         price: 250,
         income: 50
       },
       {
         id: 8,
         name: '포항항',
+        nameVi: 'Cảng Pohang',
         type: 'port',
         chibi: 'assets/chibi/cell-8.jpg',
         icon: 'assets/chibi-icons/factory.svg',
         subTag: '제철·철강 산업항',
+        subTagVi: 'Cảng Gang Thép',
         price: 250,
         income: 50
       },
       {
         id: 9,
         name: '황금열쇠',
+        nameVi: 'Chìa Khóa Vàng',
         type: 'key2',
         chibi: 'assets/chibi/cell-9.jpg',
         icon: 'assets/chibi-icons/key-modern.svg',
         subTag: '수출 보너스섬',
-        desc: '보너스 +200 / 물류 -100'
+        subTagVi: 'Đảo Thưởng Xuất Khẩu',
+        desc: '보너스 +200 / 물류 -100',
+        descVi: 'Thưởng +200 / Phí -100'
       },
       {
         id: 10,
         name: '목포항',
+        nameVi: 'Cảng Mokpo',
         type: 'port',
         chibi: 'assets/chibi/cell-10.jpg',
         icon: 'assets/chibi-icons/speedboat.svg',
         subTag: '다도해 서남권항',
+        subTagVi: 'Cảng Quần đảo Tây Nam',
         price: 200,
         income: 40
       },
       {
         id: 11,
         name: '제주항',
+        nameVi: 'Cảng Jeju',
         type: 'port',
         chibi: 'assets/chibi/cell-11.jpg',
         icon: 'assets/chibi-icons/island.svg',
         subTag: '크루즈·특산물항',
+        subTagVi: 'Du thuyền · Đặc sản',
         price: 200,
         income: 40
       }
@@ -2848,134 +2975,206 @@
     };
 
     /* =========================================================================
-       2. 순수 한국어 항구·무역 상식 4지선다 퀴즈 (18문항)
+       2. 한국어 & 베트남어 양방향 지원 항구·무역 상식 4지선다 퀴즈 (18문항)
        ========================================================================= */
     const QUIZ_BANK = [
       {
         port: '울산항',
+        portVi: 'Cảng Ulsan',
         question: '울산항의 주력 수출 품목으로 가장 알맞은 것은 무엇일까요?',
+        questionVi: 'Mặt hàng xuất khẩu chủ lực tiêu biểu nhất của Cảng Ulsan là gì?',
         options: ['자동차와 석유화학 제품', '사과와 배 등 과일류', '생수와 감귤', '면직물과 의류'],
+        optionsVi: ['Ô tô và sản phẩm hóa dầu', 'Trái cây như táo và lê', 'Nước khoáng và quýt', 'Vải sợi bông và quần áo'],
         answer: 0,
-        explanation: '울산항은 대규모 자동차 공장과 석유화학 단지가 밀집해 있어 자동차 및 액체 화물 수출이 활발합니다.'
+        explanation: '울산항은 대규모 자동차 공장과 석유화학 단지가 밀집해 있어 자동차 및 액체 화물 수출이 활발합니다.',
+        explanationVi: 'Cảng Ulsan tập trung các nhà máy sản xuất ô tô và khu liên hợp hóa dầu khổng lồ nên rất mạnh về xuất khẩu ô tô và hàng lỏng.'
       },
       {
         port: '부산항',
+        portVi: 'Cảng Busan',
         question: '대한민국 최대의 컨테이너 항구이자 세계적인 환적 항구인 곳은 어디일까요?',
+        questionVi: 'Đâu là cảng container lớn nhất Hàn Quốc đồng thời là cảng trung chuyển tầm cỡ thế giới?',
         options: ['목포항', '부산항', '제주항', '포항항'],
+        optionsVi: ['Cảng Mokpo (목포항)', 'Cảng Busan (부산항)', 'Cảng Jeju (제주항)', 'Cảng Pohang (포항항)'],
         answer: 1,
-        explanation: '부산항은 한국 전체 컨테이너 물동량의 대부분을 처리하는 대한민국 제1의 무역항입니다.'
+        explanation: '부산항은 한국 전체 컨테이너 물동량의 대부분을 처리하는 대한민국 제1의 무역항입니다.',
+        explanationVi: 'Cảng Busan xử lý phần lớn sản lượng container của toàn Hàn Quốc và là thương cảng số 1 của đất nước.'
       },
       {
         port: '포항항',
+        portVi: 'Cảng Pohang',
         question: '포항항이 발전하게 된 가장 핵심적인 기간산업은 무엇일까요?',
+        questionVi: 'Ngành công nghiệp trọng điểm cốt lõi nào đã giúp Cảng Pohang phát triển mạnh mẽ?',
         options: ['장난감 제조업', '철강 및 제철 산업', '커피 원두 재배업', '영화 촬영 산업'],
+        optionsVi: ['Sản xuất đồ chơi', 'Công nghiệp gang thép & luyện kim', 'Trồng hạt cà phê', 'Công nghiệp điện ảnh'],
         answer: 1,
-        explanation: '포항항은 포스코(POSCO)를 중심으로 철광석과 석탄을 들여오고 철강 제품을 수출하는 대표 철강 산업항입니다.'
+        explanation: '포항항은 포스코(POSCO)를 중심으로 철광석과 석탄을 들여오고 철강 제품을 수출하는 대표 철강 산업항입니다.',
+        explanationVi: 'Cảng Pohang gắn liền với tập đoàn thép POSCO, chuyên nhập quặng sắt/than đá và xuất khẩu các sản phẩm thép.'
       },
       {
         port: '인천항',
+        portVi: 'Cảng Incheon',
         question: '조수 간만의 차가 큰 서해안 인천항에서 배가 안전하게 드나들기 위해 설치한 특수 시설은 무엇일까요?',
+        questionVi: 'Tại Cảng Incheon (bờ Tây có chênh lệch thủy triều lớn), công trình đặc biệt nào giúp tàu ra vào an toàn?',
         options: ['케이블카', '갑문(물의 높이를 맞추는 수문)', '풍력 발전기', '지하 터널'],
+        optionsVi: ['Cáp treo', 'Âu tàu (cửa cống cân bằng mực nước)', 'Tua-bin điện gió', 'Đường hầm ngầm'],
         answer: 1,
-        explanation: '인천항은 밀물과 썰물의 높이 차이를 극복하기 위해 갑문 시설을 운영하여 대형 선박의 접안을 돕습니다.'
+        explanation: '인천항은 밀물과 썰물의 높이 차이를 극복하기 위해 갑문 시설을 운영하여 대형 선박의 접안을 돕습니다.',
+        explanationVi: 'Cảng Incheon vận hành hệ thống Âu tàu (갑문) để cân bằng mực nước giữa thủy triều lên và xuống, giúp tàu lớn cập cảng.'
       },
       {
         port: '광양항',
+        portVi: 'Cảng Gwangyang',
         question: '전라남도 광양만에 위치하며 컨테이너 부두와 석유화학·제철 물류를 함께 처리하는 남해안의 대표 복합 물류 항구는?',
+        questionVi: 'Cảng phức hợp tiêu biểu ở bờ Nam (vịnh Gwangyang, Jeonnam) xử lý cả container, hóa dầu và gang thép là cảng nào?',
         options: ['광양항', '속초항', '강릉항', '군산항'],
+        optionsVi: ['Cảng Gwangyang (광양항)', 'Cảng Sokcho (속초항)', 'Cảng Gangneung (강릉항)', 'Cảng Gunsan (군산항)'],
         answer: 0,
-        explanation: '광양항은 깊은 수심과 넓은 배후 부지를 갖춘 남해안의 핵심 복합 물류 허브 항만입니다.'
+        explanation: '광양항은 깊은 수심과 넓은 배후 부지를 갖춘 남해안의 핵심 복합 물류 허브 항만입니다.',
+        explanationVi: 'Cảng Gwangyang có mực nước sâu và vùng hậu cần rộng lớn, là trung tâm logistics phức hợp trọng điểm phía Nam.'
       },
       {
         port: '평택항',
+        portVi: 'Cảng Pyeongtaek',
         question: '수도권 남부와 가까우며 대한민국에서 수출입 자동차 처리 물동량이 매우 높은 서해안의 대표 항구는?',
+        questionVi: 'Cảng tiêu biểu ở bờ Tây gần phía Nam vùng Thủ đô, nổi tiếng dẫn đầu Hàn Quốc về sản lượng xuất nhập khẩu ô tô là?',
         options: ['평택항', '제주항', '묵호항', '통영항'],
+        optionsVi: ['Cảng Pyeongtaek (평택항)', 'Cảng Jeju (제주항)', 'Cảng Mukho (묵호항)', 'Cảng Tongyeong (통영항)'],
         answer: 0,
-        explanation: '평택항은 자동차 전용 부두가 발달해 국산 수출 자동차와 수입 자동차가 가장 많이 오가는 항구로 유명합니다.'
+        explanation: '평택항은 자동차 전용 부두가 발달해 국산 수출 자동차와 수입 자동차가 가장 많이 오가는 항구로 유명합니다.',
+        explanationVi: 'Cảng Pyeongtaek có bến chuyên dụng cho ô tô rất phát triển, là nơi xuất nhập khẩu xe hơi nhộn nhịp bậc nhất Hàn Quốc.'
       },
       {
         port: '목포항',
+        portVi: 'Cảng Mokpo',
         question: '전라남도 서남권의 관문 항구로, 다도해 섬 지역 여객선 운항과 조선·해양 산업이 발달한 항구는?',
+        questionVi: 'Cảng cửa ngõ vùng Tây Nam Jeonnam, phát triển mạnh tuyến phà đi quần đảo Dadohae và công nghiệp đóng tàu là?',
         options: ['목포항', '울산항', '동해항', '포항항'],
+        optionsVi: ['Cảng Mokpo (목포항)', 'Cảng Ulsan (울산항)', 'Cảng Donghae (동해항)', 'Cảng Pohang (포항항)'],
         answer: 0,
-        explanation: '목포항은 서남해안 다도해 해상 교통의 중심지이자 영산강 하구와 인접한 역사 깊은 무역항입니다.'
+        explanation: '목포항은 서남해안 다도해 해상 교통의 중심지이자 영산강 하구와 인접한 역사 깊은 무역항입니다.',
+        explanationVi: 'Cảng Mokpo là trung tâm giao thông đường biển vùng quần đảo Tây Nam và là thương cảng giàu lịch sử.'
       },
       {
         port: '제주항',
+        portVi: 'Cảng Jeju',
         question: '섬 지역인 제주도의 생활 물자 공급과 감귤·수산물 반출, 대형 크루즈 여객선 입항을 담당하는 항구는?',
+        questionVi: 'Cảng đảm nhận cung ứng hàng hóa cho đảo Jeju, vận chuyển quýt/hải sản và đón tàu du lịch biển (Cruise) cỡ lớn là?',
         options: ['인천항', '제주항', '평택항', '광양항'],
+        optionsVi: ['Cảng Incheon (인천항)', 'Cảng Jeju (제주항)', 'Cảng Pyeongtaek (평택항)', 'Cảng Gwangyang (광양항)'],
         answer: 1,
-        explanation: '제주항은 제주도민의 필수 물품 수송과 국제 크루즈 관광의 중심 역할을 수행합니다.'
+        explanation: '제주항은 제주도민의 필수 물품 수송과 국제 크루즈 관광의 중심 역할을 수행합니다.',
+        explanationVi: 'Cảng Jeju đóng vai trò huyết mạch vận chuyển nhu yếu phẩm cho đảo Jeju và là trung tâm du lịch tàu biển quốc tế.'
       },
       {
         port: '무역 상식',
+        portVi: 'Kiến thức Thương mại',
         question: '다른 나라에서 물건을 사서 우리나라로 들여오는 것을 무엇이라고 부를까요?',
+        questionVi: 'Hoạt động mua hàng hóa từ nước ngoài và đưa vào trong nước được gọi là gì?',
         options: ['수출', '수입', '환승', '예금'],
+        optionsVi: ['Xuất khẩu (수출)', 'Nhập khẩu (수입)', 'Chuyển tuyến (환승)', 'Gửi tiết kiệm (예금)'],
         answer: 1,
-        explanation: '외국으로부터 물품을 구매해 국내로 들여오는 것은 수입, 국내 물품을 외국에 파는 것은 수출입니다.'
+        explanation: '외국으로부터 물품을 구매해 국내로 들여오는 것은 수입, 국내 물품을 외국에 파는 것은 수출입니다.',
+        explanationVi: 'Mua hàng từ nước ngoài đưa vào trong nước là Nhập khẩu (수입), còn bán hàng trong nước ra nước ngoài là Xuất khẩu (수출).'
       },
       {
         port: '무역 상식',
+        portVi: 'Kiến thức Thương mại',
         question: '화물을 일정한 크기의 강철 상자에 담아 배, 기차, 트럭으로 쉽게 옮길 수 있게 만든 표준 수송 용기는?',
+        questionVi: 'Thùng thép tiêu chuẩn hóa giúp đóng hàng và chuyển dễ dàng giữa tàu biển, tàu hỏa và xe tải gọi là gì?',
         options: ['컨테이너', '비닐봉지', '우체통', '종이봉투'],
+        optionsVi: ['Container (컨테이너)', 'Túi ni-lông', 'Hòm thư', 'Phong bì giấy'],
         answer: 0,
-        explanation: '컨테이너는 규격화된 강철 상자로, 하역 시간을 크게 줄여 현대 해상 무역 혁명을 이끌었습니다.'
+        explanation: '컨테이너는 규격화된 강철 상자로, 하역 시간을 크게 줄여 현대 해상 무역 혁명을 이끌었습니다.',
+        explanationVi: 'Container (컨테이너) là thùng thép tiêu chuẩn giúp rút ngắn mạnh thời gian bốc dỡ, tạo nên cuộc cách mạng vận tải biển.'
       },
       {
         port: '무역 상식',
+        portVi: 'Kiến thức Thương mại',
         question: '외국에서 들어오는 물건에 대해 세관에서 법에 따라 매기는 세금을 무엇이라고 할까요?',
+        questionVi: 'Loại thuế do Hải quan thu theo luật đối với hàng hóa từ nước ngoài nhập vào gọi là gì?',
         options: ['관세', '수도세', '입장료', '수수료'],
+        optionsVi: ['Thuế quan / Thuế hải quan (관세)', 'Tiền nước', 'Vé vào cửa', 'Phí dịch vụ'],
         answer: 0,
-        explanation: '국경을 통과하는 수출입 화물에 부과하는 세금을 관세라고 하며, 세관에서 이를 심사·징수합니다.'
+        explanation: '국경을 통과하는 수출입 화물에 부과하는 세금을 관세라고 하며, 세관에서 이를 심사·징수합니다.',
+        explanationVi: 'Thuế đánh vào hàng hóa xuất nhập khẩu qua biên giới gọi là Thuế quan (관세), do cơ quan Hải quan kiểm tra và thu.'
       },
       {
         port: '무역 상식',
+        portVi: 'Kiến thức Thương mại',
         question: '수출액에서 수입액을 뺀 금액을 무엇이라고 하며, 수출이 수입보다 많을 때 무엇이라고 할까요?',
+        questionVi: 'Hiệu số giữa kim ngạch Xuất khẩu và Nhập khẩu gọi là gì, và khi Xuất khẩu lớn hơn Nhập khẩu gọi là gì?',
         options: ['무역수지 / 무역수지 흑자', '가계부 / 적자', '환율 / 인플레이션', '이자율 / 만기'],
+        optionsVi: ['Cán cân thương mại / Xuất siêu (Thặng dư)', 'Sổ chi tiêu / Thâm hụt', 'Tỷ giá / Lạm phát', 'Lãi suất / Đáo hạn'],
         answer: 0,
-        explanation: '수출과 수입의 차이를 무역수지라고 하며, 수출이 더 많아 외화를 벌어들인 상태를 무역수지 흑자라고 합니다.'
+        explanation: '수출과 수입의 차이를 무역수지라고 하며, 수출이 더 많아 외화를 벌어들인 상태를 무역수지 흑자라고 합니다.',
+        explanationVi: 'Chênh lệch xuất - nhập khẩu là Cán cân thương mại (무역수지); khi xuất khẩu nhiều hơn nhập khẩu gọi là Thặng dư / Xuất siêu (무역수지 흑자).'
       },
       {
         port: '무역 상식',
+        portVi: 'Kiến thức Thương mại',
         question: '수출입 물품이 세관의 검사와 허가를 거쳐 정식으로 국경을 통과하는 절차를 무엇이라고 할까요?',
+        questionVi: 'Thủ tục hàng hóa xuất nhập khẩu được Hải quan kiểm tra và cấp phép đi qua biên giới hợp pháp gọi là gì?',
         options: ['통관', '체크인', '환전', '분리수거'],
+        optionsVi: ['Thông quan (통관)', 'Check-in', 'Đổi ngoại tệ', 'Phân loại rác'],
         answer: 0,
-        explanation: '세관에서 화물의 종류, 수량, 안전성 등을 확인하고 반출입을 허가하는 절차를 통관이라고 합니다.'
+        explanation: '세관에서 화물의 종류, 수량, 안전성 등을 확인하고 반출입을 허가하는 절차를 통관이라고 합니다.',
+        explanationVi: 'Quy trình Hải quan kiểm tra chủng loại, số lượng, độ an toàn của hàng hóa và cho phép xuất/nhập cảnh gọi là Thông quan (통관).'
       },
       {
         port: '무역 상식',
+        portVi: 'Kiến thức Thương mại',
         question: '천연가스를 영하 162도 이하로 냉각해 액체 상태로 만들어 부피를 줄여 운반하는 특수 선박은?',
+        questionVi: 'Tàu chuyên dụng làm lạnh khí tự nhiên xuống dưới -162°C thành dạng lỏng để giảm thể tích khi vận chuyển là?',
         options: ['액화천연가스 운반선', '어선', '여객선', '잠수함'],
+        optionsVi: ['Tàu chở khí thiên nhiên hóa lỏng (LNG)', 'Tàu đánh cá', 'Tàu chở khách', 'Tàu ngầm'],
         answer: 0,
-        explanation: '대한민국 조선소들은 고부가가치 선박인 액화천연가스 운반선 건조 기술에서 세계 최고 수준을 자랑합니다.'
+        explanation: '대한민국 조선소들은 고부가가치 선박인 액화천연가스 운반선 건조 기술에서 세계 최고 수준을 자랑합니다.',
+        explanationVi: 'Các xưởng đóng tàu Hàn Quốc dẫn đầu thế giới về công nghệ đóng tàu chở khí thiên nhiên hóa lỏng (LNG - 액화천연가스 운반선).'
       },
       {
         port: '무역 상식',
+        portVi: 'Kiến thức Thương mại',
         question: '목적지 항구로 바로 가지 않고, 부산항 같은 대형 중간 항구에서 다른 배로 화물을 옮겨 싣는 것을 무엇이라 할까요?',
+        questionVi: 'Việc chuyển hàng hóa sang một tàu khác tại cảng trung gian lớn (như Cảng Busan) trước khi tới đích cuối gọi là gì?',
         options: ['환적', '정박', '폐선', '조업'],
+        optionsVi: ['Trung chuyển / Chuyển tải (환적)', 'Neo đậu (정박)', 'Phá dỡ tàu (폐선)', 'Đánh bắt (조업)'],
         answer: 0,
-        explanation: '다른 선박으로 화물을 옮겨 싣는 것을 환적이라고 하며, 부산항은 세계적인 환적 허브 항만입니다.'
+        explanation: '다른 선박으로 화물을 옮겨 싣는 것을 환적이라고 하며, 부산항은 세계적인 환적 허브 항만입니다.',
+        explanationVi: 'Chuyển hàng từ tàu này sang tàu khác tại cảng trung gian gọi là Trung chuyển (환적), và Cảng Busan là trung tâm trung chuyển hàng đầu thế giới.'
       },
       {
         port: '무역 상식',
+        portVi: 'Kiến thức Thương mại',
         question: '항구 안에서 거대한 크레인을 이용해 배에 화물을 싣고(선적) 내리는(양하) 작업을 통틀어 무엇이라 할까요?',
+        questionVi: 'Công việc dùng cần cẩu khổng lồ tại cảng để chất hàng lên tàu và dỡ hàng xuống khỏi tàu gọi chung là gì?',
         options: ['하역', '항해', '출항', '조타'],
+        optionsVi: ['Bốc dỡ hàng hóa (하역)', 'Hành trình biển (항해)', 'Ra khơi (출항)', 'Lái tàu (조타)'],
         answer: 0,
-        explanation: '선박에 화물을 싣고 내리는 일련의 작업을 하역이라고 합니다.'
+        explanation: '선박에 화물을 싣고 내리는 일련의 작업을 하역이라고 합니다.',
+        explanationVi: 'Toàn bộ quá trình xếp hàng lên tàu và dỡ hàng xuống cảng được gọi chung là Bốc dỡ hàng hóa (하역).'
       },
       {
         port: '무역 상식',
+        portVi: 'Kiến thức Thương mại',
         question: '대형 선박이 항구 안의 부두에 안전하게 자리를 잡도록 항구 지형을 잘 아는 전문가가 배에 타서 안내하는 일은?',
+        questionVi: 'Hoạt động chuyên gia thông thuộc địa hình cảng lên tàu lớn để dẫn đường cho tàu cập bến an toàn gọi là gì?',
         options: ['도선(도선사의 안내)', '대리 운전', '수영', '기상 예보'],
+        optionsVi: ['Hoa tiêu hàng hải (도선)', 'Lái xe hộ', 'Bơi lội', 'Dự báo thời tiết'],
         answer: 0,
-        explanation: '항만 수로를 숙지한 도선사가 선박에 승선하여 안전하게 부두까지 접안시키는 일을 도선이라고 합니다.'
+        explanation: '항만 수로를 숙지한 도선사가 선박에 승선하여 안전하게 부두까지 접안시키는 일을 도선이라고 합니다.',
+        explanationVi: 'Hoa tiêu (도선사) là chuyên gia nắm rõ luồng lạch cảng, lên tàu hướng dẫn tàu lớn vào cập cầu cảng an toàn (도선).'
       },
       {
         port: '무역 상식',
+        portVi: 'Kiến thức Thương mại',
         question: '배가 항구의 부두 벽에 안전하게 옆으로 붙어 멈추는 것을 가리키는 해운 용어는?',
+        questionVi: 'Thuật ngữ hàng hải chỉ việc tàu tiến sát và neo đậu an toàn vào bờ tường cầu cảng là gì?',
         options: ['접안', '이륙', '환승', '표류'],
+        optionsVi: ['Cập cảng / Cập bến (접안)', 'Cất cánh (이륙)', 'Chuyển tuyến (환승)', 'Trôi dạt (표류)'],
         answer: 0,
-        explanation: '선박이 부두나 안벽에 붙어 정박하는 것을 접안이라고 합니다.'
+        explanation: '선박이 부두나 안벽에 붙어 정박하는 것을 접안이라고 합니다.',
+        explanationVi: 'Khi tàu áp mạn vào cầu cảng và dừng lại an toàn thì gọi là Cập cảng / Cập bến (접안).'
       }
     ];
 
@@ -3102,21 +3301,23 @@
       boy: {
         id: 'boy',
         name: '캡틴 레오',
+        nameVi: 'Thuyền trưởng Leo',
         sprite: 'assets/chibi/char-boy.png'
       },
       girl: {
         id: 'girl',
         name: '항해사 유나',
+        nameVi: 'Hoa tiêu Yuna',
         sprite: 'assets/chibi/char-girl.png'
       }
     };
 
     /* 4인 온라인 멀티플레이어 기본 캐릭터 프리셋 (P1~P4) */
     const PLAYER_PRESETS = [
-      { idx: 0, tag: 'P1', name: '캡틴 레오', sprite: 'assets/chibi/char-boy.png',   color: '#f59e0b', badgeBg: '#2563eb' },
-      { idx: 1, tag: 'P2', name: '항해사 유나', sprite: 'assets/chibi/char-girl.png',  color: '#f43f5e', badgeBg: '#e11d48' },
-      { idx: 2, tag: 'P3', name: '제독 태호',   sprite: 'assets/chibi/chibi-cheer.png', color: '#10b981', badgeBg: '#059669' },
-      { idx: 3, tag: 'P4', name: '여왕 제니',   sprite: 'assets/chibi/chibi-king.png',  color: '#a855f7', badgeBg: '#7c3aed' }
+      { idx: 0, tag: 'P1', name: '캡틴 레오', nameVi: 'Capt. Leo',   sprite: 'assets/chibi/char-boy.png',    color: '#f59e0b', badgeBg: '#2563eb' },
+      { idx: 1, tag: 'P2', name: '항해사 유나', nameVi: 'Hoa tiêu Yuna', sprite: 'assets/chibi/char-girl.png',   color: '#f43f5e', badgeBg: '#e11d48' },
+      { idx: 2, tag: 'P3', name: '제독 태호',   nameVi: 'Đô đốc Taeho',  sprite: 'assets/chibi/chibi-cheer.png', color: '#10b981', badgeBg: '#059669' },
+      { idx: 3, tag: 'P4', name: '여왕 제니',   nameVi: 'Nữ hoàng Jenny', sprite: 'assets/chibi/chibi-king.png',  color: '#a855f7', badgeBg: '#7c3aed' }
     ];
 
     /* 6면체 3D 주사위 각 눈(1~6)이 정면/상단으로 보이도록 하는 목표 회전각 */
@@ -3130,6 +3331,7 @@
     };
 
     let state = {
+      lang: 'bi', // 'vi' (Tiếng Việt) | 'bi' (Song Ngữ Hàn-Việt) | 'ko' (한국어)
       gameMode: 'online4p', // 'online4p' | 'solo1p'
       roomCode: '7788',
       myPlayerIdx: 0,
@@ -3145,8 +3347,178 @@
       usedQuizIndices: [],
       wrongNotes: [],
       isMoving: false,
-      camMode: 'cam-3d'
+      camMode: 'cam-3d',
+      activeQuizContext: null
     };
+
+    /* =========================================================================
+       한국어(KO) · 베트남어(VI) · 한/베 병기(BI) 다국어 헬퍼 엔진
+       ========================================================================= */
+    function L(ko, vi) {
+      if (state.lang === 'ko') return ko;
+      if (state.lang === 'vi') return vi;
+      return `${ko} (${vi})`;
+    }
+    function L2(ko, vi) {
+      return state.lang === 'ko' ? ko : vi;
+    }
+    function LBlock(ko, vi) {
+      if (state.lang === 'ko') return ko;
+      if (state.lang === 'vi') return vi;
+      return `<div>${ko}</div><div style="font-size:0.86em;color:#0369a1;margin-top:4px;font-weight:800;">🇻🇳 ${vi}</div>`;
+    }
+    function cName(cell) {
+      if (!cell) return '';
+      if (state.lang === 'ko') return cell.name;
+      if (state.lang === 'vi') return cell.type === 'port' ? `${cell.nameVi} (${cell.name})` : cell.nameVi;
+      return `${cell.name} · ${cell.nameVi}`;
+    }
+    function cSub(cell) {
+      if (!cell) return '';
+      return state.lang === 'ko' ? cell.subTag : (cell.subTagVi || cell.subTag);
+    }
+    function cDesc(cell) {
+      if (!cell) return '';
+      return state.lang === 'ko' ? cell.desc : (cell.descVi || cell.desc);
+    }
+    function pName(p) {
+      if (!p) return '';
+      if (state.lang === 'ko') return p.name;
+      if (state.lang === 'vi') return p.nameVi || p.name;
+      return `${p.name} (${p.nameVi || p.name})`;
+    }
+
+    function setLanguage(lang) {
+      state.lang = ['vi', 'bi', 'ko'].includes(lang) ? lang : 'bi';
+      document.querySelectorAll('.lang-pill-btn').forEach(btn => {
+        const bLang = btn.getAttribute('data-lang');
+        btn.classList.remove('active', 'active-ko', 'active-bi');
+        if (bLang === state.lang) {
+          if (state.lang === 'vi') btn.classList.add('active');
+          else if (state.lang === 'ko') btn.classList.add('active-ko');
+          else btn.classList.add('active-bi');
+        }
+      });
+      applyLanguageUI();
+      buildBoardDOM();
+      updateBoardUI();
+      updateBestRecordUI();
+      renderOnlineLobbySlots();
+
+      // 퀴즈 모달이 열려 있으면 즉시 선택한 언어로 문제를 다시 렌더링!
+      const modal = document.getElementById('quiz-modal');
+      if (modal && modal.classList.contains('show') && state.activeQuizContext) {
+        refreshOpenQuizModalLanguage();
+      }
+      playTone('step');
+    }
+
+    function applyLanguageUI() {
+      const setEl = (id, html) => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = html;
+      };
+      setEl('ui-hero-ribbon', L('3D 치비 캐릭터 & 카와이 아일랜드 에디션', 'Phiên bản Đảo Chibi 3D & Online 4 Người'));
+      setEl('ui-main-title', L('한국 항구 퀴즈 마블', 'Cờ Tỷ Phú Cảng Biển Hàn Quốc'));
+      setEl('ui-main-subtitle', L2(
+        '3D 주사위를 광장에 던져 귀여운 치비 캐릭터와 함께 8대 무역항을 인수하세요!',
+        'Tung xúc xắc 3D vào quảng trường, trả lời Quiz và xây dựng 8 thương cảng Hàn Quốc cùng nhân vật Chibi!'
+      ));
+      setEl('ui-best-record-label', L('최고 자산 기록:', 'Kỷ lục tài sản:'));
+      setEl('ui-rules-heading', L('치비 선장님의 항해 규칙 안내', 'Luật Chơi Cờ Tỷ Phú Cảng Biển'));
+
+      const rulesUl = document.getElementById('ui-rules-list');
+      if (rulesUl) {
+        if (state.lang === 'ko') {
+          rulesUl.innerHTML = `
+            <li><strong>총 15턴</strong> 동안 3D 입체 주사위(1~6)를 중앙 광장에 굴려 치비 캐릭터가 보드 위를 점프 이동합니다.</li>
+            <li>매 턴 이동 시 보유한 항구의 <strong>턴 수익이 자동 입금</strong>되며, 출발지 통과·도착 시 <strong>지원금 +200만 원</strong>을 받습니다.</li>
+            <li>항구 칸에 도착하면 <strong>순수 한국어 무역·항구 상식 4지선다 퀴즈</strong>가 열립니다!</li>
+            <li><strong>정답 시:</strong> 상금 <strong>+100만 원</strong> 지급 + 빈 항구 <strong>인수(x1)</strong> 또는 내 항구 <strong>2배 랜드마크 업그레이드(x2)</strong>!</li>
+            <li><strong>오답 시:</strong> 벌금 <strong>-50만 원</strong>이 차감되며, 틀린 문제는 <strong>오답 노트</strong>에 저장됩니다.</li>
+          `;
+        } else if (state.lang === 'vi') {
+          rulesUl.innerHTML = `
+            <li>Trong <strong>15 lượt (Turn)</strong>, tung xúc xắc 3D (1~6) rơi xuống công viên để nhân vật Chibi nhảy trên bàn cờ.</li>
+            <li>Mỗi lượt di chuyển sẽ <strong>tự động cộng lợi nhuận cảng</strong> sở hữu; đi qua/đến Ô Xuất Phát nhận <strong>+200만 원 (200 Tr)</strong>.</li>
+            <li>Khi dừng tại ô Cảng, <strong>Câu hỏi trắc nghiệm 4 đáp án về Cảng & Thương mại Hàn Quốc</strong> sẽ mở ra!</li>
+            <li><strong>Trả lời ĐÚNG:</strong> Thưởng <strong>+100만 원</strong> + được <strong>Mua cảng xây nhà 3D (x1)</strong> hoặc <strong>Nâng cấp Landmark 2X (x2)</strong>!</li>
+            <li><strong>Trả lời SAI:</strong> Phạt <strong>-50만 원</strong> và câu hỏi sẽ được lưu vào <strong>Sổ tay câu sai</strong> cuối trận.</li>
+          `;
+        } else {
+          rulesUl.innerHTML = `
+            <li><strong>총 15턴 (15 Lượt):</strong> 3D 주사위(1~6)를 굴려 치비 캐릭터가 이동합니다 (Tung xúc xắc 3D di chuyển quanh 12 ô đảo).</li>
+            <li><strong>턴 수익 & 출발지 (+200만):</strong> 매 턴 보유 항구 수익 자동 입금 & 출발지 통과 시 +200만 원 (Nhận lợi nhuận cảng mỗi lượt & +200Tr khi qua Xuất phát).</li>
+            <li><strong>항구 퀴즈 (Quiz Cảng Biển):</strong> 항구 도착 시 한·베 4지선다 퀴즈 오픈! (Mở câu hỏi 4 lựa chọn Song Ngữ Hàn - Việt).</li>
+            <li><strong>정답 (Đúng +100만):</strong> 빈 항구 <strong>3D 빌딩 건설(x1)</strong> 또는 <strong>2배 랜드마크 업그레이드(x2)</strong>! (Xây nhà 3D x1 hoặc Nâng cấp Landmark x2).</li>
+            <li><strong>오답 (Sai -50만):</strong> 벌금 -50만 원 차감 및 오답 노트 기록 (Phạt -50Tr & lưu vào Sổ tay câu sai).</li>
+          `;
+        }
+      }
+
+      setEl('ui-mode-label', L('게임 플레이 모드 선택', 'Chọn Chế Độ Chơi'));
+      setEl('ui-mode-4p-text', L('4인 실시간 온라인 대전', 'Online 4 Người (P1~P4)'));
+      setEl('ui-mode-1p-text', L('1인 싱글 퀴즈 마블', 'Chơi Đơn 1 Người'));
+      setEl('ui-nick-label', L2('내 이름:', 'Tên bạn:'));
+      setEl('ui-room-code-label', L2('방 코드:', 'Mã phòng:'));
+      setEl('ui-room-join-btn', L2('방 접속·동기화', 'Vào phòng'));
+      setEl('ui-room-new-btn', L2('🎲 새 방', '🎲 Tạo phòng mới'));
+      setEl('ui-room-copy-btn', L2('🔗 초대 링크 & QR', '🔗 Link Mời & QR'));
+      setEl('ui-ingame-invite-btn', L2('🔗 친구 초대', '🔗 Mời Bạn Bè'));
+      setEl('ui-invite-panel-title', L(
+        '🎉 친구 초대 링크가 복사되었습니다!',
+        '🎉 Đã copy Link Mời Bạn Bè!'
+      ));
+      setEl('ui-invite-panel-desc', L2(
+        '아래 링크를 카톡/Zalo/메신저로 친구에게 보내거나, 휴대폰으로 우측 <strong>QR 코드</strong>를 스캔하면 이 방으로 즉시 들어옵니다!',
+        'Gửi link bên dưới qua Zalo/Messenger cho bạn bè, hoặc quét <strong>Mã QR</strong> bên phải bằng điện thoại để vào thẳng phòng này!'
+      ));
+      setEl('ui-copy-again-btn', L2('복사', 'Copy'));
+      setEl('ui-lobby-hint', L2(
+        '💡 친구에게 <strong>🔗 초대 링크 & QR</strong>을 보내면 클릭 한 번에 바로 입장하며, 빈자리는 <strong>스마트 치비 AI</strong>가 자동으로 채워줍니다!',
+        '💡 Bấm <strong>🔗 Link Mời & QR</strong> gửi cho bạn bè để vào phòng ngay lập tức; các ghế trống sẽ có <strong>Chibi AI thông minh</strong> tự động chơi cùng!'
+      ));
+
+      setEl('ui-char-select-label', L('내 대표 치비 캐릭터 선택', 'Chọn Nhân Vật Chibi Của Bạn'));
+      setEl('ui-char-boy-name', L('캡틴 레오', 'Thuyền trưởng Leo'));
+      setEl('ui-char-boy-desc', L('황금 해운 제독 (P1)', 'Đô đốc Hàng hải Vàng (P1)'));
+      setEl('ui-char-girl-name', L('항해사 유나', 'Hoa tiêu Yuna'));
+      setEl('ui-char-girl-desc', L('글로벌 무역 여왕 (P2)', 'Nữ hoàng Thương mại (P2)'));
+
+      setEl('ui-diff-label', L('난이도 선택 (시작 자금 설정)', 'Chọn Độ Khó (Vốn Khởi Đầu)'));
+      setEl('ui-diff-easy-title', L('쉬움 모드', 'Chế độ Dễ'));
+      setEl('ui-diff-easy-desc', L('시작 자금 1,500만 원', 'Vốn đầu: 1,500만 원 (1,500 Tr)'));
+      setEl('ui-diff-hard-title', L('어려움 모드', 'Chế độ Khó'));
+      setEl('ui-diff-hard-desc', L('시작 자금 1,000만 원', 'Vốn đầu: 1,000만 원 (1,000 Tr)'));
+
+      setEl('start-main-btn-text', state.gameMode === 'online4p'
+        ? L('4인 온라인 치비 마블 출항 시작!', 'Bắt Đầu Trận Online 4 Người!')
+        : L('1인 싱글 치비 마블 출항 시작!', 'Bắt Đầu Chơi Đơn 1 Người!'));
+
+      setEl('ui-demo-build-btn', L('3D 건설·업그레이드 이펙트!', 'Test Hiệu Ứng Xây 3D!'));
+      setEl('cam-btn-3d', L2('초선명 3D 블록', 'Khối 3D Nổi'));
+      setEl('cam-btn-iso', L2('3D 테이블 기울기', 'Góc Nghiêng 3D'));
+      setEl('cam-btn-flat', L2('2D 평면', 'Phẳng 2D'));
+
+      setEl('ui-roll-btn-main', L2('주사위 굴리기', 'Tung Xúc Xắc'));
+      setEl('ui-roll-btn-sub', L2('Dice Rolling', '주사위 굴리기 · Roll'));
+      setEl('ui-sell-btn-main', L2('항구 매각', 'Bán Cảng (80%)'));
+      setEl('ui-sell-btn-sub', L2('Sell Asset', '항구 매각 · Sell'));
+
+      setEl('ui-switch-char-hint', L2('캐릭터 변경', 'Đổi nhân vật'));
+      setEl('ui-hud-gold-label', L('보유 현금', 'Tiền mặt (Gold)'));
+      setEl('ui-hud-asset-label', L('총자산', 'Tổng tài sản (Asset)'));
+      setEl('ui-hud-turn-label', L('현재 턴', 'Lượt (Turn)'));
+      setEl('ui-hud-ports-label', L('보유 무역항', 'Cảng sở hữu'));
+
+      setEl('ui-final-rank-label', L('최종 달성 해운 등급', 'Danh Hiệu Hàng Hải Đạt Được'));
+      setEl('ui-new-record-text', L('최고 자산 기록 경신!', 'Phá Kỷ Lục Tài Sản Cao Nhất!'));
+      setEl('ui-stat-cash', L('최종 보유 현금', 'Tiền mặt cuối'));
+      setEl('ui-stat-port', L('보유 항구 평가액', 'Giá trị cảng'));
+      setEl('ui-stat-asset', L('최종 총자산', 'Tổng tài sản'));
+      setEl('ui-stat-best', L('역대 최고 기록', 'Kỷ lục cao nhất'));
+      setEl('ui-restart-btn-label', L('다시 출항하기', 'Ra Khơi Lại'));
+    }
 
     let shipTokenEl = null;
     let pawnEls = []; // 4인 캐릭터 말 배열
@@ -3156,12 +3528,15 @@
     let aiTurnTimer = null;
     let audioCtx = null;
 
-    /* 실시간 온라인 네트워크 (BroadcastChannel + WebRTC PeerJS 하이브리드) */
+    /* 실시간 온라인 네트워크 (BroadcastChannel + WebRTC PeerJS 하이브리드 + 방장 릴레이) */
     let netChannel = null;
     let peerInstance = null;
     let peerConns = [];
+    let isRoomHost = true;
     let myClientId = 'cid_' + Math.random().toString(36).slice(2, 9);
-    let roomPeersMap = {}; // clientId -> { seatIdx, name, ts }
+    let myNickname = '';
+    let roomPeersMap = {}; // clientId -> { seatIdx, nick }
+    let nextKeyOutcomeGood = null; // 황금열쇠 결과 동기화용
 
     function playTone(type) {
       try {
@@ -3233,11 +3608,13 @@
       const params = new URLSearchParams(window.location.search);
       const urlRoom = params.get('room');
       if (urlRoom) {
-        state.roomCode = urlRoom.slice(0, 6);
+        state.roomCode = urlRoom.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6) || '7788';
         const rInput = document.getElementById('room-code-input');
         if (rInput) rInput.value = state.roomCode;
+        state.gameMode = 'online4p';
       }
       initPlayersArray();
+      applyLanguageUI();
       updateBestRecordUI();
       buildBoardDOM();
       renderDiceFace(1);
@@ -3247,19 +3624,50 @@
 
     function initPlayersArray() {
       const startCash = state.difficulty === 'easy' ? 1500 : 1000;
-      state.players = PLAYER_PRESETS.map((p, idx) => ({
-        idx,
-        tag: p.tag,
-        name: p.name,
-        sprite: p.sprite,
-        color: p.color,
-        badgeBg: p.badgeBg,
-        cash: startCash,
-        position: 0,
-        isBankrupt: false,
-        isHuman: idx === state.myPlayerIdx,
-        isRemoteHuman: false
-      }));
+      state.players = PLAYER_PRESETS.map((p, idx) => {
+        // 해당 좌석에 온라인 유저 닉네임이 있으면 적용
+        let customNick = '';
+        if (idx === state.myPlayerIdx && myNickname) {
+          customNick = myNickname;
+        } else {
+          const peerEntry = Object.values(roomPeersMap).find(r => r.seatIdx === idx);
+          if (peerEntry && peerEntry.nick) customNick = peerEntry.nick;
+        }
+        return {
+          idx,
+          tag: p.tag,
+          name: customNick || p.name,
+          nameVi: customNick || p.nameVi,
+          sprite: p.sprite,
+          color: p.color,
+          badgeBg: p.badgeBg,
+          cash: startCash,
+          position: 0,
+          isBankrupt: false,
+          isHuman: idx === state.myPlayerIdx,
+          isRemoteHuman: Object.values(roomPeersMap).some(r => r.seatIdx === idx)
+        };
+      });
+    }
+
+    function updateMyNickname(val) {
+      myNickname = (val || '').trim().slice(0, 12);
+      if (state.players[state.myPlayerIdx]) {
+        const preset = PLAYER_PRESETS[state.myPlayerIdx] || PLAYER_PRESETS[0];
+        state.players[state.myPlayerIdx].name = myNickname || preset.name;
+        state.players[state.myPlayerIdx].nameVi = myNickname || preset.nameVi;
+      }
+      renderOnlineLobbySlots();
+      broadcastNetMessage({ type: 'HELLO', clientId: myClientId, seatIdx: state.myPlayerIdx, nick: myNickname });
+    }
+
+    function createNewRandomRoom() {
+      const newCode = String(Math.floor(1000 + Math.random() * 9000));
+      const rInput = document.getElementById('room-code-input');
+      if (rInput) rInput.value = newCode;
+      state.myPlayerIdx = 0;
+      joinOrSyncOnlineRoom();
+      copyInviteLink(true);
     }
 
     function selectGameMode(mode) {
@@ -3268,8 +3676,8 @@
       document.getElementById('mode-btn-1p').classList.toggle('active', state.gameMode === 'solo1p');
       document.getElementById('online-lobby-box').style.display = state.gameMode === 'online4p' ? 'block' : 'none';
       document.getElementById('start-main-btn-text').textContent = state.gameMode === 'online4p'
-        ? '4인 온라인 치비 마블 출항 시작!'
-        : '1인 싱글 치비 마블 출항 시작!';
+        ? L('4인 온라인 치비 마블 출항 시작!', 'Bắt Đầu Trận Online 4 Người!')
+        : L('1인 싱글 치비 마블 출항 시작!', 'Bắt Đầu Chơi Đơn 1 Người!');
       playTone('step');
     }
 
@@ -3277,18 +3685,22 @@
       const grid = document.getElementById('online-slots-grid');
       if (!grid) return;
 
-      const remoteSeats = Object.values(roomPeersMap).map(r => r.seatIdx);
       grid.innerHTML = PLAYER_PRESETS.map((p, idx) => {
         const isMe = idx === state.myPlayerIdx;
-        const isRemote = !isMe && remoteSeats.includes(idx);
+        const peerEntry = Object.values(roomPeersMap).find(r => r.seatIdx === idx);
+        const isRemote = !isMe && Boolean(peerEntry);
+        const displayName = (isMe && myNickname)
+          ? myNickname
+          : (peerEntry && peerEntry.nick ? peerEntry.nick : pName(p));
+
         const statusText = isMe
-          ? '👑 나 (방장/플레이어)'
-          : (isRemote ? '🟢 온라인 유저 접속됨!' : '🤖 스마트 온라인 AI');
+          ? (isRoomHost ? L2('👑 나 (방장/Host)', '👑 Bạn (Chủ phòng)') : L2('🙋 나 (참가자)', '🙋 Bạn (Người chơi)'))
+          : (isRemote ? L2('🟢 친구 접속됨!', '🟢 Bạn bè đã vào!') : L2('🤖 스마트 온라인 AI', '🤖 AI Online Thông Minh'));
         return `
-          <div class="online-slot-card ${isMe ? 'my-seat' : ''}" onclick="selectMySeat(${idx})" title="클릭하여 ${p.tag} ${p.name} 슬롯으로 변경">
+          <div class="online-slot-card ${isMe ? 'my-seat' : ''}" onclick="selectMySeat(${idx})" title="${p.tag} ${displayName}">
             <span class="slot-p-tag" style="background:${p.badgeBg};">${p.tag}</span>
             <img class="slot-avatar" src="${p.sprite}" alt="${p.name}" />
-            <span class="slot-p-name">${p.name}</span>
+            <span class="slot-p-name">${displayName}</span>
             <span class="slot-p-state">${statusText}</span>
           </div>
         `;
@@ -3300,37 +3712,61 @@
       if (idx === 0) selectCharacter('boy');
       else if (idx === 1) selectCharacter('girl');
       renderOnlineLobbySlots();
-      broadcastNetMessage({ type: 'HELLO', clientId: myClientId, seatIdx: state.myPlayerIdx });
+      broadcastNetMessage({ type: 'HELLO', clientId: myClientId, seatIdx: state.myPlayerIdx, nick: myNickname });
       playTone('step');
     }
 
     /* =========================================================================
-       실시간 4인 온라인 동기화 (BroadcastChannel + WebRTC PeerJS)
+       실시간 4인 온라인 동기화 (BroadcastChannel + WebRTC PeerJS 방장 릴레이)
        ========================================================================= */
     function joinOrSyncOnlineRoom() {
       const rInput = document.getElementById('room-code-input');
-      const code = (rInput && rInput.value.trim()) ? rInput.value.trim() : '7788';
-      state.roomCode = code;
+      const code = (rInput && rInput.value.trim()) ? rInput.value.trim().replace(/[^a-zA-Z0-9]/g, '') : '7788';
+      state.roomCode = code || '7788';
       roomPeersMap = {};
+      peerConns = [];
+      isRoomHost = true;
 
       if (netChannel) {
         try { netChannel.close(); } catch (e) {}
       }
       if ('BroadcastChannel' in window) {
-        netChannel = new BroadcastChannel('kp_marble_room_' + code);
-        netChannel.onmessage = (ev) => handleNetMessage(ev.data);
+        netChannel = new BroadcastChannel('kp_marble_room_' + state.roomCode);
+        netChannel.onmessage = (ev) => handleNetMessage(ev.data, null);
       }
 
-      // WebRTC PeerJS 공개 시그널링 서버 연결 (다른 기기/브라우저 간 실시간 P2P 연동)
-      setupPeerJSRoom(code);
+      // 초대 URL 및 QR 코드 업데이트
+      refreshInviteShareBox();
+
+      // WebRTC PeerJS 공개 시그널링 서버 연결 (다른 기기/휴대폰/PC 간 실시간 P2P 연동)
+      setupPeerJSRoom(state.roomCode);
 
       const pill = document.getElementById('online-status-pill');
       if (pill) {
-        pill.innerHTML = `🟢 온라인 방 <strong>#${code}</strong> 실시간 연결됨 (4인 멀티 준비 완료)`;
+        pill.innerHTML = L2(
+          `🟡 온라인 방 <strong>#${state.roomCode}</strong> 연결 중...`,
+          `🟡 Đang kết nối Phòng Online <strong>#${state.roomCode}</strong>...`
+        );
       }
 
       renderOnlineLobbySlots();
-      broadcastNetMessage({ type: 'HELLO', clientId: myClientId, seatIdx: state.myPlayerIdx });
+      broadcastNetMessage({ type: 'HELLO', clientId: myClientId, seatIdx: state.myPlayerIdx, nick: myNickname });
+    }
+
+    function findNextFreeSeat() {
+      const taken = new Set([state.myPlayerIdx, ...Object.values(roomPeersMap).map(r => r.seatIdx)]);
+      for (let s = 0; s < 4; s++) {
+        if (!taken.has(s)) return s;
+      }
+      return (state.myPlayerIdx + 1) % 4;
+    }
+
+    function broadcastRoomRoster() {
+      const roster = {
+        [myClientId]: { seatIdx: state.myPlayerIdx, nick: myNickname },
+        ...roomPeersMap
+      };
+      broadcastNetMessage({ type: 'ROOM_ROSTER', roster });
     }
 
     function setupPeerJSRoom(code) {
@@ -3345,21 +3781,48 @@
         peerInstance = peer;
 
         peer.on('open', () => {
+          isRoomHost = true;
+          renderOnlineLobbySlots();
           const pill = document.getElementById('online-status-pill');
-          if (pill) pill.innerHTML = `🟢 글로벌 온라인 방장 <strong>#${code}</strong> 개설됨 (4인 실시간)`;
+          if (pill) pill.innerHTML = L2(
+            `🟢 온라인 방장 <strong>#${code}</strong> 개설됨! 친구에게 링크/QR을 보내세요`,
+            `🟢 Đã mở Phòng <strong>#${code}</strong> (Chủ phòng)! Hãy gửi Link/QR mời bạn bè`
+          );
         });
 
         peer.on('connection', (conn) => {
           peerConns.push(conn);
-          conn.on('data', (data) => handleNetMessage(data));
+          conn.on('data', (data) => handleNetMessage(data, conn));
           conn.on('open', () => {
-            conn.send({ type: 'HELLO_ACK', clientId: myClientId, seatIdx: state.myPlayerIdx });
+            const assignedSeat = findNextFreeSeat();
+            conn.send({
+              type: 'ASSIGN_SEAT',
+              seatIdx: assignedSeat,
+              hostClientId: myClientId,
+              hostSeatIdx: state.myPlayerIdx,
+              hostNick: myNickname
+            });
+            // 만약 이미 게임이 진행 중이면 늦게 들어온 친구에게 현재 보드판 상태를 즉시 동기화!
+            if (document.getElementById('game-screen').classList.contains('active') && state.gameMode === 'online4p') {
+              if (state.players[assignedSeat]) {
+                state.players[assignedSeat].isRemoteHuman = true;
+              }
+              conn.send({
+                type: 'LATE_JOIN_SYNC',
+                assignedSeat,
+                snapshot: buildStateSnapshot()
+              });
+            }
+          });
+          conn.on('close', () => {
+            peerConns = peerConns.filter(c => c !== conn);
           });
         });
 
         peer.on('error', (err) => {
           // 이미 방장이 있으면 게스트 피어로 방장에게 자동 접속!
           if (err && err.type === 'unavailable-id') {
+            isRoomHost = false;
             connectAsGuestPeer(code, hostPeerId);
           }
         });
@@ -3371,17 +3834,19 @@
         const guestPeer = new Peer();
         peerInstance = guestPeer;
         guestPeer.on('open', () => {
-          const conn = guestPeer.connect(hostPeerId);
+          const conn = guestPeer.connect(hostPeerId, { reliable: true });
           peerConns.push(conn);
           conn.on('open', () => {
-            // 게스트 접속 시 자동으로 비어있는 다음 슬롯(P2~P4) 배정
             if (state.myPlayerIdx === 0) state.myPlayerIdx = 1;
             renderOnlineLobbySlots();
-            conn.send({ type: 'HELLO', clientId: myClientId, seatIdx: state.myPlayerIdx });
+            conn.send({ type: 'HELLO', clientId: myClientId, seatIdx: state.myPlayerIdx, nick: myNickname });
             const pill = document.getElementById('online-status-pill');
-            if (pill) pill.innerHTML = `🟢 온라인 방 <strong>#${code}</strong> 참가 완료! (P${state.myPlayerIdx + 1})`;
+            if (pill) pill.innerHTML = L2(
+              `🟢 온라인 방 <strong>#${code}</strong> 참가 완료! (P${state.myPlayerIdx + 1})`,
+              `🟢 Đã vào Phòng <strong>#${code}</strong> thành công! (Ghế P${state.myPlayerIdx + 1})`
+            );
           });
-          conn.on('data', (data) => handleNetMessage(data));
+          conn.on('data', (data) => handleNetMessage(data, conn));
         });
       } catch (e) {}
     }
@@ -3396,45 +3861,227 @@
       });
     }
 
-    function handleNetMessage(data) {
+    function forwardNetMessageFromHost(data, sourceConn) {
+      if (!isRoomHost) return;
+      peerConns.forEach(conn => {
+        if (conn !== sourceConn && conn.open) {
+          try { conn.send(data); } catch (e) {}
+        }
+      });
+      if (netChannel) {
+        try { netChannel.postMessage(data); } catch (e) {}
+      }
+    }
+
+    function buildStateSnapshot() {
+      return {
+        turn: state.turn,
+        activePlayerIdx: state.activePlayerIdx,
+        difficulty: state.difficulty,
+        ownedPorts: { ...state.ownedPorts },
+        portOwners: { ...state.portOwners },
+        players: state.players.map(p => ({
+          idx: p.idx,
+          name: p.name,
+          nameVi: p.nameVi,
+          cash: p.cash,
+          position: p.position,
+          isBankrupt: p.isBankrupt,
+          isRemoteHuman: p.isRemoteHuman || p.idx === state.myPlayerIdx
+        }))
+      };
+    }
+
+    function applyStateSnapshot(snap) {
+      if (!snap) return;
+      state.turn = snap.turn ?? state.turn;
+      state.activePlayerIdx = snap.activePlayerIdx ?? state.activePlayerIdx;
+      if (snap.ownedPorts) state.ownedPorts = { ...snap.ownedPorts };
+      if (snap.portOwners) state.portOwners = { ...snap.portOwners };
+      if (Array.isArray(snap.players) && state.players.length === 4) {
+        snap.players.forEach((sp, i) => {
+          if (state.players[i]) {
+            state.players[i].cash = sp.cash;
+            state.players[i].position = sp.position;
+            state.players[i].isBankrupt = Boolean(sp.isBankrupt);
+            if (sp.name) state.players[i].name = sp.name;
+            if (sp.nameVi) state.players[i].nameVi = sp.nameVi;
+          }
+        });
+        if (state.players[state.myPlayerIdx]) {
+          state.cash = state.players[state.myPlayerIdx].cash;
+          state.position = state.players[state.myPlayerIdx].position;
+        }
+      }
+      updateBoardUI();
+    }
+
+    function handleNetMessage(data, sourceConn) {
       if (!data || data.senderId === myClientId) return;
 
-      if (data.type === 'HELLO') {
-        if (data.seatIdx === state.myPlayerIdx && myClientId > data.senderId) {
-          state.myPlayerIdx = (state.myPlayerIdx + 1) % 4;
+      // 방장이 게스트로부터 받은 패킷을 다른 게스트들에게도 즉시 릴레이!
+      if (isRoomHost && sourceConn) {
+        forwardNetMessageFromHost(data, sourceConn);
+      }
+
+      if (data.type === 'ASSIGN_SEAT') {
+        state.myPlayerIdx = data.seatIdx;
+        roomPeersMap[data.hostClientId] = { seatIdx: data.hostSeatIdx, nick: data.hostNick || '' };
+        renderOnlineLobbySlots();
+        broadcastNetMessage({ type: 'HELLO', clientId: myClientId, seatIdx: state.myPlayerIdx, nick: myNickname });
+        const pill = document.getElementById('online-status-pill');
+        if (pill) pill.innerHTML = L2(
+          `🟢 방 <strong>#${state.roomCode}</strong> 접속 완료! 내 좌석: <strong>P${state.myPlayerIdx + 1}</strong>`,
+          `🟢 Đã kết nối Phòng <strong>#${state.roomCode}</strong>! Ghế của bạn: <strong>P${state.myPlayerIdx + 1}</strong>`
+        );
+      } else if (data.type === 'HELLO') {
+        let guestSeat = data.seatIdx;
+        if (isRoomHost) {
+          const existingPeer = roomPeersMap[data.senderId];
+          const conflictWithHost = guestSeat === state.myPlayerIdx;
+          const conflictWithOther = Object.entries(roomPeersMap).some(([cid, info]) => cid !== data.senderId && info.seatIdx === guestSeat);
+          if (conflictWithHost || conflictWithOther) {
+            guestSeat = existingPeer ? existingPeer.seatIdx : findNextFreeSeat();
+          }
+          roomPeersMap[data.senderId] = { seatIdx: guestSeat, nick: data.nick || '' };
+          if (state.players[guestSeat]) {
+            state.players[guestSeat].isRemoteHuman = true;
+            if (data.nick) {
+              state.players[guestSeat].name = data.nick;
+              state.players[guestSeat].nameVi = data.nick;
+            }
+          }
+          renderOnlineLobbySlots();
+          updateBoardUI();
+          broadcastRoomRoster();
+        } else {
+          roomPeersMap[data.senderId] = { seatIdx: guestSeat, nick: data.nick || '' };
+          renderOnlineLobbySlots();
         }
-        roomPeersMap[data.senderId] = { seatIdx: data.seatIdx };
+      } else if (data.type === 'ROOM_ROSTER' && data.roster) {
+        const nextMap = {};
+        Object.entries(data.roster).forEach(([cid, info]) => {
+          if (cid === myClientId) {
+            state.myPlayerIdx = info.seatIdx;
+          } else {
+            nextMap[cid] = info;
+          }
+        });
+        roomPeersMap = nextMap;
+        Object.values(roomPeersMap).forEach(info => {
+          if (state.players[info.seatIdx]) {
+            state.players[info.seatIdx].isRemoteHuman = true;
+            if (info.nick) {
+              state.players[info.seatIdx].name = info.nick;
+              state.players[info.seatIdx].nameVi = info.nick;
+            }
+          }
+        });
         renderOnlineLobbySlots();
-        broadcastNetMessage({ type: 'HELLO_ACK', clientId: myClientId, seatIdx: state.myPlayerIdx });
-      } else if (data.type === 'HELLO_ACK') {
-        roomPeersMap[data.senderId] = { seatIdx: data.seatIdx };
-        renderOnlineLobbySlots();
+        updateBoardUI();
       } else if (data.type === 'START_4P_MATCH') {
+        if (data.difficulty) state.difficulty = data.difficulty;
         if (!document.getElementById('game-screen').classList.contains('active')) {
           startGame(true);
         }
+      } else if (data.type === 'LATE_JOIN_SYNC') {
+        state.myPlayerIdx = data.assignedSeat ?? state.myPlayerIdx;
+        state.gameMode = 'online4p';
+        if (!document.getElementById('game-screen').classList.contains('active')) {
+          startGame(true);
+        }
+        applyStateSnapshot(data.snapshot);
+        prepareActivePlayerTurn();
       } else if (data.type === 'REMOTE_ROLL') {
-        if (state.gameMode === 'online4p' && state.activePlayerIdx === data.playerIdx && !state.isMoving) {
-          executeDiceRollForActivePlayer(data.diceValue, true);
+        if (state.gameMode === 'online4p') {
+          if (data.playerIdx !== undefined) state.activePlayerIdx = data.playerIdx;
+          if (typeof data.keyGood === 'boolean') nextKeyOutcomeGood = data.keyGood;
+          if (!state.isMoving) {
+            executeDiceRollForActivePlayer(data.diceValue, true);
+          }
+        }
+      } else if (data.type === 'REMOTE_QUIZ_RESULT') {
+        const pIdx = data.playerIdx;
+        const cell = BOARD_CELLS[data.cellId];
+        const actor = state.players[pIdx];
+        if (cell && actor) {
+          if (data.isCorrect) {
+            addPlayerCash(pIdx, 100);
+            showCellFloatingDelta(cell.id, L2('+100만 원', '+100 Tr'), true);
+            addLog(L2(`🎉 ${actor.tag} ${actor.name} · [${cell.name}] 퀴즈 정답! (+100만 원)`, `🎉 ${actor.tag} ${pName(actor)} · Trả lời ĐÚNG Quiz [${cName(cell)}]! (+100만 원)`), 'check.svg');
+          } else {
+            addPlayerCash(pIdx, -50);
+            showCellFloatingDelta(cell.id, L2('-50만 원', '-50 Tr'), false);
+            addLog(L2(`💥 ${actor.tag} ${actor.name} · [${cell.name}] 퀴즈 오답 (-50만 원)`, `💥 ${actor.tag} ${pName(actor)} · Trả lời SAI Quiz [${cName(cell)}] (-50만 원)`), 'cross.svg');
+          }
+          updateBoardUI();
         }
       } else if (data.type === 'REMOTE_BUILD') {
+        if (typeof data.takeoverPrevOwner === 'number' && BOARD_CELLS[data.cellId]) {
+          addPlayerCash(data.takeoverPrevOwner, BOARD_CELLS[data.cellId].price);
+        }
         applyPortBuildOrUpgrade(data.cellId, data.level, data.ownerIdx, data.cost, true);
+      } else if (data.type === 'REMOTE_SELL_PORT') {
+        const cell = BOARD_CELLS[data.cellId];
+        if (cell) {
+          delete state.ownedPorts[data.cellId];
+          delete state.portOwners[data.cellId];
+          addPlayerCash(data.playerIdx, data.sellPrice);
+          showCellFloatingDelta(data.cellId, L2(`+${data.sellPrice}만 (매각)`, `+${data.sellPrice}Tr (Bán)`), true);
+          updateBoardUI();
+        }
       } else if (data.type === 'REMOTE_NEXT_TURN') {
         if (state.gameMode === 'online4p') {
-          advanceToNextTurn(true);
+          if (data.snapshot) {
+            applyStateSnapshot(data.snapshot);
+            state.isMoving = false;
+            prepareActivePlayerTurn();
+          } else {
+            advanceToNextTurn(true);
+          }
         }
       }
     }
 
-    function copyInviteLink() {
-      const url = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(state.roomCode)}`;
+    const PUBLIC_TUNNEL_BASE = 'https://drum-filme-promotion-genre.trycloudflare.com';
+
+    function getInviteUrl() {
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const base = isLocal ? PUBLIC_TUNNEL_BASE : `${window.location.origin}${window.location.pathname.replace(/\/$/, '')}`;
+      return `${base}/?room=${encodeURIComponent(state.roomCode)}`;
+    }
+
+    function refreshInviteShareBox() {
+      const url = getInviteUrl();
+      const inputEl = document.getElementById('invite-url-readonly');
+      if (inputEl) inputEl.value = url;
+      const qrImg = document.getElementById('invite-qr-img');
+      if (qrImg) {
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=4&data=${encodeURIComponent(url)}`;
+      }
+    }
+
+    function copyInviteLink(togglePanel = true) {
+      refreshInviteShareBox();
+      const url = getInviteUrl();
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(url).catch(() => {});
       }
+      const panel = document.getElementById('invite-share-panel');
+      if (panel && togglePanel) {
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'block';
+      }
       const pill = document.getElementById('online-status-pill');
       if (pill) {
-        pill.innerHTML = `✨ 초대 링크 복사 완료! 새 탭이나 친구에게 붙여넣으세요 (#${state.roomCode})`;
+        pill.innerHTML = L2(
+          `✨ 초대 링크 복사 완료! 친구에게 붙여넣거나 QR을 스캔하세요 (#${state.roomCode})`,
+          `✨ Đã copy link mời! Gửi cho bạn bè hoặc quét mã QR (#${state.roomCode})`
+        );
       }
+      setTopBanner(L2(
+        `🔗 방 #${state.roomCode} 초대 링크 복사 완료! 친구에게 보내면 바로 함께 플레이합니다!`,
+        `🔗 Đã copy Link Mời Phòng #${state.roomCode}! Gửi cho bạn bè để vào chơi cùng ngay!`
+      ));
       playTone('buy');
     }
 
@@ -3444,6 +4091,7 @@
       document.getElementById('char-btn-girl').classList.toggle('selected', state.character === 'girl');
       PLAYER_PRESETS[0].sprite = state.character === 'boy' ? 'assets/chibi/char-boy.png' : 'assets/chibi/char-girl.png';
       PLAYER_PRESETS[0].name = state.character === 'boy' ? '캡틴 레오' : '항해사 유나';
+      PLAYER_PRESETS[0].nameVi = state.character === 'boy' ? 'Capt. Leo' : 'Hoa tiêu Yuna';
       syncCharacterSprites();
       renderOnlineLobbySlots();
     }
@@ -3454,6 +4102,7 @@
       if (state.players[state.myPlayerIdx]) {
         state.players[state.myPlayerIdx].sprite = CHARACTERS[state.character].sprite;
         state.players[state.myPlayerIdx].name = CHARACTERS[state.character].name;
+        state.players[state.myPlayerIdx].nameVi = CHARACTERS[state.character].nameVi;
       }
       updateBoardUI();
       playTone('step');
@@ -3464,7 +4113,7 @@
       const hudPortrait = document.getElementById('captain-mascot-img');
       if (hudPortrait) hudPortrait.src = charInfo.sprite;
       const hudName = document.getElementById('hud-player-name');
-      if (hudName) hudName.textContent = `PLAYER · ${charInfo.name}`;
+      if (hudName) hudName.textContent = `PLAYER · ${pName(charInfo)}`;
       const pawnImg = document.getElementById('board-pawn-img');
       if (pawnImg) pawnImg.src = charInfo.sprite;
       const topBarIco = document.getElementById('top-bar-chibi-ico');
@@ -3486,7 +4135,7 @@
       if (saved && !isNaN(Number(saved))) {
         bestText.textContent = formatMoney(Number(saved));
       } else {
-        bestText.textContent = '기록 없음';
+        bestText.textContent = L('기록 없음', 'Chưa có kỷ lục');
       }
     }
 
@@ -3508,7 +4157,9 @@
     }
 
     function formatMoney(manWon) {
-      return manWon.toLocaleString('ko-KR') + '만 원';
+      if (state.lang === 'ko') return manWon.toLocaleString('ko-KR') + '만 원';
+      if (state.lang === 'vi') return manWon.toLocaleString('ko-KR') + ' Tr (' + manWon + '만)';
+      return manWon.toLocaleString('ko-KR') + '만 (' + manWon + 'Tr)';
     }
 
     function calculatePlayerPortValue(playerIdx = 0) {
@@ -3582,11 +4233,11 @@
         if (cell.type === 'port') {
           infoHTML = `
             <div class="cell-info" id="cell-info-${cell.id}">
-              인수 ${cell.price}만 · <span class="income">+${cell.income}만/턴</span>
+              ${L2(`인수 ${cell.price}만`, `Mua ${cell.price}Tr`)} · <span class="income">+${cell.income}${L2('만/턴', 'Tr/lượt')}</span>
             </div>
           `;
         } else {
-          infoHTML = `<div class="cell-info">${cell.desc}</div>`;
+          infoHTML = `<div class="cell-info">${cDesc(cell)}</div>`;
         }
 
         div.innerHTML = `
@@ -3596,7 +4247,7 @@
               <div class="chibi-block-top">
                 <img class="chibi-block-img" src="${cell.chibi}" alt="${cell.name}" loading="eager" />
                 <div class="chibi-block-header">
-                  <span class="cell-num">${cell.id}번</span>
+                  <span class="cell-num">${state.lang === 'ko' ? cell.id + '번' : '#' + cell.id}</span>
                   <span id="badge-slot-${cell.id}"></span>
                 </div>
               </div>
@@ -3610,9 +4261,9 @@
               <div class="cell-title-row">
                 <div class="cell-name-wrap">
                   <img class="cell-mini-ico" src="${cell.icon}" alt="" />
-                  <div class="cell-name">${cell.name}</div>
+                  <div class="cell-name">${cName(cell)}</div>
                 </div>
-                <div class="cell-sub-tag">${cell.subTag}</div>
+                <div class="cell-sub-tag">${cSub(cell)}</div>
               </div>
               ${infoHTML}
             </div>
@@ -3677,8 +4328,8 @@
       const banner = document.createElement('div');
       banner.className = 'tile-build-banner';
       banner.textContent = level === 2
-        ? `👑 ${ownerPreset.tag} 황금 랜드마크 x2 건설!`
-        : `🏠 ${ownerPreset.tag} 3D 항구 빌딩 x1 건설!`;
+        ? L2(`👑 ${ownerPreset.tag} 황금 랜드마크 x2 건설!`, `👑 ${ownerPreset.tag} Nâng cấp Landmark x2!`)
+        : L2(`🏠 ${ownerPreset.tag} 3D 항구 빌딩 x1 건설!`, `🏠 ${ownerPreset.tag} Xây nhà cảng 3D x1!`);
       cellEl.appendChild(banner);
       setTimeout(() => banner.remove(), 1450);
 
@@ -3705,7 +4356,13 @@
       triggerTileBuildAnimation(targetCellId, nextLv, ownerIdx);
       updateBoardUI();
       show3DCelebrationCard(BOARD_CELLS[targetCellId], nextLv === 2, ownerIdx);
-      addLog(`[3D 건설 이펙트] ${BOARD_CELLS[targetCellId].name}에 ${nextLv === 2 ? '황금 랜드마크(x2)' : '3D 항구 빌딩(x1)'} 건설!`, nextLv === 2 ? 'crown.svg' : 'anchor.svg');
+      addLog(
+        L2(
+          `[3D 건설 이펙트] ${BOARD_CELLS[targetCellId].name}에 ${nextLv === 2 ? '황금 랜드마크(x2)' : '3D 항구 빌딩(x1)'} 건설!`,
+          `[Hiệu ứng Xây 3D] Xây ${nextLv === 2 ? 'Tháp Landmark Vàng (x2)' : 'Nhà cảng 3D (x1)'} tại ${cName(BOARD_CELLS[targetCellId])}!`
+        ),
+        nextLv === 2 ? 'crown.svg' : 'anchor.svg'
+      );
     }
 
     function showCellFloatingDelta(cellId, text, isPlus = true) {
@@ -3728,14 +4385,14 @@
       }
       document.getElementById('celeb-badge').innerHTML = `
         <img src="assets/chibi-icons/${isUpgrade ? 'landmark-lv2.svg' : 'house-lv1.svg'}" style="width:22px;height:22px;" alt="" />
-        <span>${ownerPreset.tag} ${ownerPreset.name} · ${isUpgrade ? '3D LANDMARK x2 건설!' : '3D 항구 빌딩 x1 건설!'}</span>
+        <span>${ownerPreset.tag} ${pName(ownerPreset)} · ${isUpgrade ? L2('3D LANDMARK x2 건설!', 'NÂNG CẤP LANDMARK x2!') : L2('3D 항구 빌딩 x1 건설!', 'XÂY NHÀ CẢNG 3D x1!')}</span>
       `;
       document.getElementById('celeb-title').textContent = isUpgrade
-        ? `${cell.name} 랜드마크 업그레이드!`
-        : `${cell.name} 3D 빌딩 건설 완료!`;
+        ? L2(`${cell.name} 랜드마크 업그레이드!`, `Nâng cấp Landmark ${cName(cell)}!`)
+        : L2(`${cell.name} 3D 빌딩 건설 완료!`, `Hoàn tất xây cảng ${cName(cell)}!`);
       document.getElementById('celeb-sub').textContent = isUpgrade
-        ? `매턴 수익 & 통행료 +${cell.income * 2}만 원 달성!`
-        : `매턴 수익 & 통행료 +${cell.income}만 원 확보!`;
+        ? L2(`매턴 수익 & 통행료 +${cell.income * 2}만 원 달성!`, `Lợi nhuận & phí qua cảng +${cell.income * 2}만/lượt!`)
+        : L2(`매턴 수익 & 통행료 +${cell.income}만 원 확보!`, `Lợi nhuận & phí qua cảng +${cell.income}만/lượt!`);
 
       overlay.classList.remove('show');
       void overlay.offsetWidth;
@@ -3779,17 +4436,17 @@
         return `
           <div class="hud-4p-card ${isTurn ? 'active-turn' : ''} ${p.isBankrupt ? 'bankrupt' : ''}">
             <img class="hud-4p-avatar" src="${p.sprite}" alt="${p.name}" style="background:${p.color};" />
-            <div class="hud-4p-rank">${rankMap[idx]} · ${state.turn}/${MAX_TURNS}턴</div>
+            <div class="hud-4p-rank">${rankMap[idx]} · ${state.turn}/${MAX_TURNS}${L2('턴', 'L')}</div>
             <div class="hud-4p-body">
               <div class="hud-4p-title" style="background:${p.badgeBg};">
-                ${p.tag} ${p.name} ${isMe ? '(나)' : '[ONL]'}
+                ${p.tag} ${pName(p)} ${isMe ? L2('(나)', '(Bạn)') : '[ONL]'}
               </div>
               <div class="hud-4p-line">
-                <span>현금(Gold)</span>
+                <span>${L2('현금(Gold)', 'Tiền mặt')}</span>
                 <span class="hud-4p-gold">${formatMoney(p.cash)}</span>
               </div>
               <div class="hud-4p-line">
-                <span>총자산 · 항구 ${ownedCnt}곳</span>
+                <span>${L2(`총자산 · 항구 ${ownedCnt}곳`, `Tài sản · ${ownedCnt} cảng`)}</span>
                 <span class="hud-4p-asset">${formatMoney(totalAsset)}</span>
               </div>
             </div>
@@ -3814,7 +4471,10 @@
       const ownedCount = Object.keys(state.ownedPorts).filter(cid =>
         state.gameMode === 'solo1p' || state.portOwners[cid] === state.myPlayerIdx
       ).length;
-      document.getElementById('owned-ports-pill').textContent = `보유 항구: ${ownedCount} / 8곳`;
+      document.getElementById('owned-ports-pill').textContent = L2(
+        `보유 항구: ${ownedCount} / 8곳`,
+        `Cảng sở hữu: ${ownedCount} / 8 cảng`
+      );
 
       const focusPos = state.gameMode === 'online4p'
         ? (state.players[state.activePlayerIdx]?.position || 0)
@@ -3822,7 +4482,7 @@
       const curCell = BOARD_CELLS[focusPos];
       if (curCell) {
         document.getElementById('center-chibi-thumb').src = curCell.chibi;
-        document.getElementById('center-live-title').textContent = `${curCell.name} (${curCell.subTag})`;
+        document.getElementById('center-live-title').textContent = `${cName(curCell)} (${cSub(curCell)})`;
       }
 
       render4PlayerHUD();
@@ -3848,8 +4508,8 @@
           const isJustBuilt = lastBuiltCellId === cell.id;
 
           if (lv === 1) {
-            badgeSlot.innerHTML = `<span class="owner-badge lv1" style="background:${ownerPreset.badgeBg};color:#fff;"><img src="assets/chibi-icons/house-lv1.svg" alt="" />${ownerPreset.tag} 빌딩 x1</span>`;
-            infoSlot.innerHTML = `${ownerPreset.name} · <span class="income">+${cell.income}만/턴</span>`;
+            badgeSlot.innerHTML = `<span class="owner-badge lv1" style="background:${ownerPreset.badgeBg};color:#fff;"><img src="assets/chibi-icons/house-lv1.svg" alt="" />${ownerPreset.tag} ${L2('빌딩 x1', 'Nhà x1')}</span>`;
+            infoSlot.innerHTML = `${pName(ownerPreset)} · <span class="income">+${cell.income}${L2('만/턴', 'Tr/lượt')}</span>`;
             if (buildingSlot) {
               buildingSlot.innerHTML = `
                 <div class="tile-building-model lv1 ${isJustBuilt ? 'just-built' : ''}">
@@ -3862,8 +4522,8 @@
               `;
             }
           } else if (lv === 2) {
-            badgeSlot.innerHTML = `<span class="owner-badge lv2"><img src="assets/chibi-icons/landmark-lv2.svg" alt="" />${ownerPreset.tag} 랜드마크 x2</span>`;
-            infoSlot.innerHTML = `👑 ${ownerPreset.name} · <span class="income">+${cell.income * 2}만/턴</span>`;
+            badgeSlot.innerHTML = `<span class="owner-badge lv2"><img src="assets/chibi-icons/landmark-lv2.svg" alt="" />${ownerPreset.tag} ${L2('랜드마크 x2', 'Landmark x2')}</span>`;
+            infoSlot.innerHTML = `👑 ${pName(ownerPreset)} · <span class="income">+${cell.income * 2}${L2('만/턴', 'Tr/lượt')}</span>`;
             if (buildingSlot) {
               buildingSlot.innerHTML = `
                 <div class="tile-building-model lv2 ${isJustBuilt ? 'just-built' : ''}">
@@ -3878,7 +4538,7 @@
             }
           } else {
             badgeSlot.innerHTML = '';
-            infoSlot.innerHTML = `인수 ${cell.price}만 · <span class="income">+${cell.income}만/턴</span>`;
+            infoSlot.innerHTML = `${L2(`인수 ${cell.price}만`, `Mua ${cell.price}Tr`)} · <span class="income">+${cell.income}${L2('만/턴', 'Tr/lượt')}</span>`;
             if (buildingSlot) buildingSlot.innerHTML = '';
           }
         }
@@ -3932,7 +4592,7 @@
       item.className = 'log-entry';
       item.innerHTML = `
         <img class="log-ico" src="assets/chibi-icons/${cleanIcon}" alt="" />
-        <span class="turn-tag">[${state.turn}턴]</span>
+        <span class="turn-tag">[${state.turn}${L2('턴', 'L')}]</span>
         <span>${message}</span>
       `;
       logBox.prepend(item);
@@ -3957,6 +4617,7 @@
       state.usedQuizIndices = [];
       state.wrongNotes = [];
       state.isMoving = false;
+      state.activeQuizContext = null;
       lastBuiltCellId = null;
 
       initPlayersArray();
@@ -3976,8 +4637,8 @@
       const topLabel = document.getElementById('top-bar-mode-label');
       if (topLabel) {
         topLabel.textContent = state.gameMode === 'online4p'
-          ? `한국 항구 퀴즈 마블 · 🌐 4인 실시간 온라인 방 #${state.roomCode}`
-          : `한국 항구 퀴즈 마블 · ⚓ 1인 클래식 퀴즈 마블`;
+          ? L2(`한국 항구 퀴즈 마블 · 🌐 4인 실시간 온라인 방 #${state.roomCode}`, `Cờ Tỷ Phú Cảng Biển · 🌐 Phòng Online 4 Người #${state.roomCode}`)
+          : L2(`한국 항구 퀴즈 마블 · ⚓ 1인 클래식 퀴즈 마블`, `Cờ Tỷ Phú Cảng Biển · ⚓ Chế Độ Đơn 1 Người`);
       }
 
       switchScreen('game-screen');
@@ -3985,16 +4646,28 @@
 
       if (state.gameMode === 'online4p') {
         if (!fromRemote) {
-          broadcastNetMessage({ type: 'START_4P_MATCH' });
+          broadcastNetMessage({ type: 'START_4P_MATCH', difficulty: state.difficulty });
         }
-        addLog(`🌐 4인 실시간 온라인 대전 시작! (방 코드 #${state.roomCode} · P1~P4 출항!)`, 'users-online.svg');
+        addLog(
+          L2(
+            `🌐 4인 실시간 온라인 대전 시작! (방 코드 #${state.roomCode} · P1~P4 출항!)`,
+            `🌐 Bắt đầu trận Online 4 Người! (Mã phòng #${state.roomCode} · P1~P4 ra khơi!)`
+          ),
+          'users-online.svg'
+        );
         prepareActivePlayerTurn();
       } else {
         document.getElementById('roll-btn').disabled = false;
         document.getElementById('my-turn-ribbon').textContent = 'My Turn!';
-        setTopBanner(`My Turn! · 1턴 주사위를 굴려 출항하세요!`);
+        setTopBanner(L2(`My Turn! · 1턴 주사위를 굴려 출항하세요!`, `My Turn! · Lượt 1: Hãy bấm Tung Xúc Xắc để ra khơi!`));
         const charInfo = CHARACTERS[state.character] || CHARACTERS.boy;
-        addLog(`${charInfo.name} 출항 시작! (시작 자금: ${formatMoney(state.cash)})`, 'anchor.svg');
+        addLog(
+          L2(
+            `${charInfo.name} 출항 시작! (시작 자금: ${formatMoney(state.cash)})`,
+            `${pName(charInfo)} bắt đầu ra khơi! (Vốn khởi đầu: ${formatMoney(state.cash)})`
+          ),
+          'anchor.svg'
+        );
       }
     }
 
@@ -4013,18 +4686,36 @@
       if (isMyTurn) {
         ribbon.textContent = `My Turn! (${curP.tag})`;
         rollBtn.disabled = false;
-        setTopBanner(`🎲 내 차례 (${curP.tag} ${curP.name}) · [${state.turn}/${MAX_TURNS}턴] 주사위를 굴려주세요!`);
+        setTopBanner(
+          L2(
+            `🎲 내 차례 (${curP.tag} ${curP.name}) · [${state.turn}/${MAX_TURNS}턴] 주사위를 굴려주세요!`,
+            `🎲 Lượt của bạn (${curP.tag} ${pName(curP)}) · [Lượt ${state.turn}/${MAX_TURNS}] Hãy tung xúc xắc!`
+          )
+        );
       } else {
         ribbon.textContent = `${curP.tag} Turn`;
         rollBtn.disabled = true;
-        setTopBanner(`🌐 ${curP.tag} ${curP.name} 님의 턴 진행 중... [${state.turn}/${MAX_TURNS}턴]`);
+        setTopBanner(
+          L2(
+            `🌐 ${curP.tag} ${curP.name} 님의 턴 진행 중... [${state.turn}/${MAX_TURNS}턴]`,
+            `🌐 Đang tới lượt của ${curP.tag} ${pName(curP)}... [Lượt ${state.turn}/${MAX_TURNS}]`
+          )
+        );
 
-        // 원격 유저가 접속해 있지 않은 슬롯이면 스마트 온라인 AI가 0.85초 후 자동으로 주사위를 던짐!
-        if (!curP.isRemoteHuman) {
+        // 원격 유저가 접속해 있지 않은 AI 슬롯이면 방장(isRoomHost)이 대표로 주사위를 굴려 모든 참가자에게 브로드캐스트!
+        if (!curP.isRemoteHuman && isRoomHost) {
           if (aiTurnTimer) clearTimeout(aiTurnTimer);
           aiTurnTimer = setTimeout(() => {
             if (state.activePlayerIdx === curP.idx && !state.isMoving) {
               const aiDice = Math.floor(Math.random() * 6) + 1;
+              const aiKeyGood = Math.random() < 0.55;
+              nextKeyOutcomeGood = aiKeyGood;
+              broadcastNetMessage({
+                type: 'REMOTE_ROLL',
+                playerIdx: curP.idx,
+                diceValue: aiDice,
+                keyGood: aiKeyGood
+              });
               executeDiceRollForActivePlayer(aiDice, false);
             }
           }, 850);
@@ -4123,7 +4814,7 @@
           requestAnimationFrame(stepFrame);
         } else {
           renderDiceFace(finalValue);
-          callout.textContent = `🎲 주사위 [${finalValue}]!`;
+          callout.textContent = L2(`🎲 주사위 [${finalValue}]!`, `🎲 Xúc xắc [${finalValue}]!`);
           callout.classList.add('show');
           setTimeout(() => {
             if (onComplete) onComplete();
@@ -4139,8 +4830,15 @@
       if (state.gameMode === 'online4p' && state.activePlayerIdx !== state.myPlayerIdx) return;
 
       const finalDice = Math.floor(Math.random() * 6) + 1;
+      const keyGood = Math.random() < 0.55;
+      nextKeyOutcomeGood = keyGood;
       if (state.gameMode === 'online4p') {
-        broadcastNetMessage({ type: 'REMOTE_ROLL', playerIdx: state.myPlayerIdx, diceValue: finalDice });
+        broadcastNetMessage({
+          type: 'REMOTE_ROLL',
+          playerIdx: state.myPlayerIdx,
+          diceValue: finalDice,
+          keyGood
+        });
       }
       executeDiceRollForActivePlayer(finalDice, false);
     }
@@ -4154,9 +4852,14 @@
 
       const activeP = state.gameMode === 'online4p'
         ? state.players[state.activePlayerIdx]
-        : { idx: 0, tag: 'PLAYER', name: CHARACTERS[state.character].name };
+        : { idx: 0, tag: 'PLAYER', name: CHARACTERS[state.character].name, nameVi: CHARACTERS[state.character].nameVi };
 
-      setTopBanner(`🎲 ${activeP.tag} ${activeP.name} · 3D 주사위가 광장에 떨어집니다!`);
+      setTopBanner(
+        L2(
+          `🎲 ${activeP.tag} ${activeP.name} · 3D 주사위가 광장에 떨어집니다!`,
+          `🎲 ${activeP.tag} ${pName(activeP)} · Đang tung xúc xắc 3D xuống quảng trường!`
+        )
+      );
 
       animate3DDiceDrop(finalDice, () => {
         processTurnMovement(finalDice);
@@ -4166,18 +4869,30 @@
     function processTurnMovement(diceValue) {
       const pIdx = state.gameMode === 'online4p' ? state.activePlayerIdx : 0;
       const curP = state.gameMode === 'online4p' ? state.players[pIdx] : null;
-      const actorName = curP ? `${curP.tag} ${curP.name}` : CHARACTERS[state.character].name;
+      const actorName = curP ? `${curP.tag} ${pName(curP)}` : pName(CHARACTERS[state.character]);
       const activePawn = state.gameMode === 'online4p' ? pawnEls[pIdx] : pawnEls[0];
 
       const turnIncome = calculatePlayerTurnIncome(pIdx);
       if (turnIncome > 0) {
         if (curP) curP.cash += turnIncome;
         else state.cash += turnIncome;
-        addLog(`${actorName} · 보유 항구 턴 수익 +${formatMoney(turnIncome)} 입금!`, 'coin.svg');
+        addLog(
+          L2(
+            `${actorName} · 보유 항구 턴 수익 +${formatMoney(turnIncome)} 입금!`,
+            `${actorName} · Nhận lợi nhuận cảng mỗi lượt +${formatMoney(turnIncome)}!`
+          ),
+          'coin.svg'
+        );
       }
 
-      addLog(`주사위 [${diceValue}]! ${actorName} 캐릭터가 전진합니다!`, 'dice.svg');
-      setTopBanner(`주사위 [${diceValue}]! ${actorName} 이동 중...`);
+      addLog(
+        L2(
+          `주사위 [${diceValue}]! ${actorName} 캐릭터가 전진합니다!`,
+          `Xúc xắc [${diceValue}]! ${actorName} tiến lên ${diceValue} ô!`
+        ),
+        'dice.svg'
+      );
+      setTopBanner(L2(`주사위 [${diceValue}]! ${actorName} 이동 중...`, `Xúc xắc [${diceValue}]! ${actorName} đang di chuyển...`));
 
       if (activePawn) activePawn.classList.add('pawn-hopping');
 
@@ -4196,8 +4911,14 @@
         if (nowPos === 0) {
           if (curP) curP.cash += 200;
           else state.cash += 200;
-          showCellFloatingDelta(0, '+200만 원', true);
-          addLog(`${actorName} 출발지 ${stepsLeft > 0 ? '통과' : '도착'}! 해운 지원금 +200만 원 획득!`, 'compass.svg');
+          showCellFloatingDelta(0, L2('+200만 원', '+200 Tr (200만)'), true);
+          addLog(
+            L2(
+              `${actorName} 출발지 ${stepsLeft > 0 ? '통과' : '도착'}! 해운 지원금 +200만 원 획득!`,
+              `${actorName} ${stepsLeft > 0 ? 'đi qua' : 'đến'} Ô Xuất Phát! Nhận thưởng +200만 원 (200 Tr)!`
+            ),
+            'compass.svg'
+          );
         }
 
         updateBoardUI();
@@ -4206,7 +4927,12 @@
           clearInterval(stepTimer);
           if (activePawn) activePawn.classList.remove('pawn-hopping');
           const arrivedCell = BOARD_CELLS[nowPos];
-          setTopBanner(`[${state.turn}턴] ${actorName} -> ${arrivedCell.name} 도착!`);
+          setTopBanner(
+            L2(
+              `[${state.turn}턴] ${actorName} -> ${arrivedCell.name} 도착!`,
+              `[Lượt ${state.turn}] ${actorName} -> Đã đến ${cName(arrivedCell)}!`
+            )
+          );
           setTimeout(() => {
             handleCellArrival(arrivedCell);
           }, 200);
@@ -4236,28 +4962,41 @@
     function handleCellArrival(cell) {
       const pIdx = state.gameMode === 'online4p' ? state.activePlayerIdx : 0;
       const isMe = state.gameMode === 'solo1p' || pIdx === state.myPlayerIdx;
-      const actor = state.gameMode === 'online4p' ? state.players[pIdx] : { tag: 'P1', name: CHARACTERS[state.character].name };
+      const actor = state.gameMode === 'online4p'
+        ? state.players[pIdx]
+        : { tag: 'P1', name: CHARACTERS[state.character].name, nameVi: CHARACTERS[state.character].nameVi };
 
       if (cell.type === 'start') {
-        finishTurn();
+        if (isMe || (!actor.isRemoteHuman && isRoomHost)) {
+          finishTurn();
+        }
         return;
       }
 
       if (cell.type === 'customs') {
         addPlayerCash(pIdx, -100);
-        showCellFloatingDelta(cell.id, '-100만 원', false);
+        showCellFloatingDelta(cell.id, L2('-100만 원', '-100 Tr'), false);
         playTone('bad');
-        addLog(`${actor.tag} ${actor.name} · 세관 검사소 통관 지연 벌금 -100만 원.`, 'siren.svg');
+        addLog(
+          L2(
+            `${actor.tag} ${actor.name} · 세관 검사소 통관 지연 벌금 -100만 원.`,
+            `${actor.tag} ${pName(actor)} · Trạm Hải Quan: Phạt chậm thông quan -100만 원.`
+          ),
+          'siren.svg'
+        );
         updateBoardUI();
         if (isMe) {
           showSimpleEventModal(
             cell,
-            '세관 검사소 통관 지연!',
-            '수출입 화물 서류 심사가 길어져 통관 지연 벌금 100만 원을 납부했습니다.',
-            '-100만 원 차감',
+            L('세관 검사소 통관 지연!', 'Trạm Hải Quan: Chậm Thông Quan!'),
+            LBlock(
+              '수출입 화물 서류 심사가 길어져 통관 지연 벌금 100만 원을 납부했습니다.',
+              'Quá trình kiểm tra hồ sơ hàng hóa xuất nhập khẩu bị kéo dài, bạn phải nộp phạt chậm thông quan 100만 원 (100 Tr).'
+            ),
+            L2('-100만 원 차감', 'Phạt -100만 원'),
             false
           );
-        } else {
+        } else if (!actor.isRemoteHuman && isRoomHost) {
           setTimeout(() => finishTurn(), 750);
         }
         return;
@@ -4265,28 +5004,59 @@
 
       if (cell.type === 'key1' || cell.type === 'key2') {
         const isKey1 = cell.type === 'key1';
-        const isGood = Math.random() < 0.55;
+        const isGood = typeof nextKeyOutcomeGood === 'boolean' ? nextKeyOutcomeGood : (Math.random() < 0.55);
+        nextKeyOutcomeGood = null;
         const bonusAmt = isKey1 ? 150 : 200;
         if (isGood) {
           addPlayerCash(pIdx, bonusAmt);
-          showCellFloatingDelta(cell.id, `+${bonusAmt}만 원`, true);
+          showCellFloatingDelta(cell.id, L2(`+${bonusAmt}만 원`, `+${bonusAmt} Tr`), true);
           playTone('buy');
-          addLog(`${actor.tag} ${actor.name} · 황금열쇠 보너스 +${bonusAmt}만 원 획득!`, isKey1 ? 'key-gold.svg' : 'key-modern.svg');
+          addLog(
+            L2(
+              `${actor.tag} ${actor.name} · 황금열쇠 보너스 +${bonusAmt}만 원 획득!`,
+              `${actor.tag} ${pName(actor)} · Chìa Khóa Vàng: Nhận thưởng +${bonusAmt}만 원!`
+            ),
+            isKey1 ? 'key-gold.svg' : 'key-modern.svg'
+          );
           updateBoardUI();
           if (isMe) {
-            showSimpleEventModal(cell, '황금열쇠: 무역 대호황!', `해상 무역 보너스 +${bonusAmt}만 원을 받았습니다!`, `+${bonusAmt}만 원 획득`, true);
-          } else {
+            showSimpleEventModal(
+              cell,
+              L('황금열쇠: 무역 대호황!', 'Chìa Khóa Vàng: Thương Mại Đại Thịnh!'),
+              LBlock(
+                `해상 무역 보너스 +${bonusAmt}만 원을 받았습니다!`,
+                `Chúc mừng! Bạn nhận được khoản thưởng thương mại đường biển +${bonusAmt}만 원 (${bonusAmt} Tr)!`
+              ),
+              L2(`+${bonusAmt}만 원 획득`, `Thưởng +${bonusAmt}만 원`),
+              true
+            );
+          } else if (!actor.isRemoteHuman && isRoomHost) {
             setTimeout(() => finishTurn(), 750);
           }
         } else {
           addPlayerCash(pIdx, -100);
-          showCellFloatingDelta(cell.id, '-100만 원', false);
+          showCellFloatingDelta(cell.id, L2('-100만 원', '-100 Tr'), false);
           playTone('bad');
-          addLog(`${actor.tag} ${actor.name} · 황금열쇠 해상 복구비 -100만 원 차감.`, isKey1 ? 'key-gold.svg' : 'key-modern.svg');
+          addLog(
+            L2(
+              `${actor.tag} ${actor.name} · 황금열쇠 해상 복구비 -100만 원 차감.`,
+              `${actor.tag} ${pName(actor)} · Chìa Khóa Vàng: Chi phí khắc phục bão biển -100만 원.`
+            ),
+            isKey1 ? 'key-gold.svg' : 'key-modern.svg'
+          );
           updateBoardUI();
           if (isMe) {
-            showSimpleEventModal(cell, '황금열쇠: 해상 기상 악화!', '선박 정비 및 물류 비용으로 100만 원을 지출했습니다.', '-100만 원 차감', false);
-          } else {
+            showSimpleEventModal(
+              cell,
+              L('황금열쇠: 해상 기상 악화!', 'Chìa Khóa Vàng: Thời Tiết Biển Xấu!'),
+              LBlock(
+                '선박 정비 및 물류 비용으로 100만 원을 지출했습니다.',
+                'Bạn phải chi 100만 원 (100 Tr) cho chi phí bảo dưỡng tàu và hậu cần do bão biển.'
+              ),
+              L2('-100만 원 차감', 'Trừ -100만 원'),
+              false
+            );
+          } else if (!actor.isRemoteHuman && isRoomHost) {
             setTimeout(() => finishTurn(), 750);
           }
         }
@@ -4302,16 +5072,22 @@
           const toll = cell.income * currentLv;
           addPlayerCash(pIdx, -toll);
           addPlayerCash(ownerIdx, toll);
-          showCellFloatingDelta(cell.id, `통행료 -${toll}만`, false);
+          showCellFloatingDelta(cell.id, L2(`통행료 -${toll}만`, `Phí cảng -${toll}Tr`), false);
           playTone('bad');
-          addLog(`💸 ${actor.tag} ${actor.name} -> ${ownerP.tag} ${ownerP.name}에게 [${cell.name}] 항구 통행료 ${formatMoney(toll)} 지불!`, 'coin.svg');
+          addLog(
+            L2(
+              `💸 ${actor.tag} ${actor.name} -> ${ownerP.tag} ${ownerP.name}에게 [${cell.name}] 항구 통행료 ${formatMoney(toll)} 지불!`,
+              `💸 ${actor.tag} ${pName(actor)} trả phí thông hành cảng [${cName(cell)}] ${formatMoney(toll)} cho ${ownerP.tag} ${pName(ownerP)}!`
+            ),
+            'coin.svg'
+          );
           updateBoardUI();
         }
 
         if (isMe) {
           openPortQuizModal(cell);
         } else {
-          // 온라인 AI 또는 원격 플레이어의 항구 퀴즈 & 3D 빌딩 건설 처리
+          // 온라인 AI 슬롯인 경우 방장(isRoomHost)이 시뮬레이션 후 전체 동기화
           simulateOnlinePlayerPortAction(cell, pIdx);
         }
       }
@@ -4319,17 +5095,29 @@
 
     function simulateOnlinePlayerPortAction(cell, pIdx) {
       const actor = state.players[pIdx];
-      if (!actor || actor.isRemoteHuman) {
-        // 원격 유저는 본인의 탭에서 REMOTE_BUILD / REMOTE_NEXT_TURN 이벤트를 전송함
+      if (!actor || actor.isRemoteHuman || !isRoomHost) {
         return;
       }
 
       setTimeout(() => {
         const isCorrect = Math.random() < 0.76;
+        broadcastNetMessage({
+          type: 'REMOTE_QUIZ_RESULT',
+          playerIdx: pIdx,
+          cellId: cell.id,
+          isCorrect
+        });
+
         if (isCorrect) {
           addPlayerCash(pIdx, 100);
-          showCellFloatingDelta(cell.id, '+100만 원', true);
-          addLog(`🤖 ${actor.tag} ${actor.name} · [${cell.name}] 퀴즈 정답! (+100만 원)`, 'check.svg');
+          showCellFloatingDelta(cell.id, L2('+100만 원', '+100 Tr'), true);
+          addLog(
+            L2(
+              `🤖 ${actor.tag} ${actor.name} · [${cell.name}] 퀴즈 정답! (+100만 원)`,
+              `🤖 ${actor.tag} ${pName(actor)} · Trả lời ĐÚNG Quiz [${cName(cell)}]! (+100만 원)`
+            ),
+            'check.svg'
+          );
 
           const curLv = state.ownedPorts[cell.id] || 0;
           const ownerIdx = state.portOwners[cell.id];
@@ -4345,20 +5133,27 @@
             const takeoverCost = Math.floor(cell.price * 1.5);
             if (getPlayerCash(pIdx) >= takeoverCost) {
               addPlayerCash(ownerIdx, cell.price);
-              applyPortBuildOrUpgrade(cell.id, 1, pIdx, takeoverCost, false);
+              applyPortBuildOrUpgrade(cell.id, 1, pIdx, takeoverCost, false, ownerIdx);
             }
           }
         } else {
           addPlayerCash(pIdx, -50);
-          showCellFloatingDelta(cell.id, '-50만 원', false);
-          addLog(`🤖 ${actor.tag} ${actor.name} · [${cell.name}] 퀴즈 오답 (-50만 원)`, 'cross.svg');
+          showCellFloatingDelta(cell.id, L2('-50만 원', '-50 Tr'), false);
+          addLog(
+            L2(
+              `🤖 ${actor.tag} ${actor.name} · [${cell.name}] 퀴즈 오답 (-50만 원)`,
+              `🤖 ${actor.tag} ${pName(actor)} · Trả lời SAI Quiz [${cName(cell)}] (-50만 원)`
+            ),
+            'cross.svg'
+          );
         }
         updateBoardUI();
         setTimeout(() => finishTurn(), 800);
       }, 650);
     }
 
-    function showSimpleEventModal(cell, title, desc, badgeText, isGoodEvent = true) {
+    function showSimpleEventModal(cell, titleHtml, descHtml, badgeText, isGoodEvent = true) {
+      state.activeQuizContext = null;
       const modal = document.getElementById('quiz-modal');
       document.getElementById('modal-chibi-bg').src = cell.chibi;
       document.getElementById('modal-badge-ico').src = cell.icon;
@@ -4366,16 +5161,16 @@
       document.getElementById('modal-stage-mascot').src = isGoodEvent
         ? 'assets/chibi/chibi-king.png'
         : 'assets/chibi/chibi-oops.png';
-      document.getElementById('modal-title').innerHTML = `<img src="${cell.icon}" style="width:30px;height:30px;" alt="" /> <span>${title}</span>`;
-      document.getElementById('modal-question').textContent = desc;
+      document.getElementById('modal-title').innerHTML = `<img src="${cell.icon}" style="width:30px;height:30px;" alt="" /> <span>${titleHtml}</span>`;
+      document.getElementById('modal-question').innerHTML = descHtml;
       document.getElementById('modal-options').innerHTML = '';
 
       const fb = document.getElementById('modal-feedback');
       fb.classList.add('show');
       document.getElementById('feedback-title').textContent = '';
-      document.getElementById('feedback-desc').textContent = '확인을 누르면 다음 턴으로 넘어갑니다.';
+      document.getElementById('feedback-desc').textContent = L('확인을 누르면 다음 턴으로 넘어갑니다.', 'Bấm Xác nhận để chuyển sang lượt tiếp theo.');
       document.getElementById('feedback-actions').innerHTML = `
-        <button type="button" class="action-btn btn-buy" onclick="closeModalAndFinishTurn()">확인</button>
+        <button type="button" class="action-btn btn-buy" onclick="closeModalAndFinishTurn()">${L('확인', 'Xác nhận')}</button>
       `;
 
       modal.classList.add('show');
@@ -4407,34 +5202,82 @@
       return chosen.q;
     }
 
+    function formatQuizQuestionHtml(quiz) {
+      if (state.lang === 'ko') return `Q. ${quiz.question}`;
+      if (state.lang === 'vi') return `Q. ${quiz.questionVi || quiz.question}`;
+      return `<div>Q. ${quiz.question}</div><div style="font-size:0.86rem;color:#0369a1;margin-top:5px;font-weight:800;">🇻🇳 ${quiz.questionVi || ''}</div>`;
+    }
+
+    function formatQuizOptionHtml(quiz, idx) {
+      const koOpt = quiz.options[idx];
+      const viOpt = (quiz.optionsVi && quiz.optionsVi[idx]) ? quiz.optionsVi[idx] : koOpt;
+      if (state.lang === 'ko') return `${idx + 1}. ${koOpt}`;
+      if (state.lang === 'vi') return `${idx + 1}. ${viOpt}`;
+      return `${idx + 1}. ${koOpt} <span style="color:#0369a1;font-weight:700;">(${viOpt})</span>`;
+    }
+
+    function formatQuizExplanationHtml(quiz) {
+      const koExp = quiz.explanation;
+      const viExp = quiz.explanationVi || koExp;
+      if (state.lang === 'ko') return koExp;
+      if (state.lang === 'vi') return viExp;
+      return `${koExp}<br><span style="color:#0369a1;font-weight:700;">🇻🇳 ${viExp}</span>`;
+    }
+
     function openPortQuizModal(cell) {
       const quiz = pickQuizForPort(cell.name);
-      const modal = document.getElementById('quiz-modal');
+      state.activeQuizContext = { cell, quiz, answered: false, selectedIdx: null, isCorrect: false };
+      renderActiveQuizModalDOM();
+      document.getElementById('quiz-modal').classList.add('show');
+    }
+
+    function renderActiveQuizModalDOM() {
+      const ctx = state.activeQuizContext;
+      if (!ctx) return;
+      const { cell, quiz, answered, selectedIdx } = ctx;
       const charInfo = CHARACTERS[state.character] || CHARACTERS.boy;
 
       document.getElementById('modal-chibi-bg').src = cell.chibi;
       document.getElementById('modal-badge-ico').src = cell.icon;
-      document.getElementById('modal-badge-text').textContent = `${cell.name} · 무역 상식 퀴즈`;
-      document.getElementById('modal-stage-mascot').src = charInfo.sprite;
-      document.getElementById('modal-title').innerHTML = `<img src="${cell.icon}" style="width:30px;height:30px;" alt="" /> <span>${cell.name} 도착! 퀴즈 타임!</span>`;
-      document.getElementById('modal-question').textContent = `Q. ${quiz.question}`;
+      document.getElementById('modal-badge-text').textContent = L2(
+        `${cell.name} · 무역 상식 퀴즈`,
+        `${cName(cell)} · Quiz Cảng & Thương Mại`
+      );
+      if (!answered) {
+        document.getElementById('modal-stage-mascot').src = charInfo.sprite;
+      }
+      document.getElementById('modal-title').innerHTML = `<img src="${cell.icon}" style="width:30px;height:30px;" alt="" /> <span>${L2(`${cell.name} 도착! 퀴즈 타임!`, `Đến ${cName(cell)}! Trả lời Quiz!`)}</span>`;
+      document.getElementById('modal-question').innerHTML = formatQuizQuestionHtml(quiz);
 
       const optionsBox = document.getElementById('modal-options');
       optionsBox.innerHTML = '';
 
-      const fb = document.getElementById('modal-feedback');
-      fb.classList.remove('show');
-
-      quiz.options.forEach((optText, idx) => {
+      quiz.options.forEach((_, idx) => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'option-btn';
-        btn.textContent = `${idx + 1}. ${optText}`;
-        btn.onclick = () => submitQuizAnswer(cell, quiz, idx, btn);
+        btn.innerHTML = formatQuizOptionHtml(quiz, idx);
+        if (answered) {
+          btn.disabled = true;
+          if (idx === quiz.answer) btn.classList.add('correct');
+          else if (idx === selectedIdx) btn.classList.add('wrong');
+        } else {
+          btn.onclick = () => submitQuizAnswer(cell, quiz, idx, btn);
+        }
         optionsBox.appendChild(btn);
       });
 
-      modal.classList.add('show');
+      if (!answered) {
+        document.getElementById('modal-feedback').classList.remove('show');
+      } else {
+        renderQuizFeedbackDOM(cell, quiz, selectedIdx, ctx.isCorrect);
+      }
+    }
+
+    function refreshOpenQuizModalLanguage() {
+      if (state.activeQuizContext) {
+        renderActiveQuizModalDOM();
+      }
     }
 
     function submitQuizAnswer(cell, quiz, selectedIdx, clickedBtn) {
@@ -4447,6 +5290,70 @@
         clickedBtn.classList.add('wrong');
       }
 
+      if (state.activeQuizContext) {
+        state.activeQuizContext.answered = true;
+        state.activeQuizContext.selectedIdx = selectedIdx;
+        state.activeQuizContext.isCorrect = isCorrect;
+      }
+
+      const myIdx = state.gameMode === 'online4p' ? state.myPlayerIdx : 0;
+
+      if (state.gameMode === 'online4p') {
+        broadcastNetMessage({
+          type: 'REMOTE_QUIZ_RESULT',
+          playerIdx: myIdx,
+          cellId: cell.id,
+          isCorrect
+        });
+      }
+
+      if (isCorrect) {
+        addPlayerCash(myIdx, 100);
+        showCellFloatingDelta(cell.id, L2('+100만 원', '+100 Tr'), true);
+        playTone('buy');
+        document.getElementById('modal-stage-mascot').src = 'assets/chibi/chibi-cheer.png';
+        syncCharacterSprites();
+        addLog(
+          L2(
+            `[${cell.name}] 퀴즈 정답! 보너스 +100만 원 획득!`,
+            `[${cName(cell)}] Trả lời ĐÚNG! Nhận thưởng +100만 원 (100 Tr)!`
+          ),
+          'check.svg'
+        );
+        updateBoardUI();
+      } else {
+        addPlayerCash(myIdx, -50);
+        showCellFloatingDelta(cell.id, L2('-50만 원', '-50 Tr'), false);
+        playTone('bad');
+        document.getElementById('modal-stage-mascot').src = 'assets/chibi/chibi-oops.png';
+        syncCharacterSprites();
+        addLog(
+          L2(
+            `[${cell.name}] 퀴즈 오답! 벌금 -50만 원 차감.`,
+            `[${cName(cell)}] Trả lời SAI! Bị phạt -50만 원 (50 Tr).`
+          ),
+          'cross.svg'
+        );
+        updateBoardUI();
+
+        state.wrongNotes.push({
+          port: cell.name,
+          portVi: cell.nameVi,
+          question: quiz.question,
+          questionVi: quiz.questionVi,
+          myAnswer: quiz.options[selectedIdx],
+          myAnswerVi: quiz.optionsVi ? quiz.optionsVi[selectedIdx] : quiz.options[selectedIdx],
+          correctAnswer: quiz.options[quiz.answer],
+          correctAnswerVi: quiz.optionsVi ? quiz.optionsVi[quiz.answer] : quiz.options[quiz.answer],
+          explanation: quiz.explanation,
+          explanationVi: quiz.explanationVi
+        });
+      }
+
+      renderQuizFeedbackDOM(cell, quiz, selectedIdx, isCorrect);
+    }
+
+    function renderQuizFeedbackDOM(cell, quiz, selectedIdx, isCorrect) {
       const fb = document.getElementById('modal-feedback');
       const fbTitle = document.getElementById('feedback-title');
       const fbDesc = document.getElementById('feedback-desc');
@@ -4454,18 +5361,11 @@
       fb.classList.add('show');
 
       const myIdx = state.gameMode === 'online4p' ? state.myPlayerIdx : 0;
+      const expHtml = formatQuizExplanationHtml(quiz);
 
       if (isCorrect) {
-        addPlayerCash(myIdx, 100);
-        showCellFloatingDelta(cell.id, '+100만 원', true);
-        playTone('buy');
-        document.getElementById('modal-stage-mascot').src = 'assets/chibi/chibi-cheer.png';
-        syncCharacterSprites();
-        addLog(`[${cell.name}] 퀴즈 정답! 보너스 +100만 원 획득!`, 'check.svg');
-        updateBoardUI();
-
         fbTitle.style.color = '#059669';
-        fbTitle.innerHTML = `<img src="assets/chibi-icons/check.svg" style="width:24px;height:24px;" alt="" /> <span>정답입니다! (보너스 +100만 원 지급)</span>`;
+        fbTitle.innerHTML = `<img src="assets/chibi-icons/check.svg" style="width:24px;height:24px;" alt="" /> <span>${L('정답입니다! (보너스 +100만 원 지급)', 'Chính xác! (Thưởng +100만 원 / 100 Tr)')}</span>`;
 
         const currentLv = state.ownedPorts[cell.id] || 0;
         const ownerIdx = state.portOwners[cell.id] ?? 0;
@@ -4473,88 +5373,98 @@
 
         if (currentLv === 0) {
           if (myCash >= cell.price) {
-            fbDesc.innerHTML = `${quiz.explanation}<br><br>현재 <strong>${cell.name}</strong>은(는) 빈 항구입니다.<br>인수가 <strong>${formatMoney(cell.price)}</strong>을 지불하고 <strong>3D 항구 빌딩(x1)</strong>을 건설할까요? (매턴 수익 +${formatMoney(cell.income)})`;
+            fbDesc.innerHTML = `${expHtml}<br><br>${L2(
+              `현재 <strong>${cell.name}</strong>은(는) 빈 항구입니다.<br>인수가 <strong>${formatMoney(cell.price)}</strong>을 지불하고 <strong>3D 항구 빌딩(x1)</strong>을 건설할까요? (매턴 수익 +${formatMoney(cell.income)})`,
+              `Hiện tại <strong>${cName(cell)}</strong> đang trống.<br>Bạn có muốn chi <strong>${formatMoney(cell.price)}</strong> để <strong>Mua cảng & Xây Nhà 3D (x1)</strong> không? (Thu nhập mỗi lượt +${formatMoney(cell.income)})`
+            )}`;
             fbActions.innerHTML = `
               <button type="button" class="action-btn btn-buy" onclick="buyPort(${cell.id})">
                 <img src="assets/chibi-icons/house-lv1.svg" style="width:24px;height:24px;" alt="" />
-                3D 빌딩 건설·인수 (-${cell.price}만)
+                ${L2(`3D 빌딩 건설·인수 (-${cell.price}만)`, `Mua & Xây Nhà 3D (-${cell.price}Tr)`)}
               </button>
-              <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">지나가기</button>
+              <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">${L2('지나가기', 'Bỏ qua')}</button>
             `;
           } else {
-            fbDesc.innerHTML = `${quiz.explanation}<br><br>항구를 인수하기에 보유 현금(${formatMoney(myCash)})이 부족합니다. (인수가: ${formatMoney(cell.price)})`;
+            fbDesc.innerHTML = `${expHtml}<br><br>${L2(
+              `항구를 인수하기에 보유 현금(${formatMoney(myCash)})이 부족합니다. (인수가: ${formatMoney(cell.price)})`,
+              `Tiền mặt hiện có (${formatMoney(myCash)}) không đủ để mua cảng (Giá mua: ${formatMoney(cell.price)}).`
+            )}`;
             fbActions.innerHTML = `
-              <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">확인</button>
+              <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">${L('확인', 'Xác nhận')}</button>
             `;
           }
         } else if (currentLv === 1 && (state.gameMode === 'solo1p' || ownerIdx === myIdx)) {
           const upgradeCost = Math.floor(cell.price * 0.5);
           if (myCash >= upgradeCost) {
-            fbDesc.innerHTML = `${quiz.explanation}<br><br>내 항구 <strong>${cell.name}</strong>에 도착했습니다!<br>인수가의 50%인 <strong>${formatMoney(upgradeCost)}</strong>을 지불해 <strong>3D 황금 랜드마크(x2) 업그레이드</strong>를 건설할까요? (매턴 수익 ${cell.income}만 → ${cell.income * 2}만)`;
+            fbDesc.innerHTML = `${expHtml}<br><br>${L2(
+              `내 항구 <strong>${cell.name}</strong>에 도착했습니다!<br>인수가의 50%인 <strong>${formatMoney(upgradeCost)}</strong>을 지불해 <strong>3D 황금 랜드마크(x2) 업그레이드</strong>를 건설할까요? (매턴 수익 ${cell.income}만 → ${cell.income * 2}만)`,
+              `Bạn đã quay lại cảng <strong>${cName(cell)}</strong> của mình!<br>Chi 50% giá cảng (<strong>${formatMoney(upgradeCost)}</strong>) để <strong>Nâng cấp Tháp Landmark Vàng 3D (x2)</strong> chứ? (Thu nhập ${cell.income}Tr → ${cell.income * 2}Tr/lượt)`
+            )}`;
             fbActions.innerHTML = `
               <button type="button" class="action-btn btn-upgrade" onclick="upgradePort(${cell.id})">
                 <img src="assets/chibi-icons/landmark-lv2.svg" style="width:24px;height:24px;" alt="" />
-                3D 랜드마크 건설 (-${upgradeCost}만)
+                ${L2(`3D 랜드마크 건설 (-${upgradeCost}만)`, `Nâng Cấp Landmark 3D (-${upgradeCost}Tr)`)}
               </button>
-              <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">유지하기</button>
+              <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">${L2('유지하기', 'Giữ nguyên')}</button>
             `;
           } else {
-            fbDesc.innerHTML = `${quiz.explanation}<br><br>업그레이드 비용(${formatMoney(upgradeCost)})이 부족하여 현재 상태(x1)를 유지합니다.`;
+            fbDesc.innerHTML = `${expHtml}<br><br>${L2(
+              `업그레이드 비용(${formatMoney(upgradeCost)})이 부족하여 현재 상태(x1)를 유지합니다.`,
+              `Không đủ chi phí nâng cấp (${formatMoney(upgradeCost)}), giữ nguyên cấp độ hiện tại (x1).`
+            )}`;
             fbActions.innerHTML = `
-              <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">확인</button>
+              <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">${L('확인', 'Xác nhận')}</button>
             `;
           }
         } else if (currentLv === 1 && state.gameMode === 'online4p' && ownerIdx !== myIdx) {
           const takeoverCost = Math.floor(cell.price * 1.5);
           const prevOwner = state.players[ownerIdx];
           if (myCash >= takeoverCost) {
-            fbDesc.innerHTML = `${quiz.explanation}<br><br>현재 <strong>${prevOwner.tag} ${prevOwner.name}</strong>의 항구입니다!<br>인수 비용 <strong>${formatMoney(takeoverCost)}</strong>을 지불하고 내 항구로 <strong>강제 인수(Takeover)</strong>할까요?`;
+            fbDesc.innerHTML = `${expHtml}<br><br>${L2(
+              `현재 <strong>${prevOwner.tag} ${prevOwner.name}</strong>의 항구입니다!<br>인수 비용 <strong>${formatMoney(takeoverCost)}</strong>을 지불하고 내 항구로 <strong>강제 인수(Takeover)</strong>할까요?`,
+              `Đây đang là cảng của <strong>${prevOwner.tag} ${pName(prevOwner)}</strong>!<br>Bạn có muốn chi <strong>${formatMoney(takeoverCost)}</strong> để <strong>Mua Đứt Cảng (Takeover)</strong> về tay mình không?`
+            )}`;
             fbActions.innerHTML = `
               <button type="button" class="action-btn btn-upgrade" onclick="takeoverOtherPort(${cell.id}, ${ownerIdx}, ${takeoverCost})">
                 <img src="assets/chibi-icons/hammer-build.svg" style="width:24px;height:24px;" alt="" />
-                항구 강제 인수하기 (-${takeoverCost}만)
+                ${L2(`항구 강제 인수하기 (-${takeoverCost}만)`, `Mua Đứt Cảng Đối Thủ (-${takeoverCost}Tr)`)}
               </button>
-              <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">지나가기</button>
+              <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">${L2('지나가기', 'Bỏ qua')}</button>
             `;
           } else {
-            fbDesc.innerHTML = `${quiz.explanation}<br><br>다른 플레이어의 항구 인수 비용(${formatMoney(takeoverCost)})이 부족합니다.`;
+            fbDesc.innerHTML = `${expHtml}<br><br>${L2(
+              `다른 플레이어의 항구 인수 비용(${formatMoney(takeoverCost)})이 부족합니다.`,
+              `Không đủ tiền mặt (${formatMoney(takeoverCost)}) để mua lại cảng của đối thủ.`
+            )}`;
             fbActions.innerHTML = `
-              <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">확인</button>
+              <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">${L('확인', 'Xác nhận')}</button>
             `;
           }
         } else {
-          fbDesc.innerHTML = `${quiz.explanation}<br><br><strong>${cell.name}</strong>은(는) 이미 최고 단계 <strong>3D 황금 랜드마크(x2)</strong>로 건설된 항구입니다!`;
+          fbDesc.innerHTML = `${expHtml}<br><br>${L2(
+            `<strong>${cell.name}</strong>은(는) 이미 최고 단계 <strong>3D 황금 랜드마크(x2)</strong>로 건설된 항구입니다!`,
+            `<strong>${cName(cell)}</strong> đã được nâng cấp tối đa lên <strong>Tháp Landmark Vàng 3D (x2)</strong>!`
+          )}`;
           fbActions.innerHTML = `
-            <button type="button" class="action-btn btn-buy" onclick="closeModalAndFinishTurn()">확인</button>
+            <button type="button" class="action-btn btn-buy" onclick="closeModalAndFinishTurn()">${L('확인', 'Xác nhận')}</button>
           `;
         }
       } else {
-        addPlayerCash(myIdx, -50);
-        showCellFloatingDelta(cell.id, '-50만 원', false);
-        playTone('bad');
-        document.getElementById('modal-stage-mascot').src = 'assets/chibi/chibi-oops.png';
-        syncCharacterSprites();
-        addLog(`[${cell.name}] 퀴즈 오답! 벌금 -50만 원 차감.`, 'cross.svg');
-        updateBoardUI();
-
-        state.wrongNotes.push({
-          port: cell.name,
-          question: quiz.question,
-          myAnswer: quiz.options[selectedIdx],
-          correctAnswer: quiz.options[quiz.answer],
-          explanation: quiz.explanation
-        });
-
+        const ansKo = quiz.options[quiz.answer];
+        const ansVi = (quiz.optionsVi && quiz.optionsVi[quiz.answer]) ? quiz.optionsVi[quiz.answer] : ansKo;
         fbTitle.style.color = '#e11d48';
-        fbTitle.innerHTML = `<img src="assets/chibi-icons/cross.svg" style="width:24px;height:24px;" alt="" /> <span>앗, 오답입니다! (벌금 -50만 원 차감)</span>`;
-        fbDesc.innerHTML = `정답은 <strong>[${quiz.answer + 1}번: ${quiz.options[quiz.answer]}]</strong> 입니다.<br>${quiz.explanation}<br><br>퀴즈를 틀려 이번 턴에는 3D 빌딩을 건설할 수 없으며, 오답 노트에 기록되었습니다.`;
+        fbTitle.innerHTML = `<img src="assets/chibi-icons/cross.svg" style="width:24px;height:24px;" alt="" /> <span>${L('앗, 오답입니다! (벌금 -50만 원 차감)', 'Tiếc quá, trả lời SAI rồi! (Phạt -50만 원)')}</span>`;
+        fbDesc.innerHTML = `${L2(
+          `정답은 <strong>[${quiz.answer + 1}번: ${ansKo}]</strong> 입니다.`,
+          `Đáp án đúng là <strong>[Câu ${quiz.answer + 1}: ${ansVi} (${ansKo})]</strong>.`
+        )}<br>${expHtml}`;
         fbActions.innerHTML = `
-          <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">확인</button>
+          <button type="button" class="action-btn btn-close" onclick="closeModalAndFinishTurn()">${L('확인', 'Xác nhận')}</button>
         `;
       }
     }
 
-    function applyPortBuildOrUpgrade(cellId, level, ownerIdx, cost, fromRemote = false) {
+    function applyPortBuildOrUpgrade(cellId, level, ownerIdx, cost, fromRemote = false, takeoverPrevOwner = null) {
       const cell = BOARD_CELLS[cellId];
       if (!cell) return;
       addPlayerCash(ownerIdx, -cost);
@@ -4563,9 +5473,21 @@
 
       const ownerPreset = PLAYER_PRESETS[ownerIdx] || PLAYER_PRESETS[0];
       if (level === 1) {
-        addLog(`🏗️ ${ownerPreset.tag} ${ownerPreset.name} · [${cell.name}] 3D 항구 빌딩(x1) 건설 완료! (매턴 +${cell.income}만)`, 'house-lv1.svg');
+        addLog(
+          L2(
+            `🏗️ ${ownerPreset.tag} ${ownerPreset.name} · [${cell.name}] 3D 항구 빌딩(x1) 건설 완료! (매턴 +${cell.income}만)`,
+            `🏗️ ${ownerPreset.tag} ${pName(ownerPreset)} · Xây dựng Nhà Cảng 3D (x1) tại [${cName(cell)}]! (+${cell.income}Tr/lượt)`
+          ),
+          'house-lv1.svg'
+        );
       } else {
-        addLog(`👑 ${ownerPreset.tag} ${ownerPreset.name} · [${cell.name}] 3D 황금 랜드마크(x2) 업그레이드 완성! (매턴 +${cell.income * 2}만)`, 'landmark-lv2.svg');
+        addLog(
+          L2(
+            `👑 ${ownerPreset.tag} ${ownerPreset.name} · [${cell.name}] 3D 황금 랜드마크(x2) 업그레이드 완성! (매턴 +${cell.income * 2}만)`,
+            `👑 ${ownerPreset.tag} ${pName(ownerPreset)} · Nâng cấp Tháp Landmark Vàng 3D (x2) tại [${cName(cell)}]! (+${cell.income * 2}Tr/lượt)`
+          ),
+          'landmark-lv2.svg'
+        );
       }
 
       triggerTileBuildAnimation(cellId, level, ownerIdx);
@@ -4578,7 +5500,8 @@
           cellId,
           level,
           ownerIdx,
-          cost
+          cost,
+          takeoverPrevOwner
         });
       }
     }
@@ -4607,12 +5530,13 @@
       const myIdx = state.gameMode === 'online4p' ? state.myPlayerIdx : 0;
       if (getPlayerCash(myIdx) >= takeoverCost) {
         addPlayerCash(prevOwnerIdx, cell.price);
-        applyPortBuildOrUpgrade(cellId, 1, myIdx, takeoverCost, false);
+        applyPortBuildOrUpgrade(cellId, 1, myIdx, takeoverCost, false, prevOwnerIdx);
       }
       closeModalAndFinishTurn();
     }
 
     function closeModalAndFinishTurn() {
+      state.activeQuizContext = null;
       document.getElementById('quiz-modal').classList.remove('show');
       finishTurn();
     }
@@ -4622,7 +5546,7 @@
 
       if (state.gameMode === 'solo1p') {
         if (state.cash < 0) {
-          addLog('보유 현금이 모두 소진되어 파산했습니다!', 'siren.svg');
+          addLog(L2('보유 현금이 모두 소진되어 파산했습니다!', 'Bạn đã hết sạch tiền mặt và bị phá sản!'), 'siren.svg');
           setTimeout(() => endGame(true), 450);
           return;
         }
@@ -4633,17 +5557,25 @@
         state.turn++;
         state.isMoving = false;
         updateBoardUI();
-        setTopBanner(`Change Turn · My Turn! [${state.turn} / ${MAX_TURNS}턴] 주사위를 굴려주세요!`);
+        setTopBanner(
+          L2(
+            `Change Turn · My Turn! [${state.turn} / ${MAX_TURNS}턴] 주사위를 굴려주세요!`,
+            `Change Turn · Lượt ${state.turn}/${MAX_TURNS}: Hãy bấm Tung Xúc Xắc!`
+          )
+        );
         document.getElementById('roll-btn').disabled = false;
       } else {
-        // 4인 온라인 멀티플레이 턴 전환
+        // 4인 온라인 멀티플레이 턴 전환 + 전체 상태 스냅샷 동기화!
         const curP = state.players[state.activePlayerIdx];
         if (curP && curP.cash < 0 && !curP.isBankrupt) {
           curP.isBankrupt = true;
-          addLog(`💥 ${curP.tag} ${curP.name} 파산!`, 'siren.svg');
+          addLog(L2(`💥 ${curP.tag} ${curP.name} 파산!`, `💥 ${curP.tag} ${pName(curP)} đã phá sản!`), 'siren.svg');
         }
-        broadcastNetMessage({ type: 'REMOTE_NEXT_TURN' });
         advanceToNextTurn(false);
+        broadcastNetMessage({
+          type: 'REMOTE_NEXT_TURN',
+          snapshot: buildStateSnapshot()
+        });
       }
     }
 
@@ -4681,13 +5613,13 @@
        ========================================================================= */
     function getShippingRank(totalAsset, isBankrupt) {
       if (isBankrupt || totalAsset < 1200) {
-        return { title: '수습 선원', icon: 'anchor.svg' };
+        return { title: L('수습 선원', 'Thủy Thủ Tập Sự'), icon: 'anchor.svg' };
       } else if (totalAsset < 2200) {
-        return { title: '일등 항해사', icon: 'medal.svg' };
+        return { title: L('일등 항해사', 'Hoa Tiêu Hạng Nhất'), icon: 'medal.svg' };
       } else if (totalAsset < 3200) {
-        return { title: '베테랑 선장', icon: 'trident.svg' };
+        return { title: L('베테랑 선장', 'Thuyền Trưởng Kỳ Cựu'), icon: 'trident.svg' };
       } else {
-        return { title: '대한민국 해운왕', icon: 'crown.svg' };
+        return { title: L('대한민국 해운왕', 'Vua Hàng Hải Hàn Quốc'), icon: 'crown.svg' };
       }
     }
 
@@ -4709,17 +5641,20 @@
           .map(p => ({ ...p, total: calculatePlayerTotalAsset(p.idx) }))
           .sort((a, b) => b.total - a.total);
         const winner = standings[0];
-        document.getElementById('result-main-title').textContent = `🏆 1위 우승: ${winner.tag} ${winner.name}!`;
+        document.getElementById('result-main-title').textContent = L2(
+          `🏆 1위 우승: ${winner.tag} ${winner.name}!`,
+          `🏆 Quán Quân Hạng 1: ${winner.tag} ${pName(winner)}!`
+        );
         document.getElementById('result-sub-msg').textContent = standings
-          .map((s, i) => `${i + 1}위 ${s.tag} ${s.name}(${formatMoney(s.total)})`)
+          .map((s, i) => `${i + 1}${L2('위', '')} ${s.tag} ${pName(s)}(${formatMoney(s.total)})`)
           .join(' · ');
       } else {
         document.getElementById('result-main-title').textContent = isBankrupt
-          ? '파산으로 항해 중단!'
-          : '15턴 항해 완주 성공!';
+          ? L('파산으로 항해 중단!', 'Phá sản · Dừng hải trình!')
+          : L('15턴 항해 완주 성공!', 'Hoàn thành xuất sắc 15 lượt hải trình!');
         document.getElementById('result-sub-msg').textContent = isBankrupt
-          ? '자금이 부족하여 항해를 끝까지 마치지 못했습니다. 다시 도전해 보세요!'
-          : '대한민국의 8대 무역항을 순항하며 멋진 무역 성과를 거두었습니다!';
+          ? L2('자금이 부족하여 항해를 끝까지 마치지 못했습니다. 다시 도전해 보세요!', 'Bạn đã hết vốn trước khi kết thúc hải trình. Hãy thử sức lại nhé!')
+          : L2('대한민국의 8대 무역항을 순항하며 멋진 무역 성과를 거두었습니다!', 'Bạn đã chinh phục 8 thương cảng lớn của Hàn Quốc với thành tích tuyệt vời!');
       }
 
       const resultSticker = document.getElementById('result-chibi-sticker');
@@ -4739,7 +5674,10 @@
       document.getElementById('final-total-asset').textContent = formatMoney(totalAsset);
       document.getElementById('final-best-asset').textContent = formatMoney(bestNow);
 
-      document.getElementById('wrong-note-btn-label').textContent = `오답 노트 보기 (${state.wrongNotes.length})`;
+      document.getElementById('wrong-note-btn-label').textContent = L2(
+        `오답 노트 보기 (${state.wrongNotes.length})`,
+        `Xem Sổ Tay Câu Sai (${state.wrongNotes.length})`
+      );
       renderWrongNotes();
 
       switchScreen('result-screen');
@@ -4751,16 +5689,16 @@
       box.classList.remove('show');
 
       if (state.wrongNotes.length === 0) {
-        box.innerHTML = `<p style="color:#059669; font-size:0.95rem; text-align:center;">틀린 문제가 하나도 없습니다! 완벽한 무역 상식 박사님이시네요!</p>`;
+        box.innerHTML = `<p style="color:#059669; font-size:0.95rem; text-align:center;">${L2('틀린 문제가 하나도 없습니다! 완벽한 무역 상식 박사님이시네요!', 'Không sai câu nào cả! Bạn đúng là Tiến sĩ Thương mại & Cảng biển!')}</p>`;
         return;
       }
 
       box.innerHTML = state.wrongNotes.map((item, i) => `
         <div class="wrong-item">
-          <div style="color:#1d4ed8; margin-bottom:3px;">#${i + 1} [${item.port}] ${item.question}</div>
-          <div style="color:#e11d48;">내가 고른 답: ${item.myAnswer}</div>
-          <div style="color:#059669;">정답: ${item.correctAnswer}</div>
-          <div style="color:#475569; margin-top:3px;">해설: ${item.explanation}</div>
+          <div style="color:#1d4ed8; margin-bottom:3px;">#${i + 1} [${state.lang === 'ko' ? item.port : `${item.portVi || item.port} (${item.port})`}] ${state.lang === 'vi' ? (item.questionVi || item.question) : item.question}</div>
+          <div style="color:#e11d48;">${L2('내가 고른 답:', 'Đáp án đã chọn:')} ${state.lang === 'vi' ? (item.myAnswerVi || item.myAnswer) : item.myAnswer}</div>
+          <div style="color:#059669;">${L2('정답:', 'Đáp án đúng:')} ${state.lang === 'vi' ? (item.correctAnswerVi || item.correctAnswer) : item.correctAnswer}</div>
+          <div style="color:#475569; margin-top:3px;">${L2('해설:', 'Giải thích:')} ${state.lang === 'vi' ? (item.explanationVi || item.explanation) : item.explanation}</div>
         </div>
       `).join('');
     }
@@ -4779,32 +5717,52 @@
 
     // "Siêu Cờ Tỷ Phú / Billion Marble" 스타일 항구 매각 (Sell Asset) 기능
     function sellAssetAction() {
-      const myPortIds = Object.keys(state.ownedPorts).map(Number);
+      const myIdx = state.gameMode === 'online4p' ? state.myPlayerIdx : 0;
+      const myPortIds = Object.keys(state.ownedPorts)
+        .map(Number)
+        .filter(cid => state.gameMode === 'solo1p' || state.portOwners[cid] === myIdx);
+
       if (myPortIds.length === 0) {
-        sfx.wrong();
-        addLog(`매각할 보유 항구가 없습니다! 먼저 항구를 인수해 보세요.`, 'siren.svg');
-        setTopBanner(`보유 중인 항구가 없어 매각할 수 없습니다!`);
+        playTone('bad');
+        addLog(L2(`매각할 보유 항구가 없습니다! 먼저 항구를 인수해 보세요.`, `Bạn chưa sở hữu cảng nào để bán! Hãy mua cảng trước nhé.`), 'siren.svg');
+        setTopBanner(L2(`보유 중인 항구가 없어 매각할 수 없습니다!`, `Chưa có cảng sở hữu nào để bán!`));
         return;
       }
       // 가장 먼저 보유한 항구(또는 현재 위치한 내 항구)를 80% 가격으로 즉시 매각
       const targetId = myPortIds.includes(state.position) ? state.position : myPortIds[0];
       const cell = BOARD_CELLS[targetId];
       const lv = state.ownedPorts[targetId] || 1;
-      const baseValue = lv === 2 ? Math.round(cell.cost * 1.5) : cell.cost;
+      const baseValue = lv === 2 ? Math.round(cell.price * 1.5) : cell.price;
       const sellPrice = Math.round(baseValue * 0.8);
 
       delete state.ownedPorts[targetId];
       delete state.portOwners[targetId];
-      state.cash += sellPrice;
-      if (state.gameMode === 'online4p' && state.players[state.myPlayerIdx]) {
-        state.players[state.myPlayerIdx].cash = state.cash;
-        delete state.players[state.myPlayerIdx].ownedPorts[targetId];
+      addPlayerCash(myIdx, sellPrice);
+
+      if (state.gameMode === 'online4p') {
+        broadcastNetMessage({
+          type: 'REMOTE_SELL_PORT',
+          playerIdx: myIdx,
+          cellId: targetId,
+          sellPrice
+        });
       }
 
-      sfx.coin();
-      spawnFloatingMoney(`+${sellPrice}만 (항구 매각)`, true);
-      addLog(`[항구 매각] ${cell.name} 매각 완료! 현금 +${formatMoney(sellPrice)} 확보!`, 'coin.svg');
-      setTopBanner(`${cell.name} 매각 완료! +${formatMoney(sellPrice)} 현금 확보!`);
+      playTone('buy');
+      showCellFloatingDelta(targetId, L2(`+${sellPrice}만 (매각)`, `+${sellPrice}Tr (Bán)`), true);
+      addLog(
+        L2(
+          `[항구 매각] ${cell.name} 매각 완료! 현금 +${formatMoney(sellPrice)} 확보!`,
+          `[Bán Cảng] Đã bán ${cName(cell)}! Thu về +${formatMoney(sellPrice)} tiền mặt!`
+        ),
+        'coin.svg'
+      );
+      setTopBanner(
+        L2(
+          `${cell.name} 매각 완료! +${formatMoney(sellPrice)} 현금 확보!`,
+          `Đã bán cảng ${cName(cell)}! +${formatMoney(sellPrice)} tiền mặt!`
+        )
+      );
       updateBoardUI();
     }
 
