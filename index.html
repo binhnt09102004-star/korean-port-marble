@@ -2433,19 +2433,32 @@
 
         <div class="difficulty-section">
           <div class="difficulty-label" id="ui-mode-label">게임 플레이 모드 선택</div>
-          <div class="mode-switch-tabs">
-            <button type="button" class="mode-tab-btn active" id="mode-btn-4p" onclick="selectGameMode('online4p')">
-              <img src="assets/chibi-icons/users-online.svg" style="width:28px;height:28px;" alt="" />
-              <span id="ui-mode-4p-text">4인 실시간 온라인 대전</span>
+          <div class="mode-switch-tabs" style="grid-template-columns: repeat(3, 1fr);">
+            <button type="button" class="mode-tab-btn active" id="mode-btn-2p" onclick="selectGameMode('online2p')">
+              <img src="assets/chibi-icons/users-online.svg" style="width:26px;height:26px;" alt="" />
+              <span id="ui-mode-2p-text">⚔️ 2인 대결 (1 vs 1)</span>
+            </button>
+            <button type="button" class="mode-tab-btn" id="mode-btn-4p" onclick="selectGameMode('online4p')">
+              <img src="assets/chibi-icons/users-online.svg" style="width:26px;height:26px;" alt="" />
+              <span id="ui-mode-4p-text">🌐 4인 멀티 (P1~P4)</span>
             </button>
             <button type="button" class="mode-tab-btn" id="mode-btn-1p" onclick="selectGameMode('solo1p')">
-              <img src="assets/chibi-icons/compass.svg" style="width:26px;height:26px;" alt="" />
-              <span id="ui-mode-1p-text">1인 싱글 퀴즈 마블</span>
+              <img src="assets/chibi-icons/compass.svg" style="width:24px;height:24px;" alt="" />
+              <span id="ui-mode-1p-text">⚓ 1인 싱글</span>
             </button>
           </div>
 
-          <!-- 4인 실시간 온라인 멀티플레이어 방/로비 패널 -->
+          <!-- 2인 / 4인 실시간 온라인 멀티플레이어 방/로비 패널 -->
           <div class="online-lobby-box" id="online-lobby-box">
+            <!-- 2인 모드 세부 방식 선택 (2대 기기 온라인 vs 1대 기기 함께 플레이) -->
+            <div id="submode-2p-bar" style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+              <button type="button" class="mini-lobby-btn gold" id="subbtn-2p-online" style="flex:1;padding:8px 10px;font-size:0.82rem;" onclick="set2PSubMode(false)">
+                🌐 2 Máy Online (Gửi Link/QR cho bạn · P1 vs P2)
+              </button>
+              <button type="button" class="mini-lobby-btn" id="subbtn-2p-local" style="flex:1;padding:8px 10px;font-size:0.82rem;background:#e0f2fe;color:#1e3a8a;" onclick="set2PSubMode(true)">
+                📱 2 Người 1 Máy (Chơi chung trên 1 màn hình)
+              </button>
+            </div>
             <div class="online-room-bar">
               <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                 <img src="assets/chibi-icons/users-online.svg" style="width:22px;height:22px;" alt="" />
@@ -3332,7 +3345,9 @@
 
     let state = {
       lang: 'bi', // 'vi' (Tiếng Việt) | 'bi' (Song Ngữ Hàn-Việt) | 'ko' (한국어)
-      gameMode: 'online4p', // 'online4p' | 'solo1p'
+      gameMode: 'online4p', // 'online4p' (멀티 2인/4인) | 'solo1p'
+      maxPlayers: 2, // 기본 2인 1v1 대결! (2 또는 4)
+      local2PMode: false, // true이면 한 기기에서 2인이 번갈아 주사위를 굴림
       roomCode: '7788',
       myPlayerIdx: 0,
       activePlayerIdx: 0,
@@ -3350,6 +3365,12 @@
       camMode: 'cam-3d',
       activeQuizContext: null
     };
+
+    function getControllablePlayerIdx() {
+      if (state.gameMode === 'solo1p') return 0;
+      if (state.local2PMode) return state.activePlayerIdx;
+      return state.myPlayerIdx;
+    }
 
     /* =========================================================================
        한국어(KO) · 베트남어(VI) · 한/베 병기(BI) 다국어 헬퍼 엔진
@@ -3456,9 +3477,12 @@
         }
       }
 
-      setEl('ui-mode-label', L('게임 플레이 모드 선택', 'Chọn Chế Độ Chơi'));
-      setEl('ui-mode-4p-text', L('4인 실시간 온라인 대전', 'Online 4 Người (P1~P4)'));
-      setEl('ui-mode-1p-text', L('1인 싱글 퀴즈 마블', 'Chơi Đơn 1 Người'));
+      setEl('ui-mode-label', L('게임 플레이 모드 선택', 'Chọn Chế Độ & Số Người Chơi'));
+      setEl('ui-mode-2p-text', L('⚔️ 2인 대결 (1 vs 1)', '⚔️ 2 Người (1 vs 1)'));
+      setEl('ui-mode-4p-text', L('🌐 4인 멀티 (P1~P4)', '🌐 4 Người (P1~P4)'));
+      setEl('ui-mode-1p-text', L('⚓ 1인 싱글', '⚓ 1 Người (Đơn)'));
+      setEl('subbtn-2p-online', L2('🌐 2대 기기 온라인 대결 (링크/QR로 친구와 1:1)', '🌐 2 Máy Online (Gửi Link/QR đấu 1v1 với bạn)'));
+      setEl('subbtn-2p-local', L2('📱 1대 기기 2인 대결 (한 화면에서 P1·P2 번갈아 하기)', '📱 2 Người 1 Máy (Chơi chung 2 người trên 1 màn hình)'));
       setEl('ui-nick-label', L2('내 이름:', 'Tên bạn:'));
       setEl('ui-room-code-label', L2('방 코드:', 'Mã phòng:'));
       setEl('ui-room-join-btn', L2('방 접속·동기화', 'Vào phòng'));
@@ -3474,10 +3498,15 @@
         'Gửi link bên dưới qua Zalo/Messenger cho bạn bè, hoặc quét <strong>Mã QR</strong> bên phải bằng điện thoại để vào thẳng phòng này!'
       ));
       setEl('ui-copy-again-btn', L2('복사', 'Copy'));
-      setEl('ui-lobby-hint', L2(
-        '💡 친구에게 <strong>🔗 초대 링크 & QR</strong>을 보내면 클릭 한 번에 바로 입장하며, 빈자리는 <strong>스마트 치비 AI</strong>가 자동으로 채워줍니다!',
-        '💡 Bấm <strong>🔗 Link Mời & QR</strong> gửi cho bạn bè để vào phòng ngay lập tức; các ghế trống sẽ có <strong>Chibi AI thông minh</strong> tự động chơi cùng!'
-      ));
+      setEl('ui-lobby-hint', state.maxPlayers === 2
+        ? L2(
+            '💡 <strong>2인 대결 (1 vs 1):</strong> 친구가 링크/QR로 들어오면 <strong>P1 vs P2 단둘이</strong> 대결합니다! 한 기기에서 둘이 번갈아 하려면 위에서 <strong>📱 1대 기기 2인 대결</strong>을 누르세요.',
+            '💡 <strong>Chế độ 2 Người (1 vs 1):</strong> Chỉ có đúng <strong>2 người (P1 đấu P2)</strong> trên bàn cờ! Gửi <strong>🔗 Link Mời & QR</strong> cho 1 người bạn vào ghế P2, hoặc bấm <strong>📱 2 Người 1 Máy</strong> nếu 2 bạn ngồi chung 1 máy!'
+          )
+        : L2(
+            '💡 친구에게 <strong>🔗 초대 링크 & QR</strong>을 보내면 클릭 한 번에 바로 입장하며, 빈자리는 <strong>스마트 치비 AI</strong>가 자동으로 채워줍니다!',
+            '💡 Bấm <strong>🔗 Link Mời & QR</strong> gửi cho bạn bè để vào phòng ngay lập tức; các ghế trống sẽ có <strong>Chibi AI thông minh</strong> tự động chơi cùng!'
+          ));
 
       setEl('ui-char-select-label', L('내 대표 치비 캐릭터 선택', 'Chọn Nhân Vật Chibi Của Bạn'));
       setEl('ui-char-boy-name', L('캡틴 레오', 'Thuyền trưởng Leo'));
@@ -3491,9 +3520,11 @@
       setEl('ui-diff-hard-title', L('어려움 모드', 'Chế độ Khó'));
       setEl('ui-diff-hard-desc', L('시작 자금 1,000만 원', 'Vốn đầu: 1,000만 원 (1,000 Tr)'));
 
-      setEl('start-main-btn-text', state.gameMode === 'online4p'
-        ? L('4인 온라인 치비 마블 출항 시작!', 'Bắt Đầu Trận Online 4 Người!')
-        : L('1인 싱글 치비 마블 출항 시작!', 'Bắt Đầu Chơi Đơn 1 Người!'));
+      setEl('start-main-btn-text', state.gameMode === 'solo1p'
+        ? L('1인 싱글 치비 마블 출항 시작!', 'Bắt Đầu Chơi Đơn 1 Người!')
+        : (state.maxPlayers === 2
+            ? L('⚔️ 2인 대결 (P1 vs P2) 출항 시작!', '⚔️ Bắt Đầu Trận 2 Người (P1 vs P2)!')
+            : L('🌐 4인 온라인 치비 마블 출항 시작!', '🌐 Bắt Đầu Trận Online 4 Người!')));
 
       setEl('ui-demo-build-btn', L('3D 건설·업그레이드 이펙트!', 'Test Hiệu Ứng Xây 3D!'));
       setEl('cam-btn-3d', L2('초선명 3D 블록', 'Khối 3D Nổi'));
@@ -3533,10 +3564,17 @@
     let peerInstance = null;
     let peerConns = [];
     let isRoomHost = true;
+    let hostSubChannel = 0;
+    let guestHandshakeTimer = null;
     let myClientId = 'cid_' + Math.random().toString(36).slice(2, 9);
     let myNickname = '';
     let roomPeersMap = {}; // clientId -> { seatIdx, nick }
     let nextKeyOutcomeGood = null; // 황금열쇠 결과 동기화용
+
+    // 탭 닫기/새로고침 시 즉시 PeerJS 세션 해제하여 유령 방장 방지!
+    window.addEventListener('beforeunload', () => {
+      try { if (peerInstance) peerInstance.destroy(); } catch (e) {}
+    });
 
     function playTone(type) {
       try {
@@ -3624,8 +3662,9 @@
 
     function initPlayersArray() {
       const startCash = state.difficulty === 'easy' ? 1500 : 1000;
+      const maxP = state.gameMode === 'solo1p' ? 1 : (state.maxPlayers || 2);
       state.players = PLAYER_PRESETS.map((p, idx) => {
-        // 해당 좌석에 온라인 유저 닉네임이 있으면 적용
+        const isInactive = idx >= maxP;
         let customNick = '';
         if (idx === state.myPlayerIdx && myNickname) {
           customNick = myNickname;
@@ -3643,9 +3682,10 @@
           badgeBg: p.badgeBg,
           cash: startCash,
           position: 0,
-          isBankrupt: false,
-          isHuman: idx === state.myPlayerIdx,
-          isRemoteHuman: Object.values(roomPeersMap).some(r => r.seatIdx === idx)
+          isInactive,
+          isBankrupt: isInactive, // 비활성 슬롯(예: 2인 모드에서 P3, P4)은 처음부터 제외!
+          isHuman: state.local2PMode ? (idx < 2) : (idx === state.myPlayerIdx),
+          isRemoteHuman: state.local2PMode ? (idx < 2) : Object.values(roomPeersMap).some(r => r.seatIdx === idx)
         };
       });
     }
@@ -3666,18 +3706,58 @@
       const rInput = document.getElementById('room-code-input');
       if (rInput) rInput.value = newCode;
       state.myPlayerIdx = 0;
+      hostSubChannel = 0;
       joinOrSyncOnlineRoom();
       copyInviteLink(true);
     }
 
+    function set2PSubMode(isLocalSameDevice) {
+      state.local2PMode = Boolean(isLocalSameDevice);
+      const btnOnl = document.getElementById('subbtn-2p-online');
+      const btnLoc = document.getElementById('subbtn-2p-local');
+      if (btnOnl) {
+        btnOnl.classList.toggle('gold', !state.local2PMode);
+        btnOnl.style.background = !state.local2PMode ? '' : '#e0f2fe';
+        btnOnl.style.color = !state.local2PMode ? '' : '#1e3a8a';
+      }
+      if (btnLoc) {
+        btnLoc.classList.toggle('gold', state.local2PMode);
+        btnLoc.style.background = state.local2PMode ? '' : '#e0f2fe';
+        btnLoc.style.color = state.local2PMode ? '' : '#1e3a8a';
+      }
+      renderOnlineLobbySlots();
+      playTone('step');
+    }
+
     function selectGameMode(mode) {
-      state.gameMode = mode === 'solo1p' ? 'solo1p' : 'online4p';
-      document.getElementById('mode-btn-4p').classList.toggle('active', state.gameMode === 'online4p');
-      document.getElementById('mode-btn-1p').classList.toggle('active', state.gameMode === 'solo1p');
+      if (mode === 'solo1p') {
+        state.gameMode = 'solo1p';
+        state.maxPlayers = 1;
+        state.local2PMode = false;
+      } else if (mode === 'online2p') {
+        state.gameMode = 'online4p';
+        state.maxPlayers = 2;
+      } else {
+        state.gameMode = 'online4p';
+        state.maxPlayers = 4;
+        state.local2PMode = false;
+      }
+      const btn2p = document.getElementById('mode-btn-2p');
+      const btn4p = document.getElementById('mode-btn-4p');
+      const btn1p = document.getElementById('mode-btn-1p');
+      if (btn2p) btn2p.classList.toggle('active', state.gameMode === 'online4p' && state.maxPlayers === 2);
+      if (btn4p) btn4p.classList.toggle('active', state.gameMode === 'online4p' && state.maxPlayers === 4);
+      if (btn1p) btn1p.classList.toggle('active', state.gameMode === 'solo1p');
+
+      const subBar = document.getElementById('submode-2p-bar');
+      if (subBar) subBar.style.display = (state.gameMode === 'online4p' && state.maxPlayers === 2) ? 'flex' : 'none';
+
       document.getElementById('online-lobby-box').style.display = state.gameMode === 'online4p' ? 'block' : 'none';
-      document.getElementById('start-main-btn-text').textContent = state.gameMode === 'online4p'
-        ? L('4인 온라인 치비 마블 출항 시작!', 'Bắt Đầu Trận Online 4 Người!')
-        : L('1인 싱글 치비 마블 출항 시작!', 'Bắt Đầu Chơi Đơn 1 Người!');
+      applyLanguageUI();
+      renderOnlineLobbySlots();
+      if (state.gameMode === 'online4p') {
+        broadcastNetMessage({ type: 'ROOM_MODE_CHANGE', maxPlayers: state.maxPlayers });
+      }
       playTone('step');
     }
 
@@ -3685,17 +3765,33 @@
       const grid = document.getElementById('online-slots-grid');
       if (!grid) return;
 
-      grid.innerHTML = PLAYER_PRESETS.map((p, idx) => {
-        const isMe = idx === state.myPlayerIdx;
+      const visibleCount = state.maxPlayers === 2 ? 2 : 4;
+      grid.style.gridTemplateColumns = visibleCount === 2 ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)';
+
+      grid.innerHTML = PLAYER_PRESETS.slice(0, visibleCount).map((p, idx) => {
+        const isMe = state.local2PMode ? true : (idx === state.myPlayerIdx);
         const peerEntry = Object.values(roomPeersMap).find(r => r.seatIdx === idx);
-        const isRemote = !isMe && Boolean(peerEntry);
-        const displayName = (isMe && myNickname)
+        const isRemote = !state.local2PMode && idx !== state.myPlayerIdx && Boolean(peerEntry);
+        const displayName = (idx === state.myPlayerIdx && myNickname)
           ? myNickname
           : (peerEntry && peerEntry.nick ? peerEntry.nick : pName(p));
 
-        const statusText = isMe
-          ? (isRoomHost ? L2('👑 나 (방장/Host)', '👑 Bạn (Chủ phòng)') : L2('🙋 나 (참가자)', '🙋 Bạn (Người chơi)'))
-          : (isRemote ? L2('🟢 친구 접속됨!', '🟢 Bạn bè đã vào!') : L2('🤖 스마트 온라인 AI', '🤖 AI Online Thông Minh'));
+        let statusText = '';
+        if (state.local2PMode) {
+          statusText = idx === 0
+            ? L2('🎮 플레이어 1 (이 기기)', '🎮 Người chơi 1 (Cùng máy)')
+            : L2('🎮 플레이어 2 (이 기기)', '🎮 Người chơi 2 (Cùng máy)');
+        } else if (idx === state.myPlayerIdx) {
+          statusText = isRoomHost
+            ? L2('👑 나 (방장/Host)', '👑 Bạn (Chủ phòng)')
+            : L2('🙋 나 (참가자)', '🙋 Bạn (Người chơi)');
+        } else if (isRemote) {
+          statusText = L2('🟢 친구 접속됨! (1:1 준비 완료)', '🟢 Bạn bè đã vào! (Sẵn sàng đấu)');
+        } else {
+          statusText = state.maxPlayers === 2
+            ? L2('⏳ 친구 대기 중 (또는 AI와 1:1)', '⏳ Chờ bạn vào P2 (hoặc đấu AI 1v1)')
+            : L2('🤖 스마트 온라인 AI', '🤖 AI Online Thông Minh');
+        }
         return `
           <div class="online-slot-card ${isMe ? 'my-seat' : ''}" onclick="selectMySeat(${idx})" title="${p.tag} ${displayName}">
             <span class="slot-p-tag" style="background:${p.badgeBg};">${p.tag}</span>
@@ -3717,7 +3813,7 @@
     }
 
     /* =========================================================================
-       실시간 4인 온라인 동기화 (BroadcastChannel + WebRTC PeerJS 방장 릴레이)
+       실시간 2인 / 4인 온라인 동기화 (BroadcastChannel + WebRTC PeerJS 방장 릴레이)
        ========================================================================= */
     function joinOrSyncOnlineRoom() {
       const rInput = document.getElementById('room-code-input');
@@ -3726,6 +3822,7 @@
       roomPeersMap = {};
       peerConns = [];
       isRoomHost = true;
+      hostSubChannel = 0;
 
       if (netChannel) {
         try { netChannel.close(); } catch (e) {}
@@ -3735,11 +3832,8 @@
         netChannel.onmessage = (ev) => handleNetMessage(ev.data, null);
       }
 
-      // 초대 URL 및 QR 코드 업데이트
       refreshInviteShareBox();
-
-      // WebRTC PeerJS 공개 시그널링 서버 연결 (다른 기기/휴대폰/PC 간 실시간 P2P 연동)
-      setupPeerJSRoom(state.roomCode);
+      setupPeerJSRoom(state.roomCode, 0);
 
       const pill = document.getElementById('online-status-pill');
       if (pill) {
@@ -3754,11 +3848,12 @@
     }
 
     function findNextFreeSeat() {
+      const maxS = state.maxPlayers === 2 ? 2 : 4;
       const taken = new Set([state.myPlayerIdx, ...Object.values(roomPeersMap).map(r => r.seatIdx)]);
-      for (let s = 0; s < 4; s++) {
+      for (let s = 0; s < maxS; s++) {
         if (!taken.has(s)) return s;
       }
-      return (state.myPlayerIdx + 1) % 4;
+      return (state.myPlayerIdx + 1) % maxS;
     }
 
     function broadcastRoomRoster() {
@@ -3766,16 +3861,18 @@
         [myClientId]: { seatIdx: state.myPlayerIdx, nick: myNickname },
         ...roomPeersMap
       };
-      broadcastNetMessage({ type: 'ROOM_ROSTER', roster });
+      broadcastNetMessage({ type: 'ROOM_ROSTER', roster, maxPlayers: state.maxPlayers });
     }
 
-    function setupPeerJSRoom(code) {
+    function setupPeerJSRoom(code, subIdx = 0) {
       if (typeof Peer === 'undefined') return;
+      hostSubChannel = subIdx;
+      if (guestHandshakeTimer) clearTimeout(guestHandshakeTimer);
       try {
         if (peerInstance) peerInstance.destroy();
       } catch (e) {}
 
-      const hostPeerId = `kpmarble-room-${code}-host`;
+      const hostPeerId = `kpmarble-v3-room-${code}-h${subIdx}`;
       try {
         const peer = new Peer(hostPeerId);
         peerInstance = peer;
@@ -3786,7 +3883,7 @@
           const pill = document.getElementById('online-status-pill');
           if (pill) pill.innerHTML = L2(
             `🟢 온라인 방장 <strong>#${code}</strong> 개설됨! 친구에게 링크/QR을 보내세요`,
-            `🟢 Đã mở Phòng <strong>#${code}</strong> (Chủ phòng)! Hãy gửi Link/QR mời bạn bè`
+            `🟢 Đã mở Phòng <strong>#${code}</strong> (Chủ phòng P1)! Gửi Link/QR cho bạn bè vào P2`
           );
         });
 
@@ -3798,18 +3895,21 @@
             conn.send({
               type: 'ASSIGN_SEAT',
               seatIdx: assignedSeat,
+              maxPlayers: state.maxPlayers,
               hostClientId: myClientId,
               hostSeatIdx: state.myPlayerIdx,
               hostNick: myNickname
             });
-            // 만약 이미 게임이 진행 중이면 늦게 들어온 친구에게 현재 보드판 상태를 즉시 동기화!
             if (document.getElementById('game-screen').classList.contains('active') && state.gameMode === 'online4p') {
               if (state.players[assignedSeat]) {
                 state.players[assignedSeat].isRemoteHuman = true;
+                state.players[assignedSeat].isInactive = false;
+                state.players[assignedSeat].isBankrupt = false;
               }
               conn.send({
                 type: 'LATE_JOIN_SYNC',
                 assignedSeat,
+                maxPlayers: state.maxPlayers,
                 snapshot: buildStateSnapshot()
               });
             }
@@ -3820,30 +3920,39 @@
         });
 
         peer.on('error', (err) => {
-          // 이미 방장이 있으면 게스트 피어로 방장에게 자동 접속!
           if (err && err.type === 'unavailable-id') {
             isRoomHost = false;
-            connectAsGuestPeer(code, hostPeerId);
+            connectAsGuestPeer(code, hostPeerId, subIdx);
           }
         });
       } catch (e) {}
     }
 
-    function connectAsGuestPeer(code, hostPeerId) {
+    function connectAsGuestPeer(code, hostPeerId, subIdx = 0) {
       try {
         const guestPeer = new Peer();
         peerInstance = guestPeer;
         guestPeer.on('open', () => {
           const conn = guestPeer.connect(hostPeerId, { reliable: true });
           peerConns.push(conn);
+
+          // 3.2초 내에 방장 응답이 없으면(이전 탭이 닫혀 유령 방장인 경우) 다음 서브채널 방장으로 자동 전환!
+          if (guestHandshakeTimer) clearTimeout(guestHandshakeTimer);
+          guestHandshakeTimer = setTimeout(() => {
+            if (Object.keys(roomPeersMap).length === 0 && subIdx < 3) {
+              setupPeerJSRoom(code, subIdx + 1);
+            }
+          }, 3200);
+
           conn.on('open', () => {
+            if (guestHandshakeTimer) clearTimeout(guestHandshakeTimer);
             if (state.myPlayerIdx === 0) state.myPlayerIdx = 1;
             renderOnlineLobbySlots();
             conn.send({ type: 'HELLO', clientId: myClientId, seatIdx: state.myPlayerIdx, nick: myNickname });
             const pill = document.getElementById('online-status-pill');
             if (pill) pill.innerHTML = L2(
               `🟢 온라인 방 <strong>#${code}</strong> 참가 완료! (P${state.myPlayerIdx + 1})`,
-              `🟢 Đã vào Phòng <strong>#${code}</strong> thành công! (Ghế P${state.myPlayerIdx + 1})`
+              `🟢 Đã vào Phòng <strong>#${code}</strong> cùng bạn bè! (Ghế P${state.myPlayerIdx + 1})`
             );
           });
           conn.on('data', (data) => handleNetMessage(data, conn));
@@ -3877,6 +3986,7 @@
       return {
         turn: state.turn,
         activePlayerIdx: state.activePlayerIdx,
+        maxPlayers: state.maxPlayers,
         difficulty: state.difficulty,
         ownedPorts: { ...state.ownedPorts },
         portOwners: { ...state.portOwners },
@@ -3886,7 +3996,8 @@
           nameVi: p.nameVi,
           cash: p.cash,
           position: p.position,
-          isBankrupt: p.isBankrupt,
+          isInactive: Boolean(p.isInactive),
+          isBankrupt: Boolean(p.isBankrupt),
           isRemoteHuman: p.isRemoteHuman || p.idx === state.myPlayerIdx
         }))
       };
@@ -3896,6 +4007,7 @@
       if (!snap) return;
       state.turn = snap.turn ?? state.turn;
       state.activePlayerIdx = snap.activePlayerIdx ?? state.activePlayerIdx;
+      if (snap.maxPlayers) state.maxPlayers = snap.maxPlayers;
       if (snap.ownedPorts) state.ownedPorts = { ...snap.ownedPorts };
       if (snap.portOwners) state.portOwners = { ...snap.portOwners };
       if (Array.isArray(snap.players) && state.players.length === 4) {
@@ -3903,14 +4015,16 @@
           if (state.players[i]) {
             state.players[i].cash = sp.cash;
             state.players[i].position = sp.position;
+            state.players[i].isInactive = Boolean(sp.isInactive);
             state.players[i].isBankrupt = Boolean(sp.isBankrupt);
             if (sp.name) state.players[i].name = sp.name;
             if (sp.nameVi) state.players[i].nameVi = sp.nameVi;
           }
         });
-        if (state.players[state.myPlayerIdx]) {
-          state.cash = state.players[state.myPlayerIdx].cash;
-          state.position = state.players[state.myPlayerIdx].position;
+        const myIdx = getControllablePlayerIdx();
+        if (state.players[myIdx]) {
+          state.cash = state.players[myIdx].cash;
+          state.position = state.players[myIdx].position;
         }
       }
       updateBoardUI();
@@ -3919,13 +4033,23 @@
     function handleNetMessage(data, sourceConn) {
       if (!data || data.senderId === myClientId) return;
 
+      if (guestHandshakeTimer) clearTimeout(guestHandshakeTimer);
+
       // 방장이 게스트로부터 받은 패킷을 다른 게스트들에게도 즉시 릴레이!
       if (isRoomHost && sourceConn) {
         forwardNetMessageFromHost(data, sourceConn);
       }
 
-      if (data.type === 'ASSIGN_SEAT') {
+      if (data.type === 'ROOM_MODE_CHANGE' && data.maxPlayers) {
+        state.maxPlayers = data.maxPlayers;
+        const btn2p = document.getElementById('mode-btn-2p');
+        const btn4p = document.getElementById('mode-btn-4p');
+        if (btn2p) btn2p.classList.toggle('active', state.maxPlayers === 2);
+        if (btn4p) btn4p.classList.toggle('active', state.maxPlayers === 4);
+        renderOnlineLobbySlots();
+      } else if (data.type === 'ASSIGN_SEAT') {
         state.myPlayerIdx = data.seatIdx;
+        if (data.maxPlayers) state.maxPlayers = data.maxPlayers;
         roomPeersMap[data.hostClientId] = { seatIdx: data.hostSeatIdx, nick: data.hostNick || '' };
         renderOnlineLobbySlots();
         broadcastNetMessage({ type: 'HELLO', clientId: myClientId, seatIdx: state.myPlayerIdx, nick: myNickname });
@@ -3954,11 +4078,17 @@
           renderOnlineLobbySlots();
           updateBoardUI();
           broadcastRoomRoster();
+          const pill = document.getElementById('online-status-pill');
+          if (pill) pill.innerHTML = L2(
+            `🟢 친구 참가 완료! (현재 ${Object.keys(roomPeersMap).length + 1}명 접속 중 · 출항 시작을 누르세요!)`,
+            `🟢 Bạn bè đã vào phòng! (Đang có ${Object.keys(roomPeersMap).length + 1} người · Hãy bấm Bắt Đầu!)`
+          );
         } else {
           roomPeersMap[data.senderId] = { seatIdx: guestSeat, nick: data.nick || '' };
           renderOnlineLobbySlots();
         }
       } else if (data.type === 'ROOM_ROSTER' && data.roster) {
+        if (data.maxPlayers) state.maxPlayers = data.maxPlayers;
         const nextMap = {};
         Object.entries(data.roster).forEach(([cid, info]) => {
           if (cid === myClientId) {
@@ -3981,11 +4111,13 @@
         updateBoardUI();
       } else if (data.type === 'START_4P_MATCH') {
         if (data.difficulty) state.difficulty = data.difficulty;
+        if (data.maxPlayers) state.maxPlayers = data.maxPlayers;
         if (!document.getElementById('game-screen').classList.contains('active')) {
           startGame(true);
         }
       } else if (data.type === 'LATE_JOIN_SYNC') {
         state.myPlayerIdx = data.assignedSeat ?? state.myPlayerIdx;
+        if (data.maxPlayers) state.maxPlayers = data.maxPlayers;
         state.gameMode = 'online4p';
         if (!document.getElementById('game-screen').classList.contains('active')) {
           startGame(true);
@@ -4420,17 +4552,19 @@
       container4p.style.display = 'grid';
       container1p.style.display = 'none';
 
-      // 자산 순위 계산 (1st ~ 4th)
-      const ranked = state.players
+      // 활성 플레이어들만 자산 순위 계산 (2인 대결이면 1st~2nd, 4인이면 1st~4th)
+      const activePlayers = state.players.filter(p => !p.isInactive);
+      const ranked = activePlayers
         .map(p => ({ idx: p.idx, asset: calculatePlayerTotalAsset(p.idx) }))
         .sort((a, b) => b.asset - a.asset);
       const rankLabels = ['1st', '2nd', '3rd', '4th'];
       const rankMap = {};
       ranked.forEach((r, i) => { rankMap[r.idx] = rankLabels[i] || '4th'; });
 
-      container4p.innerHTML = state.players.map((p, idx) => {
+      container4p.innerHTML = activePlayers.map((p) => {
+        const idx = p.idx;
         const isTurn = state.activePlayerIdx === idx;
-        const isMe = state.myPlayerIdx === idx;
+        const isMe = state.local2PMode ? isTurn : (state.myPlayerIdx === idx);
         const totalAsset = calculatePlayerTotalAsset(idx);
         const ownedCnt = Object.keys(state.ownedPorts).filter(cid => state.portOwners[cid] === idx).length;
         return `
@@ -4439,7 +4573,7 @@
             <div class="hud-4p-rank">${rankMap[idx]} · ${state.turn}/${MAX_TURNS}${L2('턴', 'L')}</div>
             <div class="hud-4p-body">
               <div class="hud-4p-title" style="background:${p.badgeBg};">
-                ${p.tag} ${pName(p)} ${isMe ? L2('(나)', '(Bạn)') : '[ONL]'}
+                ${p.tag} ${pName(p)} ${isMe ? L2('(내 턴/나)', '(Bạn)') : '[ONL]'}
               </div>
               <div class="hud-4p-line">
                 <span>${L2('현금(Gold)', 'Tiền mặt')}</span>
@@ -4456,10 +4590,11 @@
     }
 
     function updateBoardUI() {
-      if (state.gameMode === 'online4p' && state.players[state.myPlayerIdx]) {
-        state.cash = state.players[state.myPlayerIdx].cash;
+      const ctrlIdx = getControllablePlayerIdx();
+      if (state.gameMode === 'online4p' && state.players[ctrlIdx]) {
+        state.cash = state.players[ctrlIdx].cash;
       }
-      const totalAsset = calculateTotalAsset();
+      const totalAsset = calculatePlayerTotalAsset(ctrlIdx);
       document.getElementById('turn-display').textContent = `${state.turn} / ${MAX_TURNS}`;
       document.getElementById('cash-display').textContent = formatMoney(state.cash);
       document.getElementById('asset-display').textContent = formatMoney(totalAsset);
@@ -4469,7 +4604,7 @@
       if (shieldEl) shieldEl.textContent = `1st · ${rankNow.title}`;
 
       const ownedCount = Object.keys(state.ownedPorts).filter(cid =>
-        state.gameMode === 'solo1p' || state.portOwners[cid] === state.myPlayerIdx
+        state.gameMode === 'solo1p' || state.portOwners[cid] === ctrlIdx
       ).length;
       document.getElementById('owned-ports-pill').textContent = L2(
         `보유 항구: ${ownedCount} / 8곳`,
@@ -4624,7 +4759,7 @@
 
       // 온라인 방에 연결된 다른 탭/유저 슬롯 표시 반영
       Object.values(roomPeersMap).forEach(peerInfo => {
-        if (state.players[peerInfo.seatIdx]) {
+        if (state.players[peerInfo.seatIdx] && !state.players[peerInfo.seatIdx].isInactive) {
           state.players[peerInfo.seatIdx].isRemoteHuman = true;
         }
       });
@@ -4637,7 +4772,11 @@
       const topLabel = document.getElementById('top-bar-mode-label');
       if (topLabel) {
         topLabel.textContent = state.gameMode === 'online4p'
-          ? L2(`한국 항구 퀴즈 마블 · 🌐 4인 실시간 온라인 방 #${state.roomCode}`, `Cờ Tỷ Phú Cảng Biển · 🌐 Phòng Online 4 Người #${state.roomCode}`)
+          ? (state.maxPlayers === 2
+              ? (state.local2PMode
+                  ? L2(`한국 항구 퀴즈 마블 · 📱 2인 1기기 (P1 vs P2 대결)`, `Cờ Tỷ Phú Cảng Biển · 📱 2 Người 1 Máy (P1 vs P2)`)
+                  : L2(`한국 항구 퀴즈 마블 · ⚔️ 2인 1:1 온라인 방 #${state.roomCode}`, `Cờ Tỷ Phú Cảng Biển · ⚔️ Phòng 2 Người 1v1 #${state.roomCode}`))
+              : L2(`한국 항구 퀴즈 마블 · 🌐 4인 실시간 온라인 방 #${state.roomCode}`, `Cờ Tỷ Phú Cảng Biển · 🌐 Phòng Online 4 Người #${state.roomCode}`))
           : L2(`한국 항구 퀴즈 마블 · ⚓ 1인 클래식 퀴즈 마블`, `Cờ Tỷ Phú Cảng Biển · ⚓ Chế Độ Đơn 1 Người`);
       }
 
@@ -4645,14 +4784,18 @@
       updateBoardUI();
 
       if (state.gameMode === 'online4p') {
-        if (!fromRemote) {
-          broadcastNetMessage({ type: 'START_4P_MATCH', difficulty: state.difficulty });
+        if (!fromRemote && !state.local2PMode) {
+          broadcastNetMessage({ type: 'START_4P_MATCH', difficulty: state.difficulty, maxPlayers: state.maxPlayers });
         }
         addLog(
-          L2(
-            `🌐 4인 실시간 온라인 대전 시작! (방 코드 #${state.roomCode} · P1~P4 출항!)`,
-            `🌐 Bắt đầu trận Online 4 Người! (Mã phòng #${state.roomCode} · P1~P4 ra khơi!)`
-          ),
+          state.maxPlayers === 2
+            ? (state.local2PMode
+                ? L2(`📱 2인 1기기 대결 시작! (P1 vs P2 번갈아 주사위를 굴려요!)`, `📱 Bắt đầu 2 Người 1 Máy! (P1 và P2 thay phiên nhau tung xúc xắc!)`)
+                : L2(`⚔️ 2인 1:1 온라인 대전 시작! (방 코드 #${state.roomCode} · P1 vs P2 출항!)`, `⚔️ Bắt đầu trận 2 Người (1 vs 1) Online! (Mã phòng #${state.roomCode} · P1 đấu P2!)`))
+            : L2(
+                `🌐 4인 실시간 온라인 대전 시작! (방 코드 #${state.roomCode} · P1~P4 출항!)`,
+                `🌐 Bắt đầu trận Online 4 Người! (Mã phòng #${state.roomCode} · P1~P4 ra khơi!)`
+              ),
           'users-online.svg'
         );
         prepareActivePlayerTurn();
@@ -4674,23 +4817,28 @@
     function prepareActivePlayerTurn() {
       if (state.gameMode !== 'online4p') return;
       const curP = state.players[state.activePlayerIdx];
-      if (!curP || curP.isBankrupt) {
+      if (!curP || curP.isBankrupt || curP.isInactive) {
         advanceToNextTurn(true);
         return;
       }
 
-      const isMyTurn = state.activePlayerIdx === state.myPlayerIdx;
+      const isMyTurn = state.activePlayerIdx === getControllablePlayerIdx();
       const ribbon = document.getElementById('my-turn-ribbon');
       const rollBtn = document.getElementById('roll-btn');
 
       if (isMyTurn) {
-        ribbon.textContent = `My Turn! (${curP.tag})`;
+        ribbon.textContent = state.local2PMode ? `${curP.tag} Turn!` : `My Turn! (${curP.tag})`;
         rollBtn.disabled = false;
         setTopBanner(
-          L2(
-            `🎲 내 차례 (${curP.tag} ${curP.name}) · [${state.turn}/${MAX_TURNS}턴] 주사위를 굴려주세요!`,
-            `🎲 Lượt của bạn (${curP.tag} ${pName(curP)}) · [Lượt ${state.turn}/${MAX_TURNS}] Hãy tung xúc xắc!`
-          )
+          state.local2PMode
+            ? L2(
+                `🎲 [${curP.tag} ${curP.name} 차례] · [${state.turn}/${MAX_TURNS}턴] 주사위를 굴려주세요!`,
+                `🎲 [Lượt của ${curP.tag} ${pName(curP)}] · [Lượt ${state.turn}/${MAX_TURNS}] Hãy bấm Tung Xúc Xắc!`
+              )
+            : L2(
+                `🎲 내 차례 (${curP.tag} ${curP.name}) · [${state.turn}/${MAX_TURNS}턴] 주사위를 굴려주세요!`,
+                `🎲 Lượt của bạn (${curP.tag} ${pName(curP)}) · [Lượt ${state.turn}/${MAX_TURNS}] Hãy tung xúc xắc!`
+              )
         );
       } else {
         ribbon.textContent = `${curP.tag} Turn`;
@@ -4827,15 +4975,16 @@
 
     function rollDice() {
       if (state.isMoving) return;
-      if (state.gameMode === 'online4p' && state.activePlayerIdx !== state.myPlayerIdx) return;
+      const ctrlIdx = getControllablePlayerIdx();
+      if (state.gameMode === 'online4p' && state.activePlayerIdx !== ctrlIdx) return;
 
       const finalDice = Math.floor(Math.random() * 6) + 1;
       const keyGood = Math.random() < 0.55;
       nextKeyOutcomeGood = keyGood;
-      if (state.gameMode === 'online4p') {
+      if (state.gameMode === 'online4p' && !state.local2PMode) {
         broadcastNetMessage({
           type: 'REMOTE_ROLL',
-          playerIdx: state.myPlayerIdx,
+          playerIdx: ctrlIdx,
           diceValue: finalDice,
           keyGood
         });
@@ -4961,7 +5110,7 @@
        ========================================================================= */
     function handleCellArrival(cell) {
       const pIdx = state.gameMode === 'online4p' ? state.activePlayerIdx : 0;
-      const isMe = state.gameMode === 'solo1p' || pIdx === state.myPlayerIdx;
+      const isMe = state.gameMode === 'solo1p' || pIdx === getControllablePlayerIdx();
       const actor = state.gameMode === 'online4p'
         ? state.players[pIdx]
         : { tag: 'P1', name: CHARACTERS[state.character].name, nameVi: CHARACTERS[state.character].nameVi };
@@ -5296,9 +5445,9 @@
         state.activeQuizContext.isCorrect = isCorrect;
       }
 
-      const myIdx = state.gameMode === 'online4p' ? state.myPlayerIdx : 0;
+      const myIdx = getControllablePlayerIdx();
 
-      if (state.gameMode === 'online4p') {
+      if (state.gameMode === 'online4p' && !state.local2PMode) {
         broadcastNetMessage({
           type: 'REMOTE_QUIZ_RESULT',
           playerIdx: myIdx,
@@ -5360,7 +5509,7 @@
       const fbActions = document.getElementById('feedback-actions');
       fb.classList.add('show');
 
-      const myIdx = state.gameMode === 'online4p' ? state.myPlayerIdx : 0;
+      const myIdx = getControllablePlayerIdx();
       const expHtml = formatQuizExplanationHtml(quiz);
 
       if (isCorrect) {
@@ -5508,7 +5657,7 @@
 
     function buyPort(cellId) {
       const cell = BOARD_CELLS[cellId];
-      const myIdx = state.gameMode === 'online4p' ? state.myPlayerIdx : 0;
+      const myIdx = getControllablePlayerIdx();
       if (getPlayerCash(myIdx) >= cell.price) {
         applyPortBuildOrUpgrade(cellId, 1, myIdx, cell.price, false);
       }
@@ -5517,7 +5666,7 @@
 
     function upgradePort(cellId) {
       const cell = BOARD_CELLS[cellId];
-      const myIdx = state.gameMode === 'online4p' ? state.myPlayerIdx : 0;
+      const myIdx = getControllablePlayerIdx();
       const upgradeCost = Math.floor(cell.price * 0.5);
       if (getPlayerCash(myIdx) >= upgradeCost) {
         applyPortBuildOrUpgrade(cellId, 2, myIdx, upgradeCost, false);
@@ -5527,7 +5676,7 @@
 
     function takeoverOtherPort(cellId, prevOwnerIdx, takeoverCost) {
       const cell = BOARD_CELLS[cellId];
-      const myIdx = state.gameMode === 'online4p' ? state.myPlayerIdx : 0;
+      const myIdx = getControllablePlayerIdx();
       if (getPlayerCash(myIdx) >= takeoverCost) {
         addPlayerCash(prevOwnerIdx, cell.price);
         applyPortBuildOrUpgrade(cellId, 1, myIdx, takeoverCost, false, prevOwnerIdx);
@@ -5572,17 +5721,19 @@
           addLog(L2(`💥 ${curP.tag} ${curP.name} 파산!`, `💥 ${curP.tag} ${pName(curP)} đã phá sản!`), 'siren.svg');
         }
         advanceToNextTurn(false);
-        broadcastNetMessage({
-          type: 'REMOTE_NEXT_TURN',
-          snapshot: buildStateSnapshot()
-        });
+        if (!state.local2PMode) {
+          broadcastNetMessage({
+            type: 'REMOTE_NEXT_TURN',
+            snapshot: buildStateSnapshot()
+          });
+        }
       }
     }
 
     function advanceToNextTurn(fromRemote = false) {
       state.isMoving = false;
-      const alivePlayers = state.players.filter(p => !p.isBankrupt);
-      if (alivePlayers.length <= 1 || state.players[state.myPlayerIdx]?.isBankrupt) {
+      const alivePlayers = state.players.filter(p => !p.isBankrupt && !p.isInactive);
+      if (alivePlayers.length <= 1 || (!state.local2PMode && state.players[state.myPlayerIdx]?.isBankrupt)) {
         setTimeout(() => endGame(state.players[state.myPlayerIdx]?.isBankrupt || false), 450);
         return;
       }
@@ -5592,7 +5743,7 @@
       for (let step = 0; step < 4; step++) {
         nextIdx = (nextIdx + 1) % 4;
         if (nextIdx === 0) wrapped = true;
-        if (!state.players[nextIdx].isBankrupt) break;
+        if (!state.players[nextIdx].isBankrupt && !state.players[nextIdx].isInactive) break;
       }
 
       if (wrapped) {
@@ -5638,6 +5789,7 @@
 
       if (state.gameMode === 'online4p') {
         const standings = state.players
+          .filter(p => !p.isInactive)
           .map(p => ({ ...p, total: calculatePlayerTotalAsset(p.idx) }))
           .sort((a, b) => b.total - a.total);
         const winner = standings[0];
@@ -5717,7 +5869,7 @@
 
     // "Siêu Cờ Tỷ Phú / Billion Marble" 스타일 항구 매각 (Sell Asset) 기능
     function sellAssetAction() {
-      const myIdx = state.gameMode === 'online4p' ? state.myPlayerIdx : 0;
+      const myIdx = getControllablePlayerIdx();
       const myPortIds = Object.keys(state.ownedPorts)
         .map(Number)
         .filter(cid => state.gameMode === 'solo1p' || state.portOwners[cid] === myIdx);
