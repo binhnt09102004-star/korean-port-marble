@@ -494,9 +494,9 @@
 
     .board-wrapper {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: repeat(4, minmax(168px, auto));
-      gap: 16px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-rows: repeat(4, minmax(156px, auto));
+      gap: 14px;
       width: 100%;
       background:
         radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.42), transparent 55%),
@@ -785,10 +785,12 @@
     }
 
     .cell-name {
-      font-size: 1.02rem;
+      font-size: 0.96rem;
       color: #1e293b;
-      letter-spacing: 0px;
-      white-space: nowrap;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      white-space: normal;
+      word-break: keep-all;
     }
 
     .cell-sub-tag {
@@ -1522,18 +1524,30 @@
       text-shadow: 0 2px 0 #000000;
       width: 100%;
     }
+    .roll-btn:not(:disabled) {
+      background: linear-gradient(180deg, #16a34a 0%, #15803d 55%, #14532d 100%);
+      border-color: #fde047;
+      animation: myTurnPulseBtn 1.25s ease-in-out infinite alternate;
+    }
+    @keyframes myTurnPulseBtn {
+      from { box-shadow: 0 5px 0 #14532d, 0 0 8px rgba(250, 204, 21, 0.5); transform: scale(1); }
+      to   { box-shadow: 0 7px 0 #14532d, 0 0 22px rgba(74, 222, 128, 0.95); transform: scale(1.03); }
+    }
     .roll-btn:hover:not(:disabled) {
       transform: translateY(-2px);
       filter: brightness(1.1);
-      box-shadow: 0 7px 0 #78350f, 0 0 14px rgba(250, 204, 21, 0.75);
+      box-shadow: 0 7px 0 #14532d, 0 0 18px rgba(250, 204, 21, 0.85);
     }
     .roll-btn:active:not(:disabled) {
       transform: translateY(3px);
-      box-shadow: 0 2px 0 #78350f;
+      box-shadow: 0 2px 0 #14532d;
     }
     .roll-btn:disabled {
-      opacity: 0.6;
+      background: linear-gradient(180deg, #64748b 0%, #334155 100%);
+      border-color: #94a3b8;
+      opacity: 0.78;
       cursor: not-allowed;
+      animation: none;
     }
 
     .roll-btn-left {
@@ -1635,7 +1649,8 @@
       position: absolute;
       inset: 0;
       perspective: 900px;
-      pointer-events: none;
+      pointer-events: auto;
+      cursor: pointer;
       z-index: 20;
     }
 
@@ -2352,24 +2367,88 @@
     }
     .wrong-item:last-child { border-bottom: none; }
 
+    .settings-drawer {
+      background: #f8fafc;
+      border: 3px solid #1e3a8a;
+      border-radius: 18px;
+      padding: 10px 14px;
+      margin-top: 12px;
+      text-align: left;
+    }
+    .settings-drawer summary {
+      font-family: var(--font-chibi-title);
+      font-size: 0.95rem;
+      color: #1e3a8a;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .settings-drawer summary::-webkit-details-marker { display: none; }
+    .settings-drawer[open] summary {
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px dashed #cbd5e1;
+    }
+
     @media (max-width: 740px) {
-      .game-title { font-size: 1.85rem; }
+      body { padding: 4px; align-items: flex-start; }
+      .cartoon-panel { padding: 12px 12px; border-radius: 22px; }
+      .cartoon-hero-stage { height: 125px; padding: 10px; margin-bottom: 10px; }
+      .game-title { font-size: 1.45rem; }
+      .game-subtitle { font-size: 0.74rem; padding: 3px 10px; }
+      .board-top-bar { flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 6px; }
+      .board-top-title { font-size: 0.78rem; padding: 4px 10px; width: 100%; justify-content: center; }
+      .cam-btn-group { flex-wrap: wrap; justify-content: center; width: 100%; gap: 4px; }
+      .view-toggle-btn { font-size: 0.72rem; padding: 4px 9px; }
+      .marble-top-turn-banner { font-size: 0.88rem; padding: 5px 10px; margin-bottom: 6px; }
+      .board-stage { padding: 4px 0 10px 0; }
       .board-wrapper {
-        gap: 8px;
-        padding: 10px;
-        grid-template-rows: repeat(4, minmax(136px, auto));
+        gap: 5px;
+        padding: 7px;
+        border-radius: 20px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-rows: repeat(4, minmax(104px, auto));
       }
       .board-wrapper.cam-3d,
       .board-wrapper.cam-iso { transform: none; }
-      .cell { min-height: 136px; }
-      .chibi-block-top { height: 78px; }
-      .cell-name { font-size: 0.84rem; }
+      .cell { min-height: 104px; }
+      .cell-pedestal { padding: 4px 4px 5px 4px; border-radius: 14px; border-width: 2.5px; }
+      .chibi-3d-block { margin: -8px 1px 3px 1px; }
+      .chibi-block-top { height: 54px; border-width: 2px; }
+      .chibi-block-cliff { height: 8px; }
+      .cell-mini-ico { width: 15px; height: 15px; }
+      .cell-name { font-size: 0.68rem; line-height: 1.1; }
       .cell-sub-tag { display: none; }
-      .cell-info { font-size: 0.65rem; padding: 2px 4px; }
-      .center-dashboard { padding: 8px; }
-      .my-turn-floating-box { width: 130px; }
-      .marble-bottom-hud { flex-direction: column; }
+      .cell-info { font-size: 0.58rem; padding: 2px 3px; border-radius: 7px; }
+      .ship-token { width: 48px; height: 72px; top: -28px; right: 1px; }
+      .ship-token img.pawn-char-sprite { width: 44px; height: 56px; }
+      .pawn-pedestal-ring { width: 36px; height: 12px; }
+      .center-dashboard { padding: 6px; border-radius: 16px; }
+      .my-turn-floating-box {
+        width: 100%;
+        max-width: 100%;
+        padding: 6px;
+        gap: 4px;
+        background: rgba(254, 243, 199, 0.95);
+      }
+      .roll-btn { padding: 7px 8px; font-size: 0.82rem; }
+      .sell-asset-btn { padding: 4px 7px; font-size: 0.68rem; }
+      .my-turn-port-pill { display: none; }
+      .cube-dice-anchor { left: 50%; top: 56%; transform: scale(0.78); }
+      .dice-floor-shadow, .dice-impact-ring { left: 50%; top: 64%; }
+      .log-box { height: 44px; font-size: 0.65rem; padding: 4px 6px; }
+      .marble-4p-hud-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 6px; }
+      .hud-4p-avatar { width: 36px; height: 40px; margin-right: 6px; }
+      .hud-4p-title { font-size: 0.66rem; }
+      .hud-4p-gold { font-size: 0.76rem; }
+      .marble-bottom-hud { flex-direction: column; gap: 8px; }
+      .marble-player-card { min-width: 0; width: 100%; }
       .hero-chibi-mascot-left, .hero-chibi-mascot-right { display: none; }
+      .mode-switch-tabs { gap: 6px; }
+      .mode-tab-btn { padding: 8px 6px; font-size: 0.78rem; flex-direction: column; gap: 3px; }
     }
   </style>
 </head>
@@ -2412,26 +2491,13 @@
           <p class="game-subtitle" id="ui-main-subtitle">3D 주사위를 광장에 던져 귀여운 치비 캐릭터와 함께 8대 무역항을 인수하세요!</p>
         </div>
 
-        <div class="best-record-box">
-          <img src="assets/chibi-icons/trophy.svg" style="width:30px;height:30px;" alt="" />
-          <span><span id="ui-best-record-label">최고 자산 기록:</span> <strong id="best-asset-text">기록 없음</strong></span>
-        </div>
+        <!-- 1-Click Quick Start Button right at the top (No scrolling needed on mobile/other devices!) -->
+        <button type="button" class="cartoon-primary-btn" id="start-main-btn" onclick="startGame()" style="margin-bottom:14px;">
+          <img src="assets/chibi-icons/ship.svg" style="width:34px;height:34px;" alt="" />
+          <span id="start-main-btn-text">⚔️ Bắt Đầu Trận 2 Người (P1 vs P2)!</span>
+        </button>
 
-        <div class="rules-box">
-          <h3>
-            <img src="assets/chibi/chibi-cheer.png" style="width:34px;height:34px;object-fit:contain;" alt="" />
-            <span id="ui-rules-heading">치비 선장님의 항해 규칙 안내</span>
-          </h3>
-          <ul class="rules-list" id="ui-rules-list">
-            <li><strong>총 15턴</strong> 동안 3D 입체 주사위(1~6)를 중앙 광장에 굴려 치비 캐릭터가 보드 위를 점프 이동합니다.</li>
-            <li>매 턴 이동 시 보유한 항구의 <strong>턴 수익이 자동 입금</strong>되며, 출발지 통과·도착 시 <strong>지원금 +200만 원</strong>을 받습니다.</li>
-            <li>항구 칸에 도착하면 <strong>순수 한국어 무역·항구 상식 4지선다 퀴즈</strong>가 열립니다!</li>
-            <li><strong>정답 시:</strong> 상금 <strong>+100만 원</strong> 지급 + 빈 항구 <strong>인수(x1)</strong> 또는 내 항구 <strong>2배 랜드마크 업그레이드(x2)</strong>!</li>
-            <li><strong>오답 시:</strong> 벌금 <strong>-50만 원</strong>이 차감되며, 틀린 문제는 <strong>오답 노트</strong>에 저장됩니다.</li>
-          </ul>
-        </div>
-
-        <div class="difficulty-section">
+        <div class="difficulty-section" style="margin-bottom:10px;">
           <div class="difficulty-label" id="ui-mode-label">게임 플레이 모드 선택</div>
           <div class="mode-switch-tabs" style="grid-template-columns: repeat(3, 1fr);">
             <button type="button" class="mode-tab-btn active" id="mode-btn-2p" onclick="selectGameMode('online2p')">
@@ -2460,17 +2526,17 @@
               </button>
             </div>
             <div class="online-room-bar">
-              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;width:100%;">
                 <img src="assets/chibi-icons/users-online.svg" style="width:22px;height:22px;" alt="" />
                 <span id="ui-nick-label" style="font-family:var(--font-chibi-title);font-size:0.84rem;color:#1e3a8a;">내 이름:</span>
-                <input type="text" id="player-nick-input" class="room-code-input" style="width:115px;" placeholder="닉네임 / Tên" maxlength="12" oninput="updateMyNickname(this.value)" />
-                <span id="ui-room-code-label" style="font-family:var(--font-chibi-title);font-size:0.84rem;color:#1e3a8a;margin-left:4px;">방 코드:</span>
-                <input type="text" id="room-code-input" class="room-code-input" value="7788" maxlength="6" />
+                <input type="text" id="player-nick-input" class="room-code-input" style="width:105px;" placeholder="닉네임 / Tên" maxlength="12" oninput="updateMyNickname(this.value)" />
+                <span id="ui-room-code-label" style="font-family:var(--font-chibi-title);font-size:0.84rem;color:#1e3a8a;margin-left:2px;">방 코드:</span>
+                <input type="text" id="room-code-input" class="room-code-input" value="7788" maxlength="6" style="width:76px;" />
                 <button type="button" class="mini-lobby-btn" id="ui-room-join-btn" onclick="joinOrSyncOnlineRoom()">방 접속·동기화</button>
                 <button type="button" class="mini-lobby-btn" id="ui-room-new-btn" style="background:#38bdf8;color:#0f172a;" onclick="createNewRandomRoom()">🎲 새 방</button>
-                <button type="button" class="mini-lobby-btn gold" id="ui-room-copy-btn" onclick="copyInviteLink(true)">🔗 초대 링크 & QR</button>
+                <button type="button" class="mini-lobby-btn gold" id="ui-room-copy-btn" onclick="copyInviteLink(true)" style="flex:1;min-width:140px;font-size:0.84rem;padding:6px 12px;">🔗 초대 링크 & QR</button>
               </div>
-              <span class="online-status-pill" id="online-status-pill">🟢 온라인 채널 준비 완료 (#7788)</span>
+              <span class="online-status-pill" id="online-status-pill" style="width:100%;justify-content:center;">🟢 온라인 채널 준비 완료 (#7788)</span>
             </div>
 
             <!-- 친구 초대 링크 + QR 코드 카드 (토글 표시) -->
@@ -2496,55 +2562,73 @@
             </div>
 
             <div id="ui-lobby-hint" style="font-size:0.78rem;color:#334155;margin-bottom:8px;">
-              💡 다른 브라우저/탭/기기에서 같은 <strong>방 코드(7788)</strong>로 접속하면 실시간 연동되며, 빈자리는 <strong>스마트 치비 AI</strong>가 자동으로 함께 플레이합니다! (클릭하여 내 슬롯 변경)
+              💡 다른 브라우저/탭/기기에서 같은 <strong>방 코드(7788)</strong>로 접속하면 실시간 연동되며, 친구가 링크를 열면 <strong>자동으로 함께 게임이 시작</strong>됩니다!
             </div>
 
             <div class="online-slots-grid" id="online-slots-grid">
-              <!-- JS에서 4인 슬롯(P1~P4) 렌더링 -->
+              <!-- JS에서 2인/4인 슬롯 렌더링 -->
             </div>
           </div>
 
-          <div class="difficulty-label" id="ui-char-select-label">내 대표 치비 캐릭터 선택</div>
-          <div class="char-select-grid">
-            <button type="button" class="char-select-btn selected" id="char-btn-boy" onclick="selectCharacter('boy')">
-              <img class="char-select-thumb" src="assets/chibi/char-boy.png" alt="캡틴 레오" />
-              <div>
-                <span class="diff-title" id="ui-char-boy-name">캡틴 레오</span>
-                <span class="diff-desc" id="ui-char-boy-desc">황금 해운 제독 (P1)</span>
-              </div>
-            </button>
-            <button type="button" class="char-select-btn" id="char-btn-girl" onclick="selectCharacter('girl')">
-              <img class="char-select-thumb" src="assets/chibi/char-girl.png" alt="항해사 유나" />
-              <div>
-                <span class="diff-title" id="ui-char-girl-name">항해사 유나</span>
-                <span class="diff-desc" id="ui-char-girl-desc">글로벌 무역 여왕 (P2)</span>
-              </div>
-            </button>
-          </div>
+          <!-- 접이식 상세 설정 & 규칙 서랍 (Nhân vật, Độ khó, Kỷ lục & Luật chơi gọn trong 1 nút) -->
+          <details class="settings-drawer">
+            <summary id="ui-drawer-summary">
+              <span>⚙️ Tùy chỉnh Nhân Vật · Độ Khó · Xem Luật Chơi (캐릭터·난이도·규칙 열기)</span>
+              <span>▼</span>
+            </summary>
 
-          <div class="difficulty-label" id="ui-diff-label">난이도 선택 (시작 자금 설정)</div>
-          <div class="difficulty-buttons">
-            <button type="button" class="diff-btn selected" id="diff-easy" onclick="selectDifficulty('easy')">
-              <img src="assets/chibi-icons/money-bag.svg" style="width:40px;height:40px;" alt="" />
-              <div>
-                <span class="diff-title" id="ui-diff-easy-title">쉬움 모드</span>
-                <span class="diff-desc" id="ui-diff-easy-desc">시작 자금 1,500만 원</span>
-              </div>
-            </button>
-            <button type="button" class="diff-btn" id="diff-hard" onclick="selectDifficulty('hard')">
-              <img src="assets/chibi-icons/trident.svg" style="width:40px;height:40px;" alt="" />
-              <div>
-                <span class="diff-title" id="ui-diff-hard-title">어려움 모드</span>
-                <span class="diff-desc" id="ui-diff-hard-desc">시작 자금 1,000만 원</span>
-              </div>
-            </button>
-          </div>
+            <div class="best-record-box" style="width:100%;justify-content:center;margin-bottom:12px;">
+              <img src="assets/chibi-icons/trophy.svg" style="width:26px;height:26px;" alt="" />
+              <span><span id="ui-best-record-label">최고 자산 기록:</span> <strong id="best-asset-text">기록 없음</strong></span>
+            </div>
+
+            <div class="difficulty-label" id="ui-char-select-label">내 대표 치비 캐릭터 선택</div>
+            <div class="char-select-grid">
+              <button type="button" class="char-select-btn selected" id="char-btn-boy" onclick="selectCharacter('boy')">
+                <img class="char-select-thumb" src="assets/chibi/char-boy.png" alt="캡틴 레오" />
+                <div>
+                  <span class="diff-title" id="ui-char-boy-name">캡틴 레오</span>
+                  <span class="diff-desc" id="ui-char-boy-desc">황금 해운 제독 (P1)</span>
+                </div>
+              </button>
+              <button type="button" class="char-select-btn" id="char-btn-girl" onclick="selectCharacter('girl')">
+                <img class="char-select-thumb" src="assets/chibi/char-girl.png" alt="항해사 유나" />
+                <div>
+                  <span class="diff-title" id="ui-char-girl-name">항해사 유나</span>
+                  <span class="diff-desc" id="ui-char-girl-desc">글로벌 무역 여왕 (P2)</span>
+                </div>
+              </button>
+            </div>
+
+            <div class="difficulty-label" id="ui-diff-label">난이도 선택 (시작 자금 설정)</div>
+            <div class="difficulty-buttons" style="margin-bottom:14px;">
+              <button type="button" class="diff-btn selected" id="diff-easy" onclick="selectDifficulty('easy')">
+                <img src="assets/chibi-icons/money-bag.svg" style="width:36px;height:36px;" alt="" />
+                <div>
+                  <span class="diff-title" id="ui-diff-easy-title">쉬움 모드</span>
+                  <span class="diff-desc" id="ui-diff-easy-desc">시작 자금 1,500만 원</span>
+                </div>
+              </button>
+              <button type="button" class="diff-btn" id="diff-hard" onclick="selectDifficulty('hard')">
+                <img src="assets/chibi-icons/trident.svg" style="width:36px;height:36px;" alt="" />
+                <div>
+                  <span class="diff-title" id="ui-diff-hard-title">어려움 모드</span>
+                  <span class="diff-desc" id="ui-diff-hard-desc">시작 자금 1,000만 원</span>
+                </div>
+              </button>
+            </div>
+
+            <div class="rules-box" style="margin-bottom:0;">
+              <h3>
+                <img src="assets/chibi/chibi-cheer.png" style="width:30px;height:30px;object-fit:contain;" alt="" />
+                <span id="ui-rules-heading">치비 선장님의 항해 규칙 안내</span>
+              </h3>
+              <ul class="rules-list" id="ui-rules-list">
+                <li><strong>총 15턴</strong> 동안 3D 입체 주사위(1~6)를 중앙 광장에 굴려 치비 캐릭터가 보드 위를 점프 이동합니다.</li>
+              </ul>
+            </div>
+          </details>
         </div>
-
-        <button type="button" class="cartoon-primary-btn" id="start-main-btn" onclick="startGame()">
-          <img src="assets/chibi-icons/ship.svg" style="width:34px;height:34px;" alt="" />
-          <span id="start-main-btn-text">4인 온라인 치비 마블 출항 시작!</span>
-        </button>
       </div>
     </section>
 
@@ -2623,8 +2707,8 @@
               </div>
             </div>
 
-            <!-- 위에서 떨어져 잔디밭에서 통통 튀는 진짜 6면체 3D 물리 주사위 -->
-            <div class="dice-drop-stage" id="dice-drop-stage">
+            <!-- 위에서 떨어져 잔디밭에서 통통 튀는 진짜 6면체 3D 물리 주사위 (클릭해도 주사위 굴림!) -->
+            <div class="dice-drop-stage" id="dice-drop-stage" onclick="rollDice()" title="주사위를 클릭하여 굴리기 / Bấm vào xúc xắc để tung!">
               <div class="dice-floor-shadow" id="dice-floor-shadow"></div>
               <div class="dice-impact-ring" id="dice-impact-ring"></div>
               <div class="dice-result-callout" id="dice-result-callout">🎲 1칸 전진!</div>
@@ -4096,6 +4180,8 @@
           roomPeersMap[data.senderId] = { seatIdx: guestSeat, nick: data.nick || '' };
           if (state.players[guestSeat]) {
             state.players[guestSeat].isRemoteHuman = true;
+            state.players[guestSeat].isInactive = false;
+            state.players[guestSeat].isBankrupt = false;
             if (data.nick) {
               state.players[guestSeat].name = data.nick;
               state.players[guestSeat].nameVi = data.nick;
@@ -4104,14 +4190,36 @@
           renderOnlineLobbySlots();
           updateBoardUI();
           broadcastRoomRoster();
-          const pill = document.getElementById('online-status-pill');
-          if (pill) pill.innerHTML = L2(
-            `🟢 친구 참가 완료! (현재 ${Object.keys(roomPeersMap).length + 1}명 접속 중 · 출항 시작을 누르세요!)`,
-            `🟢 Bạn bè đã vào phòng! (Đang có ${Object.keys(roomPeersMap).length + 1} người · Hãy bấm Bắt Đầu!)`
-          );
+
+          // 방장이 이미 게임 화면에 있으면 들어온 친구를 즉시 보드판으로 동기화 입장시킴!
+          if (document.getElementById('game-screen').classList.contains('active') && state.gameMode === 'online4p') {
+            broadcastNetMessage({
+              type: 'LATE_JOIN_SYNC',
+              assignedSeat: guestSeat,
+              maxPlayers: state.maxPlayers,
+              snapshot: buildStateSnapshot()
+            });
+          } else if (state.gameMode === 'online4p' && !state.local2PMode) {
+            // 로비 대기 중에 친구가 접속하면 1.2초 후 양쪽 기기 모두 자동으로 보드판 시작!
+            playTone('buy');
+            const pill = document.getElementById('online-status-pill');
+            if (pill) pill.innerHTML = L2(
+              `🎉 친구 접속 완료! (${Object.keys(roomPeersMap).length + 1}명) · 1초 후 자동으로 출항합니다!`,
+              `🎉 Bạn bè đã vào phòng! (${Object.keys(roomPeersMap).length + 1} máy) · Tự động vào bàn cờ ngay!`
+            );
+            setTimeout(() => {
+              if (!document.getElementById('game-screen').classList.contains('active') && isRoomHost) {
+                startGame(false);
+              }
+            }, 1100);
+          }
         } else {
           roomPeersMap[data.senderId] = { seatIdx: guestSeat, nick: data.nick || '' };
           renderOnlineLobbySlots();
+        }
+      } else if (data.type === 'REQUEST_HOST_START') {
+        if (isRoomHost && !document.getElementById('game-screen').classList.contains('active')) {
+          startGame(false);
         }
       } else if (data.type === 'ROOM_ROSTER' && data.roster) {
         if (data.maxPlayers) state.maxPlayers = data.maxPlayers;
@@ -4140,6 +4248,10 @@
         if (data.maxPlayers) state.maxPlayers = data.maxPlayers;
         if (!document.getElementById('game-screen').classList.contains('active')) {
           startGame(true);
+        }
+        if (data.snapshot) {
+          applyStateSnapshot(data.snapshot);
+          prepareActivePlayerTurn();
         }
       } else if (data.type === 'LATE_JOIN_SYNC') {
         state.myPlayerIdx = data.assignedSeat ?? state.myPlayerIdx;
@@ -4580,6 +4692,7 @@
 
       // 활성 플레이어들만 자산 순위 계산 (2인 대결이면 1st~2nd, 4인이면 1st~4th)
       const activePlayers = state.players.filter(p => !p.isInactive);
+      container4p.style.gridTemplateColumns = activePlayers.length <= 2 ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)';
       const ranked = activePlayers
         .map(p => ({ idx: p.idx, asset: calculatePlayerTotalAsset(p.idx) }))
         .sort((a, b) => b.asset - a.asset);
@@ -4768,6 +4881,11 @@
        6. 게임 시작 (1인 / 4인 온라인) · 3D 물리 주사위 낙하 · 캐릭터 점프 이동
        ========================================================================= */
     function startGame(fromRemote = false) {
+      // 게스트(P2)가 방장(P1)에 연결된 상태에서 시작 버튼을 누르면 방장에게 동기화 시작 요청!
+      if (!fromRemote && state.gameMode === 'online4p' && !state.local2PMode && !isRoomHost && Object.keys(roomPeersMap).length > 0) {
+        broadcastNetMessage({ type: 'REQUEST_HOST_START' });
+        return;
+      }
       if (aiTurnTimer) clearTimeout(aiTurnTimer);
       state.turn = 1;
       state.cash = state.difficulty === 'easy' ? 1500 : 1000;
@@ -4811,7 +4929,12 @@
 
       if (state.gameMode === 'online4p') {
         if (!fromRemote && !state.local2PMode) {
-          broadcastNetMessage({ type: 'START_4P_MATCH', difficulty: state.difficulty, maxPlayers: state.maxPlayers });
+          broadcastNetMessage({
+            type: 'START_4P_MATCH',
+            difficulty: state.difficulty,
+            maxPlayers: state.maxPlayers,
+            snapshot: buildStateSnapshot()
+          });
         }
         addLog(
           state.maxPlayers === 2
@@ -4851,10 +4974,14 @@
       const isMyTurn = state.activePlayerIdx === getControllablePlayerIdx();
       const ribbon = document.getElementById('my-turn-ribbon');
       const rollBtn = document.getElementById('roll-btn');
+      const rollMain = document.getElementById('ui-roll-btn-main');
+      const rollSub = document.getElementById('ui-roll-btn-sub');
 
       if (isMyTurn) {
-        ribbon.textContent = state.local2PMode ? `${curP.tag} Turn!` : `My Turn! (${curP.tag})`;
+        ribbon.textContent = state.local2PMode ? `🎲 ${curP.tag} Turn!` : `🎲 My Turn! (${curP.tag})`;
         rollBtn.disabled = false;
+        if (rollMain) rollMain.textContent = L2('🎲 주사위 굴리기!', '🎲 Tung Xúc Xắc!');
+        if (rollSub) rollSub.textContent = L2(`내 차례 (${curP.tag})`, `Đến lượt ${curP.tag} của bạn!`);
         setTopBanner(
           state.local2PMode
             ? L2(
@@ -4867,8 +4994,10 @@
               )
         );
       } else {
-        ribbon.textContent = `${curP.tag} Turn`;
+        ribbon.textContent = `⏳ ${curP.tag} Turn`;
         rollBtn.disabled = true;
+        if (rollMain) rollMain.textContent = L2(`⏳ ${curP.tag} 턴 대기...`, `⏳ Đợi ${curP.tag} tung...`);
+        if (rollSub) rollSub.textContent = L2(`${curP.name} 진행 중`, `Máy ${curP.tag} đang đi`);
         setTopBanner(
           L2(
             `🌐 ${curP.tag} ${curP.name} 님의 턴 진행 중... [${state.turn}/${MAX_TURNS}턴]`,
